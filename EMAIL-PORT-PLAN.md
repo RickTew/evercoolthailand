@@ -80,12 +80,12 @@ Add per-staff `name@evercoolthailand.com` addresses as assigned.
 
 **IMPORTANT (Rick, 2026-07-12): A2 hosts MANY mailboxes, not just hello@/info@ — every staff member has their own @evercoolthailand.com address.** Consequences: (a) after the MX flip ALL of them keep receiving, but their mail lands in the shared admin Email inbox (labeled per address) — there is NO IMAP on Resend, so phone/desktop mail apps for these addresses stop working; (b) in access-model v1 the queue is shared, so colleagues' personal mail is visible to all staff — the deferred per-staff privacy wall (support_staff_prefs inbox_scope/assigned_inboxes/personal_address, already ported) must be DECIDED before cutover; (c) if any staff genuinely need a real mailbox, that's a separate mail host for those few, decided BEFORE canceling A2.
 
-1. **Inventory**: pull the full list of mailboxes from A2 (cPanel → Email Accounts): every address, owner, in-use status. Add active ones to `EVERCOOL_INBOXES`.
-2. **Team conversation**: app-only email OK? shared queue vs per-staff scoping (machinery is ported; it's configuration).
-3. **Export EVERY mailbox** from A2 (once A2 is gone, stored mail is gone).
-4. Move DNS hosting off A2 — domain is registered at Squarespace Domains, so switch nameservers to Squarespace (or another DNS host) and recreate ALL records there: Vercel site records, SPF/DKIM/TXT for Resend, and MX → Resend inbound.
-5. Confirm site + inbound/outbound mail all working on the new DNS.
-6. Cancel A2 hosting.
+1. ~~Inventory~~ DONE (12 mailboxes; all in `EVERCOOL_INBOXES`).
+2. ~~Per-staff decision~~ DONE 2026-07-12: privacy wall ON. 5 staff accounts created (passwords handed to Rick) + Wanrawee scoped; each sees ONLY their own address; care_sections=['inbox'].
+3. ~~Move DNS off A2~~ **DONE 2026-07-12 ~23:15: nameservers → ns1/ns2.vercel-dns.com at Squarespace; Vercel DNS zone populated and verified (site A 216.150.1.1, Resend MX/DKIM/SPF/dmarc, test subdomain, mail/webmail A → A2 for archive access).** Note: `vercel dns add` 400s ("not a DNS zone") until ~15 min post-NS-change; retry loop in setup-vercel-dns.sh handled it.
+4. **PROOF gate (pending)**: first real inbound to the root domain lands in the portal (waiting out sender-side MX caches from the same-evening MX flip; auto-tester fires 6 staff welcome emails when the route opens).
+5. Archive window: A2 keeps old mailboxes readable (webmail.evercoolthailand.com); staff phones keep old mail. A few weeks.
+6. Cancel A2 hosting (mail archives die with it).
 
 ---
 
