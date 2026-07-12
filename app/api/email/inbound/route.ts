@@ -37,17 +37,16 @@ function addressList(v: unknown): string[] {
     .filter(Boolean);
 }
 
-// Which of OUR addresses the mail was sent to (hi@, later per-staff addresses).
+// Which of OUR addresses the mail was sent to (hi@, per-staff addresses).
 // The whole domain routes into the shared inbox, so this is the only signal of
 // which inbox it landed in; we store it as the message's to_address so the team
-// can tell them apart. Returns the first @evercoolthailand.com address across
-// To then Cc, or null.
+// can tell them apart. Accepts the root domain AND subdomains (the
+// test.evercoolthailand.com dress-rehearsal inbox). Returns the first match
+// across To then Cc, or null.
+const OWN_DOMAIN_RE = /@(?:[a-z0-9-]+\.)*evercoolthailand\.com$/i;
+
 function pickInboxAddress(to: unknown, cc: unknown): string | null {
-  return (
-    [...addressList(to), ...addressList(cc)].find((a) =>
-      a.endsWith("@evercoolthailand.com"),
-    ) ?? null
-  );
+  return [...addressList(to), ...addressList(cc)].find((a) => OWN_DOMAIN_RE.test(a)) ?? null;
 }
 
 // The webhook and the Receiving GET are metadata/body only; the files come from
