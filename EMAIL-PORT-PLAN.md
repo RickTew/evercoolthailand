@@ -70,7 +70,13 @@ Add per-staff `name@evercoolthailand.com` addresses as assigned.
 - **1.4** Port inbox UI into `app/admin/email/`, add nav entry, wire to Evercool profiles/roles (admin sees all).
 - **1.5** Port newnei's Test Lab (`app/support/test/`) simulated-inbound so we verify thread creation → reply → attachments → labels locally, with NO real Resend/DNS.
 
-**Then Phase 2 (Rick):** create dedicated Evercool Resend account → add domain → 2 webhooks (`/api/email/inbound` type `email.received`, `/api/email/events` for delivery/open/click/bounce) → API key into Vercel. **Phase 3 (together):** flip MX to Resend inbound, verify, decommission A2.
+**Then Phase 2 (Rick):** create dedicated Evercool Resend account → add domain → 2 webhooks (`/api/email/inbound` type `email.received`, `/api/email/events` for delivery/open/click/bounce) → API key into Vercel.
+
+**Phase 3 (together) — A2 is being CANCELED ENTIRELY (Rick's firm decision, stated twice; never propose keeping it as an archive).** Everything moves to Resend. Order matters because the domain's nameservers ARE A2's (ns1–4.a2hosting.com) — canceling A2 without moving DNS first takes down the website AND mail:
+1. Export the existing hello@/info@ mailbox contents from A2 (once A2 is gone, stored mail is gone).
+2. Move DNS hosting off A2 — domain is registered at Squarespace Domains, so switch nameservers to Squarespace (or another DNS host) and recreate ALL records there: Vercel site records, SPF/DKIM/TXT for Resend, and MX → Resend inbound.
+3. Confirm site + inbound/outbound mail all working on the new DNS.
+4. Cancel A2 hosting.
 
 ---
 
