@@ -14,7 +14,7 @@
 - **Keep newnei's `support_*` / `contacts` / `tags` table names** so the ported data-layer code runs unchanged. UI is labeled "Email".
 - **Ticket reference prefix = `EC-`** (e.g. `EC-10001`).
 - **DROP when porting** (newnei-specific, not wanted): AI features (`after-hours`, `match-guide`, agent requests logic), the WhatsApp channel, and the marketing `email_sequence_*` / `app/admin/email` / `app/email` / `lib/email.ts` drip-campaign stack.
-- **Dedicated Resend account** for Evercool (Rick got cross-project inbound mail on the shared account). Not the shared key currently in `.env.local`.
+- **Resend: REUSE the existing shared `ricktew` Pro team (decided 2026-07-12, supersedes the dedicated-account plan).** Creating a second team costs $20/mo (paywalled), and a standalone free account needs a separate login. The old cross-project mail-copies problem was newnei's unfiltered webhook; both apps now hard-filter inbound by their own domain (Evercool: `pickInboxAddress` drops non-@evercoolthailand.com), so the shared team is safe. Fallback if anything leaks: Option A = separate FREE Resend account (free tier includes receiving, 3,000/mo, 1 domain — verified 2026-07-12) under a different email (e.g. info@ricktew.com). So Phase 2 = add receiving + the 2 webhooks to the EXISTING team; the shared `RESEND_API_KEY` already in Vercel stays.
 
 ---
 
