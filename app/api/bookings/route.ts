@@ -1,9 +1,16 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
+import { HONEYPOT_FIELD, isBot, tooLong, LIMITS } from "@/lib/spam";
 
 export async function POST(request: Request) {
   try {
     const formData = await request.formData();
+
+    // Silently accept-and-drop bot submissions (honeypot filled).
+    if (isBot(formData.get(HONEYPOT_FIELD))) {
+      return NextResponse.json({ success: true });
+    }
+
     const admin = createAdminClient();
 
     const name = formData.get("name") as string;
@@ -20,6 +27,13 @@ export async function POST(request: Request) {
 
     if (!name || !phone || !serviceSlug || !bookingDate || !bookingTime || !area || !address) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    }
+
+    if (tooLong(
+      [name, LIMITS.name], [phone, LIMITS.phone], [email, LIMITS.email],
+      [address, LIMITS.message], [area, LIMITS.shortText], [notes, LIMITS.message],
+    )) {
+      return NextResponse.json({ error: "One or more fields are too long" }, { status: 400 });
     }
 
     // Upload photos

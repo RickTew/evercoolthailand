@@ -1,12 +1,26 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
+import { HONEYPOT_FIELD, isBot, tooLong, LIMITS } from "@/lib/spam";
 
 export async function POST(request: Request) {
   try {
-    const { name, phone, email, subject, message } = await request.json();
+    const body = await request.json();
+    const { name, phone, email, subject, message } = body;
+
+    // Silently accept-and-drop bot submissions (honeypot filled).
+    if (isBot(body[HONEYPOT_FIELD])) {
+      return NextResponse.json({ success: true });
+    }
 
     if (!name || !phone || !message) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    }
+
+    if (tooLong(
+      [name, LIMITS.name], [phone, LIMITS.phone], [email, LIMITS.email],
+      [subject, LIMITS.subject], [message, LIMITS.message],
+    )) {
+      return NextResponse.json({ error: "One or more fields are too long" }, { status: 400 });
     }
 
     const admin = createAdminClient();

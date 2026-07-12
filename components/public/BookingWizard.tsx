@@ -175,6 +175,7 @@ export default function BookingWizard() {
   const [photoError, setPhotoError] = useState("");
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
   const [bookingId, setBookingId] = useState<string>("");
+  const [company, setCompany] = useState(""); // honeypot — stays empty for real users
   const [showPayment, setShowPayment] = useState(false);
 
   // Pre-fill service from URL param
@@ -238,6 +239,7 @@ export default function BookingWizard() {
       fd.append("address", form.address);
       fd.append("notes", form.notes);
       fd.append("preferredLanguage", form.preferredLang);
+      fd.append("company", company);
       for (const photo of form.photos) fd.append("photos", photo);
 
       const res = await fetch("/api/bookings", { method: "POST", body: fd });
@@ -298,6 +300,17 @@ export default function BookingWizard() {
 
   return (
     <main className="page-enter px-4 pt-6 pb-8">
+      {/* Honeypot — hidden from users, catches bots. Do not remove. */}
+      <input
+        type="text"
+        name="company"
+        value={company}
+        onChange={(e) => setCompany(e.target.value)}
+        tabIndex={-1}
+        autoComplete="off"
+        aria-hidden="true"
+        style={{ position: "absolute", left: "-9999px", width: 1, height: 1, opacity: 0 }}
+      />
       <h1 className="text-2xl font-bold text-ec-text mb-1">{t.bookTitle}</h1>
 
       <StepBar step={step} labels={stepLabels} />

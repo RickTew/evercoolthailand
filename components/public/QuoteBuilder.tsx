@@ -48,6 +48,7 @@ export default function QuoteBuilder() {
   const [error, setError] = useState("");
   const [photoPreviews, setPhotoPreviews] = useState<string[]>([]);
   const [photoError, setPhotoError] = useState("");
+  const [company, setCompany] = useState(""); // honeypot — stays empty for real users
 
   const [form, setForm] = useState<QuoteForm>({
     propertyType: "",
@@ -132,6 +133,7 @@ export default function QuoteBuilder() {
       body.append("notes", form.notes);
       body.append("preferredLang", form.preferredLang);
       body.append("preferredTier", form.preferredTier);
+      body.append("company", company);
       form.photos.forEach((photo) => body.append("photos", photo));
 
       const res = await fetch("/api/quotes", { method: "POST", body });
@@ -166,6 +168,17 @@ export default function QuoteBuilder() {
 
   return (
     <main className="page-enter px-5 py-6">
+      {/* Honeypot — hidden from users, catches bots. Do not remove. */}
+      <input
+        type="text"
+        name="company"
+        value={company}
+        onChange={(e) => setCompany(e.target.value)}
+        tabIndex={-1}
+        autoComplete="off"
+        aria-hidden="true"
+        style={{ position: "absolute", left: "-9999px", width: 1, height: 1, opacity: 0 }}
+      />
       <h1 className="text-lg font-bold text-ec-text mb-1">{t.quoteTitle}</h1>
 
       {/* Progress Bar */}
