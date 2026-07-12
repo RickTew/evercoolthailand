@@ -57,20 +57,20 @@ export async function POST(request: Request) {
 
     // Non-blocking email
     try {
-      const { sendEmail } = await import("@/lib/email/send");
+      const { sendEmail, escapeHtml } = await import("@/lib/email/send");
       await sendEmail({
         to: "info@evercoolthailand.com",
         subject: `New Booking: ${serviceName} on ${bookingDate} at ${bookingTime}`,
         html: `
           <h2>New Service Booking</h2>
-          <p><strong>Name:</strong> ${name}</p>
-          <p><strong>Phone:</strong> ${phone}</p>
-          ${email ? `<p><strong>Email:</strong> ${email}</p>` : ""}
-          <p><strong>Service:</strong> ${serviceName}</p>
-          <p><strong>Date:</strong> ${bookingDate} at ${bookingTime}</p>
-          <p><strong>Area:</strong> ${area}</p>
-          <p><strong>Address:</strong> ${address}</p>
-          ${notes ? `<p><strong>Notes:</strong> ${notes}</p>` : ""}
+          <p><strong>Name:</strong> ${escapeHtml(name)}</p>
+          <p><strong>Phone:</strong> ${escapeHtml(phone)}</p>
+          ${email ? `<p><strong>Email:</strong> ${escapeHtml(email)}</p>` : ""}
+          <p><strong>Service:</strong> ${escapeHtml(serviceName)}</p>
+          <p><strong>Date:</strong> ${escapeHtml(bookingDate)} at ${escapeHtml(bookingTime)}</p>
+          <p><strong>Area:</strong> ${escapeHtml(area)}</p>
+          <p><strong>Address:</strong> ${escapeHtml(address)}</p>
+          ${notes ? `<p><strong>Notes:</strong> ${escapeHtml(notes)}</p>` : ""}
           <p><strong>Photos:</strong> ${photoPaths.length}</p>
         `,
       });

@@ -26,7 +26,12 @@ export async function POST(request: Request) {
 
     // Non-blocking email notification
     try {
-      const { sendEmail } = await import("@/lib/email/send");
+      const { sendEmail, escapeHtml } = await import("@/lib/email/send");
+      const nameEsc = escapeHtml(name);
+      const phoneEsc = escapeHtml(phone);
+      const emailEsc = escapeHtml(email);
+      const subjectEsc = escapeHtml(subject);
+      const messageEsc = escapeHtml(message).replace(/\n/g, "<br>");
       const now = new Date().toLocaleString("en-GB", {
         timeZone: "Asia/Bangkok",
         day: "2-digit", month: "short", year: "numeric",
@@ -34,7 +39,7 @@ export async function POST(request: Request) {
       });
       await sendEmail({
         to: "hello@evercoolthailand.com",
-        subject: `New enquiry from ${name}`,
+        subject: `New enquiry from ${nameEsc}`,
         html: `<!DOCTYPE html>
 <html lang="en">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
@@ -58,25 +63,25 @@ export async function POST(request: Request) {
             <tr>
               <td style="padding:10px 14px;background:#f8fafc;border-radius:8px 8px 0 0;border-bottom:1px solid #e2e8f0;">
                 <p style="margin:0;font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;">From</p>
-                <p style="margin:3px 0 0;font-size:16px;font-weight:700;color:#0f172a;">${name}</p>
+                <p style="margin:3px 0 0;font-size:16px;font-weight:700;color:#0f172a;">${nameEsc}</p>
               </td>
             </tr>
             <tr>
               <td style="padding:10px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;">
                 <p style="margin:0;font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;">Phone</p>
-                <p style="margin:3px 0 0;font-size:14px;color:#0f172a;">${phone}</p>
+                <p style="margin:3px 0 0;font-size:14px;color:#0f172a;">${phoneEsc}</p>
               </td>
             </tr>
             ${email ? `<tr>
               <td style="padding:10px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;">
                 <p style="margin:0;font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;">Email</p>
-                <p style="margin:3px 0 0;font-size:14px;color:#0f172a;">${email}</p>
+                <p style="margin:3px 0 0;font-size:14px;color:#0f172a;">${emailEsc}</p>
               </td>
             </tr>` : ""}
             ${subject ? `<tr>
               <td style="padding:10px 14px;background:#f8fafc;border-radius:0 0 8px 8px;">
                 <p style="margin:0;font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;">Subject</p>
-                <p style="margin:3px 0 0;font-size:14px;color:#0f172a;">${subject}</p>
+                <p style="margin:3px 0 0;font-size:14px;color:#0f172a;">${subjectEsc}</p>
               </td>
             </tr>` : ""}
           </table>
@@ -84,7 +89,7 @@ export async function POST(request: Request) {
           <!-- Message -->
           <p style="margin:0 0 8px;font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;">Message</p>
           <div style="background:#f8fafc;border-left:3px solid #00b2d4;border-radius:0 8px 8px 0;padding:16px 18px;">
-            <p style="margin:0;font-size:14px;color:#334155;line-height:1.7;">${message.replace(/\n/g, "<br>")}</p>
+            <p style="margin:0;font-size:14px;color:#334155;line-height:1.7;">${messageEsc}</p>
           </div>
 
         </td></tr>
@@ -92,7 +97,7 @@ export async function POST(request: Request) {
         <!-- CTA -->
         <tr><td style="background:#f8fafc;padding:20px 32px;border-radius:0 0 12px 12px;border-top:1px solid #e2e8f0;">
           <a href="tel:+${phone.replace(/\D/g, "")}" style="display:inline-block;background:#00b2d4;color:#ffffff;font-size:13px;font-weight:700;text-decoration:none;padding:10px 22px;border-radius:8px;margin-right:10px;">Call Back</a>
-          ${email ? `<a href="mailto:${email}" style="display:inline-block;background:#ffffff;color:#003554;font-size:13px;font-weight:700;text-decoration:none;padding:10px 22px;border-radius:8px;border:1px solid #e2e8f0;">Reply by Email</a>` : ""}
+          ${email ? `<a href="mailto:${encodeURIComponent(email)}" style="display:inline-block;background:#ffffff;color:#003554;font-size:13px;font-weight:700;text-decoration:none;padding:10px 22px;border-radius:8px;border:1px solid #e2e8f0;">Reply by Email</a>` : ""}
           <p style="margin:14px 0 0;font-size:11px;color:#94a3b8;">This message was submitted via the contact form at evercoolthailand.com</p>
         </td></tr>
 

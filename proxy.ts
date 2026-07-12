@@ -1,7 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Only protect /admin routes
@@ -42,14 +42,14 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  // Check admin/staff profile
+  // Check admin/staff profile — must exist and be active
   const { data: profile } = await supabase
     .from("profiles")
-    .select("role")
+    .select("role, is_active")
     .eq("id", user.id)
     .maybeSingle();
 
-  if (!profile) {
+  if (!profile || !profile.is_active) {
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = "/login";
     return NextResponse.redirect(loginUrl);

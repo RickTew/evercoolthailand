@@ -75,3 +75,21 @@ Bugs found during the audit were FIXED already and are listed in the Part A summ
 - No rate limiting / abuse protection on public POST routes.
 - Middleware file convention is deprecated in Next 16 — migrate `middleware.ts` to `proxy.ts` (build warns).
 - Serwist logs "disabled" in dev — confirm the service worker + push actually register in production.
+
+## Part B — Backend audit findings (2026-07-12)
+
+### Fixed this session (bugs)
+- **HTML injection in notification emails** — public form fields (name/phone/email/subject/message/notes/property/service) were interpolated raw into the Resend HTML for contact/quote/booking notifications. A form submitter could inject arbitrary markup/links (phishing) into staff inboxes. Added `escapeHtml()` in `lib/email/send.ts` and escaped every interpolated value in the three routes; `mailto:` now uses `encodeURIComponent`.
+- **`middleware.ts` → `proxy.ts`** — migrated to the Next 16 file convention (function renamed `middleware`→`proxy`). Build now labels it "ƒ Proxy (Middleware)". Also added the missing `is_active` check so a deactivated staff account is rejected at the proxy layer (previously only the admin layout caught it).
+- **Open redirect in `/auth/callback`** — the `next` query param was concatenated as `${origin}${next}`, so `next=@evil.com` → `https://evercoolthailand.com@evil.com` (navigates to evil.com). Now only same-origin relative paths (`/…`, not `//…`) are honored; anything else falls back to `/account`.
+
+### Hardening backlog (not yet done — needs decisions / infra)
+- **Rate limiting + honeypot on the 3 public POST routes** (contact/quotes/bookings) and on `/api/admin/login` (brute-force). No throttling exists today. (Also item #12 above.)
+- **Input validation / length caps** on public submissions — no max length, email-format, or phone-format checks; oversized payloads and junk data flow straight to the DB and staff email.
+- **Mass-assignment** in admin content routes — `articles`, `services`, `gallery` POST/PATCH spread the raw request `body` into insert/update. Staff-only so low risk, but a column allowlist (or zod schema) would prevent setting unexpected columns (`id`, timestamps, etc.).
+- **Web-push is entirely non-functional** — no VAPID keys set (`NEXT_PUBLIC_VAPID_PUBLIC_KEY` / `VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY`), so `PushOptIn` silently no-ops and `/api/push/send` returns 503. `/api/push/send` is also **dead code** (no caller anywhere) and gated on `ADMIN_API_KEY`, which isn't set either. Decide: wire it up (generate VAPID keys, call it from booking/quote status changes) or remove it.
+- **Service-role key used on public SSR pages** — `services`, `gallery`, `learn`, `sitemap` server components use `createAdminClient()` (bypasses RLS) to read data that anon can already read. Switch these to the anon server client so RLS stays in force; keep service-role for admin/mutations only.
+- **Authorization granularity** — the `[id]` status routes (bookings/quotes/messages) and content routes treat any profile as authorized (`!!profile`); only `users` requires `role === "admin"`. Confirm "any staff can edit all content/statuses" is intended, or tighten per-role.
+- **Anon write-RLS unverified** — read-RLS is correctly locked (anon sees only articles/services/gallery; profiles/quotes/bookings/contact_messages return 0 rows). Anon *write* RLS could not be tested (would mutate production). Verify in Supabase that anon/authenticated INSERT is denied on quotes/bookings/contact_messages/profiles/staff_messages so PostgREST can't be hit directly to spam or self-promote to admin.
+- **Advisors not run** — Supabase MCP `list_tables`/`get_advisors` were permission-denied this session; run the Security + Performance advisors from the dashboard for RLS-enabled confirmation and missing-index warnings.
+- **Email recipient inconsistency** — bookings notify `info@evercoolthailand.com`; contact/quotes notify `hello@evercoolthailand.com`; all send `from: hello@`. Pick one inbox convention.

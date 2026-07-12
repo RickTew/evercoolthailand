@@ -76,7 +76,16 @@ export async function POST(request: Request) {
 
     // Send email notification (non-blocking — don't fail if email fails)
     try {
-      const { sendEmail } = await import("@/lib/email/send");
+      const { sendEmail, escapeHtml } = await import("@/lib/email/send");
+      const nameEsc = escapeHtml(name);
+      const phoneEsc = escapeHtml(phone);
+      const emailEsc = escapeHtml(email);
+      const propertyTypeEsc = escapeHtml(propertyType);
+      const areaSqmEsc = escapeHtml(areaSqm);
+      const numRoomsEsc = escapeHtml(numRooms);
+      const serviceTypeEsc = escapeHtml(serviceType);
+      const preferredTierEsc = escapeHtml(preferredTier);
+      const notesEsc = notes ? escapeHtml(notes).replace(/\n/g, "<br>") : "";
       const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
       const now = new Date().toLocaleString("en-GB", {
         timeZone: "Asia/Bangkok",
@@ -92,7 +101,7 @@ export async function POST(request: Request) {
 
       await sendEmail({
         to: "hello@evercoolthailand.com",
-        subject: `New quote request from ${name}`,
+        subject: `New quote request from ${nameEsc}`,
         html: `<!DOCTYPE html>
 <html lang="en">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
@@ -115,27 +124,27 @@ export async function POST(request: Request) {
           <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
             <tr><td style="padding:10px 14px;background:#f8fafc;border-radius:8px 8px 0 0;border-bottom:1px solid #e2e8f0;">
               <p style="margin:0;font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;">From</p>
-              <p style="margin:3px 0 0;font-size:16px;font-weight:700;color:#0f172a;">${name}</p>
+              <p style="margin:3px 0 0;font-size:16px;font-weight:700;color:#0f172a;">${nameEsc}</p>
             </td></tr>
             <tr><td style="padding:10px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;">
               <p style="margin:0;font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;">Phone</p>
-              <p style="margin:3px 0 0;font-size:14px;color:#0f172a;">${phone}</p>
+              <p style="margin:3px 0 0;font-size:14px;color:#0f172a;">${phoneEsc}</p>
             </td></tr>
             ${email ? `<tr><td style="padding:10px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;">
               <p style="margin:0;font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;">Email</p>
-              <p style="margin:3px 0 0;font-size:14px;color:#0f172a;">${email}</p>
+              <p style="margin:3px 0 0;font-size:14px;color:#0f172a;">${emailEsc}</p>
             </td></tr>` : ""}
             <tr><td style="padding:10px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;">
               <p style="margin:0;font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;">Property</p>
-              <p style="margin:3px 0 0;font-size:14px;color:#0f172a;">${propertyType} ${areaSqm ? `· ${areaSqm} m²` : ""} ${numRooms ? `· ${numRooms} rooms` : ""}</p>
+              <p style="margin:3px 0 0;font-size:14px;color:#0f172a;">${propertyTypeEsc} ${areaSqm ? `· ${areaSqmEsc} m²` : ""} ${numRooms ? `· ${numRoomsEsc} rooms` : ""}</p>
             </td></tr>
             <tr><td style="padding:10px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;">
               <p style="margin:0;font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;">Service</p>
-              <p style="margin:3px 0 0;font-size:14px;color:#0f172a;text-transform:capitalize;">${serviceType.replace(/-/g, " ")}</p>
+              <p style="margin:3px 0 0;font-size:14px;color:#0f172a;text-transform:capitalize;">${serviceTypeEsc.replace(/-/g, " ")}</p>
             </td></tr>
             ${preferredTier ? `<tr><td style="padding:10px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;">
               <p style="margin:0;font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;">Preferred Tier</p>
-              <p style="margin:3px 0 0;font-size:14px;color:#0f172a;text-transform:capitalize;">${preferredTier}</p>
+              <p style="margin:3px 0 0;font-size:14px;color:#0f172a;text-transform:capitalize;">${preferredTierEsc}</p>
             </td></tr>` : ""}
             <tr><td style="padding:10px 14px;background:#f8fafc;border-radius:0 0 8px 8px;">
               <p style="margin:0;font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;">Concerns</p>
@@ -148,7 +157,7 @@ export async function POST(request: Request) {
           ${notes ? `<!-- Notes -->
           <p style="margin:0 0 8px;font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;">Notes</p>
           <div style="background:#f8fafc;border-left:3px solid #00b2d4;border-radius:0 8px 8px 0;padding:16px 18px;margin-bottom:24px;">
-            <p style="margin:0;font-size:14px;color:#334155;line-height:1.7;">${notes.replace(/\n/g, "<br>")}</p>
+            <p style="margin:0;font-size:14px;color:#334155;line-height:1.7;">${notesEsc}</p>
           </div>` : ""}
 
           <!-- Photos -->
@@ -160,7 +169,7 @@ export async function POST(request: Request) {
         <!-- CTA -->
         <tr><td style="background:#f8fafc;padding:20px 32px;border-radius:0 0 12px 12px;border-top:1px solid #e2e8f0;">
           <a href="tel:+${phone.replace(/\D/g, "")}" style="display:inline-block;background:#00b2d4;color:#ffffff;font-size:13px;font-weight:700;text-decoration:none;padding:10px 22px;border-radius:8px;margin-right:10px;">Call Back</a>
-          ${email ? `<a href="mailto:${email}" style="display:inline-block;background:#ffffff;color:#003554;font-size:13px;font-weight:700;text-decoration:none;padding:10px 22px;border-radius:8px;border:1px solid #e2e8f0;">Reply by Email</a>` : ""}
+          ${email ? `<a href="mailto:${encodeURIComponent(email)}" style="display:inline-block;background:#ffffff;color:#003554;font-size:13px;font-weight:700;text-decoration:none;padding:10px 22px;border-radius:8px;border:1px solid #e2e8f0;">Reply by Email</a>` : ""}
           <p style="margin:14px 0 0;font-size:11px;color:#94a3b8;">Quote #${data.id} · submitted via evercoolthailand.com</p>
         </td></tr>
 
