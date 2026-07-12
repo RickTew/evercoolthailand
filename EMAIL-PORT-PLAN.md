@@ -74,11 +74,16 @@ Add per-staff `name@evercoolthailand.com` addresses as assigned.
 
 **Phase 2 — DONE & VERIFIED LIVE (2026-07-12).** On the shared `ricktew` Resend team: receiving enabled for evercoolthailand.com (MX records shown but NOT applied — that's Phase 3); two webhooks live at `https://evercoolthailand.com/api/email/inbound` (email.received) and `https://evercoolthailand.com/api/email/events` (delivered/opened/clicked/bounced/complained) — NOTE: apex URL only, www does not resolve. `RESEND_INBOUND_WEBHOOK_SECRET`, `RESEND_EVENTS_WEBHOOK_SECRET`, `SUPPORT_FROM_ADDRESS` in Vercel and deployed. END-TO-END PROVEN: test email hi@ → info@ricktew.com delivered, events webhook fired, app verified the Svix signature and returned Success (visible in the webhook's Events log; Replay button available). Inbound secret confirmed by construction (re-pasted from the labeled row); first real inbound after the MX flip is its live test — Resend stores + retries, so nothing can be lost.
 
-**Phase 3 (together) — A2 is being CANCELED ENTIRELY (Rick's firm decision, stated twice; never propose keeping it as an archive).** Everything moves to Resend. Order matters because the domain's nameservers ARE A2's (ns1–4.a2hosting.com) — canceling A2 without moving DNS first takes down the website AND mail:
-1. Export the existing hello@/info@ mailbox contents from A2 (once A2 is gone, stored mail is gone).
-2. Move DNS hosting off A2 — domain is registered at Squarespace Domains, so switch nameservers to Squarespace (or another DNS host) and recreate ALL records there: Vercel site records, SPF/DKIM/TXT for Resend, and MX → Resend inbound.
-3. Confirm site + inbound/outbound mail all working on the new DNS.
-4. Cancel A2 hosting.
+**Phase 3 (together) — A2 is being CANCELED ENTIRELY (Rick's firm decision, stated twice; never propose keeping it as an archive).** Everything moves to Resend. Order matters because the domain's nameservers ARE A2's (ns1–4.a2hosting.com) — canceling A2 without moving DNS first takes down the website AND mail.
+
+**IMPORTANT (Rick, 2026-07-12): A2 hosts MANY mailboxes, not just hello@/info@ — every staff member has their own @evercoolthailand.com address.** Consequences: (a) after the MX flip ALL of them keep receiving, but their mail lands in the shared admin Email inbox (labeled per address) — there is NO IMAP on Resend, so phone/desktop mail apps for these addresses stop working; (b) in access-model v1 the queue is shared, so colleagues' personal mail is visible to all staff — the deferred per-staff privacy wall (support_staff_prefs inbox_scope/assigned_inboxes/personal_address, already ported) must be DECIDED before cutover; (c) if any staff genuinely need a real mailbox, that's a separate mail host for those few, decided BEFORE canceling A2.
+
+1. **Inventory**: pull the full list of mailboxes from A2 (cPanel → Email Accounts): every address, owner, in-use status. Add active ones to `EVERCOOL_INBOXES`.
+2. **Team conversation**: app-only email OK? shared queue vs per-staff scoping (machinery is ported; it's configuration).
+3. **Export EVERY mailbox** from A2 (once A2 is gone, stored mail is gone).
+4. Move DNS hosting off A2 — domain is registered at Squarespace Domains, so switch nameservers to Squarespace (or another DNS host) and recreate ALL records there: Vercel site records, SPF/DKIM/TXT for Resend, and MX → Resend inbound.
+5. Confirm site + inbound/outbound mail all working on the new DNS.
+6. Cancel A2 hosting.
 
 ---
 
