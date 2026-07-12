@@ -6,8 +6,13 @@ import { useRouter } from "next/navigation";
 type Article = {
   id: string;
   title_en: string;
+  title_th: string | null;
   slug: string;
   category: string;
+  excerpt_en: string | null;
+  excerpt_th: string | null;
+  content_en: string | null;
+  content_th: string | null;
   read_time_mins: number;
   is_published: boolean;
 };
@@ -19,15 +24,16 @@ export default function AdminArticleForm({ article }: { article?: Article }) {
   const isEdit = !!article;
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
   const [form, setForm] = useState({
     title_en: article?.title_en ?? "",
-    title_th: "",
+    title_th: article?.title_th ?? "",
     slug: article?.slug ?? "",
     category: article?.category ?? "maintenance",
-    excerpt_en: "",
-    excerpt_th: "",
-    content_en: "",
-    content_th: "",
+    excerpt_en: article?.excerpt_en ?? "",
+    excerpt_th: article?.excerpt_th ?? "",
+    content_en: article?.content_en ?? "",
+    content_th: article?.content_th ?? "",
     read_time_mins: article?.read_time_mins ?? 3,
     is_published: article?.is_published ?? false,
   });
@@ -39,12 +45,25 @@ export default function AdminArticleForm({ article }: { article?: Article }) {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
+    setError("");
     const url = isEdit ? `/api/admin/articles/${article!.id}` : "/api/admin/articles";
-    await fetch(url, {
-      method: isEdit ? "PATCH" : "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
-    });
+    try {
+      const res = await fetch(url, {
+        method: isEdit ? "PATCH" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        setError(data?.error ?? `Save failed (${res.status}). Your text is still here — try again.`);
+        setSaving(false);
+        return;
+      }
+    } catch {
+      setError("Network error. Your text is still here — try again.");
+      setSaving(false);
+      return;
+    }
     setSaving(false);
     setOpen(false);
     router.refresh();
@@ -124,14 +143,25 @@ export default function AdminArticleForm({ article }: { article?: Article }) {
         </div>
       </div>
 
-      <div>
-        <label className="text-xs font-semibold text-ec-text-muted block mb-1">Excerpt (EN)</label>
-        <textarea
-          value={form.excerpt_en}
-          onChange={(e) => setForm(f => ({ ...f, excerpt_en: e.target.value }))}
-          rows={2}
-          className="w-full rounded-xl border border-ec-border bg-ec-bg px-3 py-2 text-sm text-ec-text focus:outline-none focus:border-ec-teal resize-none"
-        />
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className="text-xs font-semibold text-ec-text-muted block mb-1">Excerpt (EN)</label>
+          <textarea
+            value={form.excerpt_en}
+            onChange={(e) => setForm(f => ({ ...f, excerpt_en: e.target.value }))}
+            rows={2}
+            className="w-full rounded-xl border border-ec-border bg-ec-bg px-3 py-2 text-sm text-ec-text focus:outline-none focus:border-ec-teal resize-none"
+          />
+        </div>
+        <div>
+          <label className="text-xs font-semibold text-ec-text-muted block mb-1">Excerpt (TH)</label>
+          <textarea
+            value={form.excerpt_th}
+            onChange={(e) => setForm(f => ({ ...f, excerpt_th: e.target.value }))}
+            rows={2}
+            className="w-full rounded-xl border border-ec-border bg-ec-bg px-3 py-2 text-sm text-ec-text focus:outline-none focus:border-ec-teal resize-none"
+          />
+        </div>
       </div>
 
       <div>
@@ -139,6 +169,16 @@ export default function AdminArticleForm({ article }: { article?: Article }) {
         <textarea
           value={form.content_en}
           onChange={(e) => setForm(f => ({ ...f, content_en: e.target.value }))}
+          rows={8}
+          className="w-full rounded-xl border border-ec-border bg-ec-bg px-3 py-2 text-sm text-ec-text focus:outline-none focus:border-ec-teal resize-y"
+        />
+      </div>
+
+      <div>
+        <label className="text-xs font-semibold text-ec-text-muted block mb-1">Content (TH) - separate paragraphs with blank lines</label>
+        <textarea
+          value={form.content_th}
+          onChange={(e) => setForm(f => ({ ...f, content_th: e.target.value }))}
           rows={8}
           className="w-full rounded-xl border border-ec-border bg-ec-bg px-3 py-2 text-sm text-ec-text focus:outline-none focus:border-ec-teal resize-y"
         />
@@ -154,6 +194,10 @@ export default function AdminArticleForm({ article }: { article?: Article }) {
         />
         <label htmlFor="is_published" className="text-xs font-semibold text-ec-text-muted">Published (visible on site)</label>
       </div>
+
+      {error && (
+        <p className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded-xl px-3 py-2">{error}</p>
+      )}
 
       <div className="flex items-center gap-3">
         <button

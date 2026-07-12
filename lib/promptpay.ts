@@ -33,7 +33,7 @@ export function buildPromptPayPayload(phone: string, amount?: number): string {
 
   let payload =
     field("00", "01") +                          // Payload format indicator
-    field("01", "12") +                          // Point of initiation (dynamic)
+    field("01", amount !== undefined ? "12" : "11") + // Point of initiation: 12 = one-time w/ amount, 11 = static/reusable
     field("29", merchantAccountInfo) +            // PromptPay merchant account info
     field("52", "0000") +                        // Merchant category code
     field("53", "764") +                         // Currency (THB)

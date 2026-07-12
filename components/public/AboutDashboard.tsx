@@ -173,7 +173,7 @@ export default function AboutDashboard() {
             </p>
             <p className="text-sm text-white/55 leading-relaxed max-w-md mb-8">
               Led by a husband-and-wife founding team known throughout the industry as
-              "Mama and Papa", the culture at EverCool is built on personal accountability,
+              &ldquo;Mama and Papa&rdquo;, the culture at EverCool is built on personal accountability,
               deep technical expertise, and long-term relationships.
             </p>
             <div className="flex flex-wrap gap-3">
@@ -464,7 +464,7 @@ export default function AboutDashboard() {
             {t.aboutCtaTitle}
           </h2>
           <p className="text-sm text-white/55 max-w-lg mx-auto mb-8 leading-relaxed">
-            Whether you're specifying a new hospital HVAC system, replacing ageing AHUs in a data
+            Whether you&apos;re specifying a new hospital HVAC system, replacing ageing AHUs in a data
             centre, or sourcing IAQ solutions for a pharmaceutical plant, our engineers will
             match the right system to your exact requirements.
           </p>

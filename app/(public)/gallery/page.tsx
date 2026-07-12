@@ -11,15 +11,24 @@ export const metadata: Metadata = {
     "Before and after gallery of AC installation, maintenance, custom AHU, and air purifier projects across Bangkok, Koh Tao, and Surat Thani.",
 };
 
-export default async function GalleryPage() {
+async function fetchGalleryItems() {
   const admin = createAdminClient();
-  const { data: items } = await admin
+  const { data } = await admin
     .from("gallery_items")
     .select("id, title, title_th, description, description_th, before_image_url, after_image_url, category, location")
     .eq("is_active", true)
     .order("sort_order");
+  return data;
+}
 
-  const allItems = items ?? [];
+export default async function GalleryPage() {
+  // Render the page even if the DB is unreachable (e.g. missing local env keys).
+  let allItems: NonNullable<Awaited<ReturnType<typeof fetchGalleryItems>>> = [];
+  try {
+    allItems = (await fetchGalleryItems()) ?? [];
+  } catch {
+    // DB unavailable — show the static page without the dynamic list.
+  }
 
   return (
     <main className="page-enter px-4 md:px-10 pt-6 pb-8">

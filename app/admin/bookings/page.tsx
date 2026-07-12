@@ -50,7 +50,7 @@ export default async function AdminBookingsPage() {
                 {b.service_name as string}
               </span>
               <span className="bg-ec-border/40 rounded-lg px-2 py-0.5 text-ec-text-muted capitalize">
-                {(b.area as string).replace(/-/g, " ")}
+                {String(b.area ?? "").replace(/-/g, " ")}
               </span>
             </div>
             <p className="text-xs text-ec-text-muted">{b.address as string}</p>
@@ -58,7 +58,7 @@ export default async function AdminBookingsPage() {
               <p className="text-xs text-ec-text-muted mt-2 border-t border-ec-border/50 pt-2">{b.notes}</p>
             )}
             <p className="text-[10px] text-ec-text-muted/50 mt-2">
-              Booked {new Date(b.created_at).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" })}
+              Booked {new Date(b.created_at).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Bangkok" })}
             </p>
           </div>
         ))}

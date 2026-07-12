@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { useLanguage } from "@/lib/i18n/useLanguage";
 import PromptPaySheet from "@/components/public/PromptPaySheet";
+import { bangkokToday } from "@/lib/timezone";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -50,14 +51,11 @@ const EMPTY_FORM: BookingForm = {
 // ─── Calendar ─────────────────────────────────────────────────────────────────
 
 function BookingCalendar({ selected, onSelect }: { selected: string; onSelect: (d: string) => void }) {
-  const [viewMonth, setViewMonth] = useState(() => {
-    const d = new Date();
-    d.setHours(0, 0, 0, 0);
-    return new Date(d.getFullYear(), d.getMonth(), 1);
-  });
+  // "Today" in Bangkok, not the visitor's timezone — bangkokToday() returns "YYYY-MM-DD".
+  const [bkkYear, bkkMonth, bkkDay] = bangkokToday().split("-").map(Number);
+  const today = new Date(bkkYear, bkkMonth - 1, bkkDay);
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const [viewMonth, setViewMonth] = useState(() => new Date(bkkYear, bkkMonth - 1, 1));
 
   const maxDate = new Date(today);
   maxDate.setDate(maxDate.getDate() + 60);
@@ -174,6 +172,7 @@ export default function BookingWizard() {
   const [step, setStep] = useState(0);
   const [form, setForm] = useState<BookingForm>(EMPTY_FORM);
   const [photoPreviews, setPhotoPreviews] = useState<string[]>([]);
+  const [photoError, setPhotoError] = useState("");
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
   const [bookingId, setBookingId] = useState<string>("");
   const [showPayment, setShowPayment] = useState(false);
@@ -203,13 +202,23 @@ export default function BookingWizard() {
   }
 
   function addPhoto(file: File) {
-    if (form.photos.length >= 3 || file.size > 5 * 1024 * 1024) return;
+    if (form.photos.length >= 3) {
+      setPhotoError("Maximum 3 photos.");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setPhotoError(`"${file.name}" is over 5MB and was skipped.`);
+      return;
+    }
+    setPhotoError("");
     const url = URL.createObjectURL(file);
     setPhotoPreviews((prev) => [...prev, url]);
     setForm((prev) => ({ ...prev, photos: [...prev.photos, file] }));
   }
 
   function removePhoto(i: number) {
+    URL.revokeObjectURL(photoPreviews[i]);
+    setPhotoError("");
     setPhotoPreviews((prev) => prev.filter((_, idx) => idx !== i));
     setForm((prev) => ({ ...prev, photos: prev.photos.filter((_, idx) => idx !== i) }));
   }
@@ -437,6 +446,7 @@ export default function BookingWizard() {
             )}
           </div>
           <p className="text-xs text-ec-text-muted">{t.optional} (max 3 photos, 5MB each)</p>
+          {photoError && <p className="text-xs text-amber-500 mt-1">{photoError}</p>}
         </div>
       )}
 

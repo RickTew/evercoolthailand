@@ -8,6 +8,7 @@ const CATEGORIES = ["installation", "maintenance", "ahu", "purification", "broan
 export default function AdminGalleryForm() {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
   const [form, setForm] = useState({
     title: "",
     title_th: "",
@@ -29,7 +30,20 @@ export default function AdminGalleryForm() {
     if (beforeFile) fd.append("before_image", beforeFile);
     if (afterFile) fd.append("after_image", afterFile);
 
-    await fetch("/api/admin/gallery", { method: "POST", body: fd });
+    setError("");
+    try {
+      const res = await fetch("/api/admin/gallery", { method: "POST", body: fd });
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        setError(data?.error ?? `Upload failed (${res.status}). Try again.`);
+        setSaving(false);
+        return;
+      }
+    } catch {
+      setError("Network error. Try again.");
+      setSaving(false);
+      return;
+    }
     setSaving(false);
     setForm({ title: "", title_th: "", category: "installation", location: "" });
     setBeforeFile(null);
@@ -102,6 +116,10 @@ export default function AdminGalleryForm() {
           />
         </div>
       </div>
+
+      {error && (
+        <p className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded-xl px-3 py-2">{error}</p>
+      )}
 
       <button
         type="submit"

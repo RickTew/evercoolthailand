@@ -143,7 +143,7 @@ export default function GalleryGrid({ items }: { items: GalleryItem[] }) {
                 </div>
                 <p className="text-xs text-ec-text-muted leading-relaxed mb-3">{desc}</p>
                 <Link
-                  href={`/quote?service=${item.category === "installation" ? "ac-installation" : item.category === "maintenance" ? "ac-maintenance" : item.category === "ahu" ? "custom-ahu" : item.category === "broan" ? "broan-distribution" : item.category}`}
+                  href={`/quote?service=${item.category === "installation" ? "ac-installation" : item.category === "maintenance" ? "ac-maintenance" : item.category === "ahu" ? "custom-ahu" : item.category === "broan" ? "iaq-consultation" : item.category === "purification" ? "air-purifier" : item.category}`}
                   className="block w-full text-center bg-ec-teal/10 hover:bg-ec-teal/20 text-ec-teal font-semibold text-xs rounded-xl py-2 transition-all"
                 >
                   {t.galleryRequestSimilar}

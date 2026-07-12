@@ -3,6 +3,29 @@
 import { useState } from "react";
 import { useLanguage } from "@/lib/i18n/useLanguage";
 
+function Field({ label, value, onChange, unit, min, max, step }: {
+  label: string; value: string; onChange: (v: string) => void;
+  unit?: string; min?: number; max?: number; step?: string;
+}) {
+  return (
+    <div>
+      <label className="text-xs font-semibold text-ec-text-muted block mb-1">{label}</label>
+      <div className="flex items-center gap-2">
+        <input
+          type="number"
+          value={value}
+          min={min}
+          max={max}
+          step={step ?? "0.1"}
+          onChange={(e) => onChange(e.target.value)}
+          className="flex-1 rounded-xl border border-ec-border bg-ec-bg px-3 py-2.5 text-sm text-ec-text focus:outline-none focus:border-ec-teal transition-colors"
+        />
+        {unit && <span className="text-xs text-ec-text-muted shrink-0">{unit}</span>}
+      </div>
+    </div>
+  );
+}
+
 export default function EnergyCostCalculator() {
   const { t } = useLanguage();
   const [kw, setKw] = useState("1.5");
@@ -19,29 +42,6 @@ export default function EnergyCostCalculator() {
   const annual = monthly * 12;
 
   const hasResult = kwNum > 0 && hoursNum > 0 && daysNum > 0 && rateNum > 0;
-
-  function Field({ label, value, onChange, unit, min, max, step }: {
-    label: string; value: string; onChange: (v: string) => void;
-    unit?: string; min?: number; max?: number; step?: string;
-  }) {
-    return (
-      <div>
-        <label className="text-xs font-semibold text-ec-text-muted block mb-1">{label}</label>
-        <div className="flex items-center gap-2">
-          <input
-            type="number"
-            value={value}
-            min={min}
-            max={max}
-            step={step ?? "0.1"}
-            onChange={(e) => onChange(e.target.value)}
-            className="flex-1 rounded-xl border border-ec-border bg-ec-bg px-3 py-2.5 text-sm text-ec-text focus:outline-none focus:border-ec-teal transition-colors"
-          />
-          {unit && <span className="text-xs text-ec-text-muted shrink-0">{unit}</span>}
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="bg-ec-card rounded-2xl border border-ec-border p-4">

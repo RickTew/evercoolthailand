@@ -46,6 +46,8 @@ export default function QuoteBuilder() {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
+  const [photoPreviews, setPhotoPreviews] = useState<string[]>([]);
+  const [photoError, setPhotoError] = useState("");
 
   const [form, setForm] = useState<QuoteForm>({
     propertyType: "",
@@ -85,15 +87,29 @@ export default function QuoteBuilder() {
   function addPhotos(files: FileList | null) {
     if (!files) return;
     const newPhotos = [...form.photos];
-    for (let i = 0; i < files.length && newPhotos.length < 3; i++) {
-      if (files[i].size <= 5 * 1024 * 1024) {
-        newPhotos.push(files[i]);
+    const newPreviews = [...photoPreviews];
+    let rejected = "";
+    for (let i = 0; i < files.length; i++) {
+      if (newPhotos.length >= 3) {
+        rejected = "Maximum 3 photos.";
+        break;
       }
+      if (files[i].size > 5 * 1024 * 1024) {
+        rejected = `"${files[i].name}" is over 5MB and was skipped.`;
+        continue;
+      }
+      newPhotos.push(files[i]);
+      newPreviews.push(URL.createObjectURL(files[i]));
     }
+    setPhotoPreviews(newPreviews);
+    setPhotoError(rejected);
     update("photos", newPhotos);
   }
 
   function removePhoto(index: number) {
+    URL.revokeObjectURL(photoPreviews[index]);
+    setPhotoPreviews((prev) => prev.filter((_, i) => i !== index));
+    setPhotoError("");
     update("photos", form.photos.filter((_, i) => i !== index));
   }
 
@@ -286,10 +302,10 @@ export default function QuoteBuilder() {
           <p className="text-sm font-medium text-ec-text-muted mb-1">{t.quotePhotosTitle}</p>
           <p className="text-xs text-ec-text-muted mb-4">{t.quotePhotosDesc}</p>
           <div className="grid grid-cols-3 gap-3">
-            {form.photos.map((photo, i) => (
+            {form.photos.map((_photo, i) => (
               <div key={i} className="relative aspect-square rounded-xl overflow-hidden bg-ec-border">
                 <img
-                  src={URL.createObjectURL(photo)}
+                  src={photoPreviews[i]}
                   alt={`Photo ${i + 1}`}
                   className="w-full h-full object-cover"
                 />
@@ -313,6 +329,9 @@ export default function QuoteBuilder() {
               </button>
             )}
           </div>
+          {photoError && (
+            <p className="text-xs text-amber-500 mt-2">{photoError}</p>
+          )}
           <input
             ref={fileInputRef}
             type="file"

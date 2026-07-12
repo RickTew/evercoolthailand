@@ -15,19 +15,30 @@ export default function DeleteButton({
   const router = useRouter();
   const [confirming, setConfirming] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [failed, setFailed] = useState(false);
 
   async function handleDelete() {
     setLoading(true);
-    await fetch(`/api/admin/${table}/${id}`, { method: "DELETE" });
-    setLoading(false);
-    setConfirming(false);
-    router.refresh();
+    setFailed(false);
+    try {
+      const res = await fetch(`/api/admin/${table}/${id}`, { method: "DELETE" });
+      if (!res.ok) {
+        setFailed(true);
+        return;
+      }
+      setConfirming(false);
+      router.refresh();
+    } catch {
+      setFailed(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   if (confirming) {
     return (
       <div className="flex items-center gap-2">
-        <span className="text-xs text-ec-text-muted">Sure?</span>
+        <span className="text-xs text-ec-text-muted">{failed ? "Delete failed — retry?" : "Sure?"}</span>
         <button
           onClick={handleDelete}
           disabled={loading}

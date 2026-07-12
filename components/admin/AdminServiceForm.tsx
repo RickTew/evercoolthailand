@@ -20,6 +20,7 @@ export default function AdminServiceForm({ service }: { service?: Service }) {
   const isEdit = !!service;
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
   const [form, setForm] = useState({
     name_en: service?.name_en ?? "",
     name_th: service?.name_th ?? "",
@@ -36,13 +37,26 @@ export default function AdminServiceForm({ service }: { service?: Service }) {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
+    setError("");
     const url = isEdit ? `/api/admin/services/${service!.id}` : "/api/admin/services";
     const method = isEdit ? "PATCH" : "POST";
-    await fetch(url, {
-      method,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
-    });
+    try {
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        setError(data?.error ?? `Save failed (${res.status}). Try again.`);
+        setSaving(false);
+        return;
+      }
+    } catch {
+      setError("Network error. Try again.");
+      setSaving(false);
+      return;
+    }
     setSaving(false);
     setOpen(false);
     router.refresh();
@@ -134,6 +148,10 @@ export default function AdminServiceForm({ service }: { service?: Service }) {
         />
         <label htmlFor="is_active" className="text-xs font-semibold text-ec-text-muted">Active (visible on site)</label>
       </div>
+
+      {error && (
+        <p className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded-xl px-3 py-2">{error}</p>
+      )}
 
       <div className="flex items-center gap-3">
         <button

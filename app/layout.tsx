@@ -21,6 +21,7 @@ const sarabun = Sarabun({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://evercoolthailand.com"),
   title: {
     default: "Evercool Thailand | IAQ & HVAC Specialists",
     template: "%s | Evercool Thailand",

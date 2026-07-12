@@ -14,15 +14,24 @@ export const metadata: Metadata = {
     "AC installation, repair, maintenance, air purifiers, custom AHU, and IAQ consultation in Thailand. Bangkok, Koh Tao & Surat Thani.",
 };
 
-export default async function ServicesPage() {
+async function fetchServices() {
   const admin = createAdminClient();
-  const { data: services } = await admin
+  const { data } = await admin
     .from("services")
     .select("id, slug, name_en, name_th, description_en, description_th, icon, category")
     .eq("is_active", true)
     .order("display_order");
+  return data;
+}
 
-  const allServices = services ?? [];
+export default async function ServicesPage() {
+  // Render the page even if the DB is unreachable (e.g. missing local env keys).
+  let allServices: NonNullable<Awaited<ReturnType<typeof fetchServices>>> = [];
+  try {
+    allServices = (await fetchServices()) ?? [];
+  } catch {
+    // DB unavailable — show the static page without the dynamic list.
+  }
 
   return (
     <main>

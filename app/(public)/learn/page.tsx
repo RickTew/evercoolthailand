@@ -13,15 +13,24 @@ export const metadata: Metadata = {
     "AC guides, indoor air quality tips, AC sizing calculator, and energy cost estimator for Thailand.",
 };
 
-export default async function LearnPage() {
+async function fetchArticles() {
   const admin = createAdminClient();
-  const { data: articles } = await admin
+  const { data } = await admin
     .from("articles")
     .select("id, slug, title_en, title_th, excerpt_en, excerpt_th, category, read_time_mins, published_at")
     .eq("is_published", true)
     .order("published_at", { ascending: false });
+  return data;
+}
 
-  const allArticles = articles ?? [];
+export default async function LearnPage() {
+  // Render the page even if the DB is unreachable (e.g. missing local env keys).
+  let allArticles: NonNullable<Awaited<ReturnType<typeof fetchArticles>>> = [];
+  try {
+    allArticles = (await fetchArticles()) ?? [];
+  } catch {
+    // DB unavailable — show the static page without the dynamic list.
+  }
 
   return (
     <main className="page-enter px-4 md:px-10 pt-6 pb-8">

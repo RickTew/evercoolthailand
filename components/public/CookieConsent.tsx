@@ -28,7 +28,7 @@ export default function CookieConsent() {
   if (!visible) return null;
 
   return (
-    <div className="fixed bottom-nav-height left-0 right-0 z-50 px-3 pb-2 pointer-events-none">
+    <div className="fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom,0px))] md:bottom-4 left-0 right-0 z-50 px-3 pb-2 pointer-events-none">
       <div className="mx-auto max-w-[480px] pointer-events-auto">
         <div className="bg-ec-navy border border-white/20 rounded-2xl p-4 shadow-xl">
           <p className="text-xs text-white/80 mb-3 leading-relaxed">

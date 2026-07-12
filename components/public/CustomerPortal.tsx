@@ -64,6 +64,7 @@ export default function CustomerPortal({
   const [phone, setPhone] = useState(customer?.phone ?? "");
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [saveError, setSaveError] = useState("");
   const [codeCopied, setCodeCopied] = useState(false);
 
   const totalPoints = loyaltyPoints.reduce((sum, e) => sum + e.points, 0);
@@ -71,9 +72,13 @@ export default function CustomerPortal({
   async function copyReferralCode() {
     const code = customer?.referral_code ?? "";
     if (!code) return;
-    await navigator.clipboard.writeText(`https://evercoolthailand.com?ref=${code}`);
-    setCodeCopied(true);
-    setTimeout(() => setCodeCopied(false), 2000);
+    try {
+      await navigator.clipboard.writeText(`https://evercoolthailand.com?ref=${code}`);
+      setCodeCopied(true);
+      setTimeout(() => setCodeCopied(false), 2000);
+    } catch {
+      // Clipboard unavailable (insecure context / old browser) — silently skip.
+    }
   }
 
   const supabase = createBrowserClient(
@@ -89,13 +94,18 @@ export default function CustomerPortal({
   async function handleSaveProfile(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
-    await supabase.from("customers").upsert({
+    setSaveError("");
+    const { error } = await supabase.from("customers").upsert({
       id: user.id,
       name,
       phone,
       email: user.email,
     });
     setSaving(false);
+    if (error) {
+      setSaveError(error.message);
+      return;
+    }
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   }
@@ -151,6 +161,7 @@ export default function CustomerPortal({
           >
             {saved ? t.accountProfileSaved : saving ? t.loading : t.accountSaveProfile}
           </button>
+          {saveError && <p className="text-xs text-red-400">{saveError}</p>}
         </form>
       </div>
 

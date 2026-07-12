@@ -10,7 +10,7 @@ export default async function AdminArticlesPage() {
   const admin = createAdminClient();
   const { data: articles } = await admin
     .from("articles")
-    .select("id, title_en, slug, category, read_time_mins, is_published, created_at")
+    .select("id, title_en, title_th, slug, category, excerpt_en, excerpt_th, content_en, content_th, read_time_mins, is_published, created_at")
     .order("created_at", { ascending: false });
 
   const all = articles ?? [];

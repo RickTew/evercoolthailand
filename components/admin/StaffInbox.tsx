@@ -61,7 +61,7 @@ export default function StaffInbox({ initial }: { initial: StaffMessage[] }) {
                   {m.sender_role}
                 </span>
                 <span className="text-[10px] text-ec-text-muted ml-auto shrink-0">
-                  {new Date(m.created_at).toLocaleString("en-US", { dateStyle: "short", timeStyle: "short" })}
+                  {new Date(m.created_at).toLocaleString("en-US", { dateStyle: "short", timeStyle: "short", timeZone: "Asia/Bangkok" })}
                 </span>
               </div>
               <p className="text-sm text-ec-text-muted leading-relaxed">{m.message}</p>

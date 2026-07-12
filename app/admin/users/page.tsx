@@ -49,10 +49,17 @@ export default function UsersPage() {
 
   const loadUsers = useCallback(async () => {
     setLoading(true);
-    const res = await fetch("/api/admin/users");
-    const data = await res.json();
-    setUsers(data ?? []);
-    setLoading(false);
+    try {
+      const res = await fetch("/api/admin/users");
+      const data = res.ok ? await res.json() : null;
+      setUsers(Array.isArray(data) ? data : []);
+      if (!res.ok) setError("Could not load users. Refresh to try again.");
+    } catch {
+      setUsers([]);
+      setError("Could not load users. Refresh to try again.");
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => { loadUsers(); }, [loadUsers]);
@@ -210,7 +217,7 @@ export default function UsersPage() {
             {active.map(u => (
               <div key={u.id} className="bg-ec-card border border-ec-border rounded-2xl px-4 py-3 flex items-center gap-3">
                 <div className="w-8 h-8 rounded-full bg-ec-teal/20 flex items-center justify-center text-ec-teal font-bold text-sm shrink-0">
-                  {(u.name ?? u.email ?? "?")[0].toUpperCase()}
+                  {((u.name || u.email || "?")[0] ?? "?").toUpperCase()}
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-ec-text truncate">{u.name ?? "—"}</p>
@@ -235,7 +242,7 @@ export default function UsersPage() {
                 {inactive.map(u => (
                   <div key={u.id} className="bg-ec-card border border-ec-border rounded-2xl px-4 py-3 flex items-center gap-3">
                     <div className="w-8 h-8 rounded-full bg-ec-border flex items-center justify-center text-ec-text-muted font-bold text-sm shrink-0">
-                      {(u.name ?? u.email ?? "?")[0].toUpperCase()}
+                      {((u.name || u.email || "?")[0] ?? "?").toUpperCase()}
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold text-ec-text-muted truncate">{u.name ?? "—"}</p>

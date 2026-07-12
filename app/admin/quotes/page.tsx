@@ -45,7 +45,7 @@ export default async function AdminQuotesPage() {
             </div>
             <div className="flex flex-wrap gap-2 text-xs">
               <span className="bg-ec-border/40 rounded-lg px-2 py-0.5 text-ec-text-muted capitalize">
-                {(q.service_type as string).replace(/-/g, " ")}
+                {String(q.service_type ?? "").replace(/-/g, " ")}
               </span>
               <span className="bg-ec-border/40 rounded-lg px-2 py-0.5 text-ec-text-muted capitalize">
                 {q.property_type as string}
@@ -67,7 +67,7 @@ export default async function AdminQuotesPage() {
               </p>
             )}
             <p className="text-[10px] text-ec-text-muted/50 mt-2">
-              {new Date(q.created_at).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" })}
+              {new Date(q.created_at).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Bangkok" })}
             </p>
           </div>
         ))}

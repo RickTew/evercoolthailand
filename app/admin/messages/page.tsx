@@ -47,7 +47,7 @@ export default async function AdminMessagesPage() {
             <p className="text-sm text-ec-text-muted leading-relaxed whitespace-pre-wrap">{m.message}</p>
             <div className="flex items-center gap-3 mt-3 pt-2 border-t border-ec-border/50">
               <p className="text-[10px] text-ec-text-muted/50">
-                {new Date(m.created_at).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" })}
+                {new Date(m.created_at).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Bangkok" })}
               </p>
               {m.phone && (
                 <a href={`tel:${m.phone}`} className="text-xs text-ec-teal hover:underline">Call</a>

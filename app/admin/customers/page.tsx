@@ -50,7 +50,7 @@ export default async function AdminCustomersPage() {
             </div>
             <div className="flex items-center gap-3 mt-3 pt-2 border-t border-ec-border/50">
               <p className="text-[10px] text-ec-text-muted/50">
-                Joined {new Date(c.created_at).toLocaleDateString("en-US", { dateStyle: "medium" })}
+                Joined {new Date(c.created_at).toLocaleDateString("en-US", { dateStyle: "medium", timeZone: "Asia/Bangkok" })}
               </p>
               {c.phone && (
                 <a href={`tel:${c.phone}`} className="text-xs text-ec-teal hover:underline">Call</a>

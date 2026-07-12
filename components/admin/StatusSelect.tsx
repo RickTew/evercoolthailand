@@ -27,19 +27,27 @@ type Props = {
 export default function StatusSelect({ table, id, current, options }: Props) {
   const [status, setStatus] = useState(current);
   const [loading, setLoading] = useState(false);
+  const [failed, setFailed] = useState(false);
   const router = useRouter();
 
   async function handleChange(e: React.ChangeEvent<HTMLSelectElement>) {
     const newStatus = e.target.value;
     setLoading(true);
+    setFailed(false);
     try {
-      await fetch(`/api/admin/${table}/${id}`, {
+      const res = await fetch(`/api/admin/${table}/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: newStatus }),
       });
+      if (!res.ok) {
+        setFailed(true);
+        return;
+      }
       setStatus(newStatus);
       router.refresh();
+    } catch {
+      setFailed(true);
     } finally {
       setLoading(false);
     }
@@ -61,6 +69,7 @@ export default function StatusSelect({ table, id, current, options }: Props) {
           </option>
         ))}
       </select>
+      {failed && <span className="ml-1 text-[10px] text-red-400 font-semibold normal-case">save failed</span>}
     </span>
   );
 }
