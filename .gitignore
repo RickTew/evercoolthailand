@@ -47,3 +47,4 @@ next-env.d.ts
 /EverCool Thailand Files/
 /reference/
 .claude/
+.env*.local
