@@ -83,11 +83,27 @@ Add per-staff `name@evercoolthailand.com` addresses as assigned.
 1. ~~Inventory~~ DONE (12 mailboxes; all in `EVERCOOL_INBOXES`).
 2. ~~Per-staff decision~~ DONE 2026-07-12: privacy wall ON. 5 staff accounts created (passwords handed to Rick) + Wanrawee scoped; each sees ONLY their own address; care_sections=['inbox'].
 3. ~~Move DNS off A2~~ **DONE 2026-07-12 ~23:15: nameservers → ns1/ns2.vercel-dns.com at Squarespace; Vercel DNS zone populated and verified (site A 216.150.1.1, Resend MX/DKIM/SPF/dmarc, test subdomain, mail/webmail A → A2 for archive access).** Note: `vercel dns add` 400s ("not a DNS zone") until ~15 min post-NS-change; retry loop in setup-vercel-dns.sh handled it.
-4. **PROOF gate (pending)**: first real inbound to the root domain lands in the portal (waiting out sender-side MX caches from the same-evening MX flip; auto-tester fires 6 staff welcome emails when the route opens).
+4. **PROOF gate (pending) — FIRST TASK NEXT SESSION (the overnight auto-tester died with Rick's computer, so do this manually):**
+   (a) Send a canary: from the repo, `KEY=$(grep '^# RESEND_API_KEY=' .env.local | sed 's/^# RESEND_API_KEY=//' | tr -d '"')` then POST to api.resend.com/emails from `Evercool Test <hi@test.evercoolthailand.com>` to `hi@evercoolthailand.com` (do NOT send from hi@ itself; the inbound webhook drops hi@ as self).
+   (b) Check the portal /admin/email or `support_threads` for the arrival (caches expired overnight, should land within a minute).
+   (c) If it lands: send the same welcome test to all 6 staff addresses (blancheli, jakkrit, kongnatee, tassanee, theerachai, wanrawee @evercoolthailand.com), verify 6 tickets, then Rick hands out passwords.
+   (d) If it does not land: check Resend receiving log + inbound webhook log before anything else.
 5. Archive window: A2 keeps old mailboxes readable (webmail.evercoolthailand.com); staff phones keep old mail. A few weeks.
 6. Cancel A2 hosting (mail archives die with it).
 
 ---
+
+## PHASE 4 (NEW DIRECTIVE, Rick 2026-07-12 end of cutover night): FULL CARE PARITY
+
+**Rick reversed the original "drop the extras" decision: Evercool should be an EXACT copy of newnei's Care, just Evercool-only.** The trimmed port left out features the team wants. Port the remainder:
+- **AI drafting ("Aide" draft button)**: `_lib/ai/draft.ts` (+ kb.ts retrieval, template.ts, systemPrompt.ts), generateDraftAction, draft buttons in Composer, QC (`ai/qc.ts`), translate (`ai/translate.ts`, TranslateButton). Needs `ANTHROPIC_API_KEY` + the `lib/ai/usage` logging plumbing (port from newnei) + AI budget/cost page decision.
+- **After-hours agent + AI toggle** (AgentModeToggle, AgentControls, `ai/after-hours.ts`, voice profiles `ai/voice.ts`, draftStyle, agent settings pages, saveAiDraft repo methods, agent activity).
+- **Knowledge base ("Wisdom")**: knowledge page + actions, KB articles CRUD, help center decision (public /help or internal only), canned responses admin, answer-review learning loop (logAnswerReview + promote), Test Lab compare.
+- **Phone/voice calls** (CallButton, MemberDialer, PhoneSettings, `lib/calls/*`): needs the calling infra newnei uses; investigate what backs it before porting.
+- **Customers/Contacts section** (customers pages, searchContacts/getContactDetail repo methods).
+- **Settings section** (SettingsTabs: Trash retention UI, MePreferences/signatures, draft style).
+- Em-dash audit of all UI copy (golden rule), plus inline cid: image rendering and further perf polish.
+Order per Rick: **email proof first, then this port.**
 
 ## Env vars needed (add to Vercel + `.env.local` in Phase 2)
 - `RESEND_API_KEY` — the DEDICATED Evercool account key (replaces shared key).
