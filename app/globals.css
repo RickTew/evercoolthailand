@@ -26,6 +26,19 @@
   --ec-border: #253040;
 }
 
+/* The Email inbox (ported from newnei) renders on white cards, so it must
+   keep the LIGHT palette even when the portal is in dark mode — otherwise
+   dark mode flips the text tokens light and produces pale-on-white. Scoped
+   re-assertion beats the .dark override inside this subtree. Proper dark
+   styling for the inbox is a later polish item. */
+.email-light {
+  --ec-bg: #f8fbfd;
+  --ec-card: #ffffff;
+  --ec-text: #1a2332;
+  --ec-text-muted: #5a6a7e;
+  --ec-border: #e2e8f0;
+}
+
 @theme inline {
   --font-sans: var(--font-inter);
   --color-ec-teal: var(--ec-teal);
