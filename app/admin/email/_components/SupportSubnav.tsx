@@ -11,6 +11,7 @@ import { usePathname } from "next/navigation";
 const ITEMS = [
   { href: "/admin/email/inbox", label: "Inbox", section: "inbox" },
   { href: "/admin/email/labels", label: "Labels", section: "labels" },
+  { href: "/admin/email/test", label: "Test Lab", section: "test" },
 ];
 
 export function SupportSubnav({

@@ -197,6 +197,9 @@ export interface SupportRepo {
       attachments?: PendingAttachment[];
     },
   ): Promise<string | null>;
+  // Test Lab cleanup: delete every contact with a test address (@example.* /
+  // *.test) and, via FK cascade, all their threads/messages/attachments/notes.
+  clearTestData(): Promise<void>;
   // Saved replies (canned responses) for the composer.
   listCannedResponses(): Promise<CannedResponse[]>;
   addCannedResponse(title: string, body: string, language: string): Promise<void>;

@@ -1170,6 +1170,20 @@ export class SupabaseRepo implements SupportRepo {
     return thread.id;
   }
 
+  // Test Lab cleanup: remove every contact created with a test address
+  // (@example.* / *.test), which cascades to their threads, messages,
+  // attachment rows, thread tags, and notes via FKs. Storage blobs uploaded
+  // during tests are left behind (tiny, and the private bucket is not listed
+  // anywhere); real customer data never matches these patterns.
+  async clearTestData(): Promise<void> {
+    const db = await this.db();
+    const { error } = await db
+      .from("contacts")
+      .delete()
+      .or("email.ilike.%@example.%,email.ilike.%.test");
+    if (error) throw new Error(error.message);
+  }
+
   async listCannedResponses(): Promise<CannedResponse[]> {
     const db = await this.db();
     const { data } = await db
