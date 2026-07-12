@@ -21,7 +21,10 @@
 ## STATUS
 
 - **Phase 1.1 — DONE & verified (2026-07-12).** Schema applied to Evercool prod. 17 tables (`contacts`, `tags`, `contact_tags`, `support_threads`, `support_messages`, `support_message_attachments`, `support_thread_tags`, `support_thread_notes`, `support_folders`, `support_thread_folders`, `support_settings`, `support_staff_prefs`, `support_kb_articles`, `support_canned_responses`, `support_agent_requests`, `support_answer_reviews`, `support_onboarding_progress`) all exist, all RLS-locked to `service_role`, private `support-attachments` bucket created. Migration: `supabase/migrations/0001_email_care_system.sql`.
-- **Phase 1.2–1.5 — TODO** (this handoff).
+- **Phase 1.2 — DONE (2026-07-12).** Webhook routes (`app/api/email/{inbound,events}/route.ts`), mail helpers (`app/admin/email/_lib/mail/{send,inbound,recipients,consent}.ts`), storage (`_lib/storage/attachments.ts`), trimmed `_lib/types.ts`, `_lib/inboxes.ts` (hi@ only). Adapted: `@evercoolthailand.com`, `EC-` regex, `Evercool <hi@evercoolthailand.com>` fallback sender; AI calls dropped. `_lib/data/repo.ts` holds only the webhook-facing interface; `getRepo()` throws until 1.3 delivers `supabase-repo.ts`. Build green.
+- **Phase 1.3–1.5 — TODO.**
+- **`supabase-ricktew` MCP — WORKING (verified 2026-07-12,** `select 1` **OK).** Use `execute_sql` / `apply_migration` directly; no browser fallback needed.
+- **GitHub repo moved** to `https://github.com/RickTew/evercoolthailand.git`. Local `origin` still points at the old URL (pushes redirect fine); update with `git remote set-url origin https://github.com/RickTew/evercoolthailand.git` when Rick confirms. Dependabot reports 3 vulnerabilities (2 moderate, 1 low) — review when convenient.
 
 ---
 
