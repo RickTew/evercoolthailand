@@ -1,4 +1,5 @@
 import type {
+  CannedResponse,
   Folder,
   PendingAttachment,
   StaffPrefs,
@@ -6,6 +7,7 @@ import type {
   TeamMember,
   ThreadDetail,
   ThreadListItem,
+  ThreadNote,
   ThreadStatus,
 } from "@/app/admin/email/_lib/types";
 
@@ -195,6 +197,14 @@ export interface SupportRepo {
       attachments?: PendingAttachment[];
     },
   ): Promise<string | null>;
+  // Saved replies (canned responses) for the composer.
+  listCannedResponses(): Promise<CannedResponse[]>;
+  addCannedResponse(title: string, body: string, language: string): Promise<void>;
+  deleteCannedResponse(id: string): Promise<void>;
+  // Internal team-only notes on a ticket, never sent to the customer.
+  addThreadNote(threadId: string, authorName: string, body: string): Promise<ThreadNote>;
+  updateThreadNote(id: string, body: string): Promise<void>;
+  deleteThreadNote(id: string): Promise<void>;
   // Per-staff prefs (support_staff_prefs). getStaffPrefs returns defaults
   // (never null) when the person has no row yet.
   setStaffSignature(profileId: string, signature: string): Promise<void>;

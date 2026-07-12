@@ -1,5 +1,6 @@
 import type {
   Attachment,
+  CannedResponse,
   Contact,
   Message,
   PendingAttachment,
@@ -10,6 +11,7 @@ import type {
   Thread,
   ThreadDetail,
   ThreadListItem,
+  ThreadNote,
   ThreadStatus,
 } from "@/app/admin/email/_lib/types";
 import { cache } from "react";
@@ -1166,6 +1168,52 @@ export class SupabaseRepo implements SupportRepo {
       .eq("id", thread.id);
 
     return thread.id;
+  }
+
+  async listCannedResponses(): Promise<CannedResponse[]> {
+    const db = await this.db();
+    const { data } = await db
+      .from("support_canned_responses")
+      .select("id, title, body, language")
+      .order("title", { ascending: true });
+    return (data ?? []) as CannedResponse[];
+  }
+
+  async addCannedResponse(title: string, body: string, language: string): Promise<void> {
+    const db = await this.db();
+    await db.from("support_canned_responses").insert({ title, body, language });
+  }
+
+  async deleteCannedResponse(id: string): Promise<void> {
+    const db = await this.db();
+    await db.from("support_canned_responses").delete().eq("id", id);
+  }
+
+  async addThreadNote(threadId: string, authorName: string, body: string): Promise<ThreadNote> {
+    const db = await this.db();
+    const { data, error } = await db
+      .from("support_thread_notes")
+      .insert({ thread_id: threadId, author_name: authorName, body })
+      .select("id, thread_id, author_name, body, created_at")
+      .single();
+    if (error) throw new Error(error.message);
+    return {
+      id: data.id as string,
+      threadId: data.thread_id as string,
+      authorName: data.author_name as string,
+      body: data.body as string,
+      createdAt: data.created_at as string,
+    };
+  }
+
+  async updateThreadNote(id: string, body: string): Promise<void> {
+    const db = await this.db();
+    await db.from("support_thread_notes").update({ body }).eq("id", id);
+  }
+
+  async deleteThreadNote(id: string): Promise<void> {
+    const db = await this.db();
+    await db.from("support_thread_notes").delete().eq("id", id);
   }
 
   async setStaffSignature(profileId: string, signature: string): Promise<void> {

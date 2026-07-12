@@ -41,6 +41,19 @@
   --color-ec-text: var(--ec-text);
   --color-ec-text-muted: var(--ec-text-muted);
   --color-ec-border: var(--ec-border);
+  /* Aliases used by the Email inbox (ported from newnei's Care module), mapped
+     onto the Evercool palette so the ported components inherit the brand. */
+  --color-navy: var(--ec-navy);
+  --color-navy-dark: #002238;
+  --color-teal: var(--ec-teal);
+  --color-green: var(--ec-green);
+  --color-orange: var(--ec-orange);
+  --color-purple: #7a4a9c;
+  --color-red: #d64545;
+  --color-canvas: var(--ec-bg);
+  --color-ink: var(--ec-text);
+  --color-muted: var(--ec-text-muted);
+  --color-line: var(--ec-border);
 }
 
 body {
