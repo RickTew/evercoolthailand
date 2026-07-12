@@ -60,8 +60,7 @@ export function FolderStrip({
         <p className="w-full text-[11px] text-muted">
           🗑️ Items in Trash are kept for {trashRetentionDays}{" "}
           {trashRetentionDays === 1 ? "day" : "days"}, then permanently deleted automatically.
-          Restore one any time before then from its conversation. An admin can change this in
-          Settings &rarr; Trash.
+          Restore one any time before then from its conversation.
         </p>
       )}
     </div>

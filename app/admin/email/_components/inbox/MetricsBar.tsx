@@ -72,7 +72,7 @@ export function MetricsBar({
     // Clickable and toggles off, like the AI-draft tile (R22).
     { label: "Unassigned", value: unassigned, accent: "text-navy", activeClass: "border-navy bg-navy text-white", href: buildInboxHref(current, { assignee: unassignedActive ? null : "unassigned" }), active: unassignedActive, clearable: true },
     // Clickable: toggle the "AI replies awaiting approval" filter.
-    { label: "AI replies to approve", value: awaiting, accent: "text-purple", activeClass: "border-purple bg-purple text-white", href: buildInboxHref(current, { drafts: draftsActive ? null : "pending" }), active: draftsActive, clearable: true },
+    { label: "Drafts waiting", value: awaiting, accent: "text-purple", activeClass: "border-purple bg-purple text-white", href: buildInboxHref(current, { drafts: draftsActive ? null : "pending" }), active: draftsActive, clearable: true },
   ];
 
   return (
