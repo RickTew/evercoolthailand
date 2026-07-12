@@ -211,7 +211,7 @@ export function Composer({
       router.refresh();
       setBanner({
         kind: "ok",
-        text: res.via === "resend" ? "Reply sent via Resend." : "Reply recorded (test mode, no email sent).",
+        text: res.via === "resend" ? "Reply sent." : "Reply recorded (test mode, no email sent).",
       });
     });
   }
