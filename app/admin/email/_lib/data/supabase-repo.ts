@@ -1,10 +1,13 @@
 import type {
   Attachment,
+  BlockedSender,
   CannedResponse,
   Contact,
   Message,
+  MessageAuthResults,
   PendingAttachment,
   Folder,
+  SpamStatus,
   StaffPrefs,
   Tag,
   TeamMember,
@@ -19,6 +22,7 @@ import type { SupportRepo, ThreadFilter, InboxCounts } from "@/app/admin/email/_
 import { createAdminClient } from "@/lib/supabase/server";
 import { isArchived } from "@/app/admin/email/_lib/ui";
 import { classifyTopics } from "@/app/admin/email/_lib/support/classify";
+import { normalizeBlockPattern, senderMatchesPattern } from "@/app/admin/email/_lib/mail/spam";
 import { signedUrl } from "@/app/admin/email/_lib/storage/attachments";
 
 // Trash retention default (days) when no support_settings row exists, plus the
@@ -88,6 +92,7 @@ type ThreadRow = {
   archived_at?: string | null;
   follow_up_at?: string | null;
   deleted_at?: string | null;
+  spam_status?: SpamStatus;
 };
 
 function mapThread(row: ThreadRow): Thread {
@@ -105,6 +110,7 @@ function mapThread(row: ThreadRow): Thread {
     archivedAt: row.archived_at ?? null,
     followUpAt: row.follow_up_at ?? null,
     deletedAt: row.deleted_at ?? null,
+    spamStatus: row.spam_status ?? null,
   };
 }
 
@@ -130,6 +136,7 @@ type MessageRow = {
   click_count?: number | null;
   bounced_at?: string | null;
   complained_at?: string | null;
+  auth_results?: MessageAuthResults | null;
 };
 
 function mapMessage(row: MessageRow): Message {
@@ -155,6 +162,7 @@ function mapMessage(row: MessageRow): Message {
     clickCount: row.click_count ?? 0,
     bouncedAt: row.bounced_at ?? null,
     complainedAt: row.complained_at ?? null,
+    authResults: row.auth_results ?? null,
   };
 }
 
@@ -420,6 +428,12 @@ export class SupabaseRepo implements SupportRepo {
       const trashed = !!(t.deleted_at ?? null);
       if (view === "trash") return trashed;
       if (trashed) return false;
+      // Spam is its own axis too (Trash still wins: a trashed spam thread is in
+      // Trash). The Spam view shows only flagged threads; every other view
+      // hides them, so a phish never sits in the shared queue looking real.
+      const spam = !!(t.spam_status ?? null);
+      if (view === "spam") return spam;
+      if (spam) return false;
       // Sent is its own axis (like Trash): show every non-trashed thread that has
       // a sent outbound message, whether it is active or archived.
       if (view === "sent") return sentThreadIds?.has(t.id) ?? false;
@@ -537,19 +551,21 @@ export class SupabaseRepo implements SupportRepo {
     // listThreads() that would be run only to feed the overview tiles.
     const { data: rows } = await db
       .from("support_threads")
-      .select("id, status, assignee_id, archived_at, deleted_at, contact_id");
+      .select("id, status, assignee_id, archived_at, deleted_at, spam_status, contact_id");
     const threads = ((rows ?? []) as {
       id: string;
       status: string;
       assignee_id: string | null;
       archived_at: string | null;
       deleted_at: string | null;
+      spam_status: string | null;
       contact_id: string;
     }[]).filter((t) => {
       if (inboxThreadIds && !inboxThreadIds.has(t.id)) return false;
       if (topicThreadIds && !topicThreadIds.has(t.id)) return false;
       if (segmentContactIds && !segmentContactIds.has(t.contact_id)) return false;
       if (t.deleted_at) return false; // trashed threads are off the active axis
+      if (t.spam_status) return false; // spam lives only in the Spam folder
       // Active axis only (not archived), matching the unfiltered listThreads scope.
       return !isArchived(t.archived_at ?? null);
     });
@@ -1031,6 +1047,8 @@ export class SupabaseRepo implements SupportRepo {
     toAddress?: string; // the full original To list (joined)
     ccAddress?: string; // the full original Cc list (joined)
     attachments?: PendingAttachment[];
+    spamStatus?: "suspected" | "confirmed" | null;
+    authResults?: MessageAuthResults | null;
   }): Promise<string> {
     const db = await this.db();
     const email = input.email.trim().toLowerCase();
@@ -1068,19 +1086,24 @@ export class SupabaseRepo implements SupportRepo {
         channel: "email",
         status: "open",
         last_message_at: now,
+        spam_status: input.spamStatus ?? null,
       })
       .select("id")
       .maybeSingle();
     if (!thread) throw new Error("Could not create the thread.");
 
-    // Auto-tag the new ticket by topic so it lands triaged.
-    const topicIds = await this.topicTagIdsForNames(
-      classifyTopics(input.subject ?? "", input.body),
-    );
-    if (topicIds.length) {
-      await db
-        .from("support_thread_tags")
-        .upsert(topicIds.map((tagId) => ({ thread_id: thread.id, tag_id: tagId })));
+    // Auto-tag the new ticket by topic so it lands triaged. Skipped for spam:
+    // a phish mentioning "payment" must not arrive wearing a Billing tag that
+    // makes it look like real work.
+    if (!input.spamStatus) {
+      const topicIds = await this.topicTagIdsForNames(
+        classifyTopics(input.subject ?? "", input.body),
+      );
+      if (topicIds.length) {
+        await db
+          .from("support_thread_tags")
+          .upsert(topicIds.map((tagId) => ({ thread_id: thread.id, tag_id: tagId })));
+      }
     }
 
     const { data: inserted } = await db
@@ -1094,6 +1117,7 @@ export class SupabaseRepo implements SupportRepo {
         cc_address: input.ccAddress ?? "",
         body_text: input.body,
         body_html: input.bodyHtml ?? null,
+        auth_results: input.authResults ?? null,
       })
       .select("id")
       .maybeSingle();
@@ -1113,6 +1137,7 @@ export class SupabaseRepo implements SupportRepo {
       toAddress?: string;
       ccAddress?: string;
       attachments?: PendingAttachment[];
+      authResults?: MessageAuthResults | null;
     },
   ): Promise<string | null> {
     const ref = reference.trim().toUpperCase();
@@ -1153,6 +1178,7 @@ export class SupabaseRepo implements SupportRepo {
         cc_address: msg.ccAddress ?? "",
         body_text: msg.body,
         body_html: msg.bodyHtml ?? null,
+        auth_results: msg.authResults ?? null,
       })
       .select("id")
       .maybeSingle();
@@ -1168,6 +1194,76 @@ export class SupabaseRepo implements SupportRepo {
       .eq("id", thread.id);
 
     return thread.id;
+  }
+
+  // Spam triage. Humans only ever set 'confirmed' (Mark as spam) or null (Not
+  // spam); 'suspected' is written exclusively by the inbound filter at arrival.
+  async setSpamStatus(threadId: string, status: "confirmed" | null): Promise<void> {
+    const db = await this.db();
+    await db.from("support_threads").update({ spam_status: status }).eq("id", threadId);
+  }
+
+  // ---- Blocked senders (the team's blocklist) ----
+  // Small table, read on every inbound webhook: fetch all and match in memory
+  // with the same senderMatchesPattern the Block action uses, so a domain
+  // pattern ("@imgsafe.org") catches subdomains too, which SQL equality can't.
+
+  async listBlockedSenders(): Promise<BlockedSender[]> {
+    const db = await this.db();
+    const { data } = await db
+      .from("support_blocked_senders")
+      .select("id, pattern, reason, created_at, hit_count, last_hit_at")
+      .order("created_at", { ascending: false });
+    return (data ?? []).map((r) => ({
+      id: r.id,
+      pattern: r.pattern,
+      reason: r.reason,
+      createdAt: r.created_at,
+      hitCount: r.hit_count ?? 0,
+      lastHitAt: r.last_hit_at,
+    }));
+  }
+
+  async addBlockedSender(
+    pattern: string,
+    reason: string,
+    createdBy: string | null,
+  ): Promise<{ ok: boolean; error?: string }> {
+    const clean = normalizeBlockPattern(pattern);
+    if (!clean) return { ok: false, error: "Enter an address or domain to block." };
+    const db = await this.db();
+    // Upsert on the unique pattern: re-blocking an already-blocked sender is a
+    // no-op, not an error (Mark as spam may run twice on the same sender).
+    const { error } = await db
+      .from("support_blocked_senders")
+      .upsert({ pattern: clean, reason, created_by: createdBy }, { onConflict: "pattern" });
+    if (error) return { ok: false, error: error.message };
+    return { ok: true };
+  }
+
+  async removeBlockedSender(pattern: string): Promise<void> {
+    const clean = normalizeBlockPattern(pattern);
+    if (!clean) return;
+    const db = await this.db();
+    await db.from("support_blocked_senders").delete().eq("pattern", clean);
+  }
+
+  async matchBlockedSender(email: string): Promise<BlockedSender | null> {
+    const all = await this.listBlockedSenders();
+    return all.find((b) => senderMatchesPattern(email, b.pattern)) ?? null;
+  }
+
+  async recordBlockedHit(id: string): Promise<void> {
+    const db = await this.db();
+    const { data } = await db
+      .from("support_blocked_senders")
+      .select("hit_count")
+      .eq("id", id)
+      .maybeSingle();
+    await db
+      .from("support_blocked_senders")
+      .update({ hit_count: (data?.hit_count ?? 0) + 1, last_hit_at: new Date().toISOString() })
+      .eq("id", id);
   }
 
   // Test Lab cleanup: remove every contact created with a test address

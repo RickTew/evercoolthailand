@@ -8,6 +8,8 @@ import { ArchiveControl } from "@/app/admin/email/_components/inbox/ArchiveContr
 import { DeleteThreadControl } from "@/app/admin/email/_components/inbox/DeleteThreadControl";
 import { TrashControls } from "@/app/admin/email/_components/inbox/TrashControls";
 import { ThreadFolderControl } from "@/app/admin/email/_components/inbox/ThreadFolderControl";
+import { SpamBanner } from "@/app/admin/email/_components/inbox/SpamBanner";
+import { SpamControl } from "@/app/admin/email/_components/inbox/SpamControl";
 import { Composer } from "@/app/admin/email/_components/inbox/Composer";
 import { channelLabel } from "@/app/admin/email/_lib/ui";
 import { LinkifiedText } from "@/app/admin/email/_components/inbox/LinkifiedText";
@@ -123,12 +125,29 @@ export async function ThreadView({
             <TrashControls threadId={thread.id} />
           ) : (
             <>
+              {!thread.spamStatus && <SpamControl threadId={thread.id} senderEmail={contact.email} />}
               <ArchiveControl threadId={thread.id} archived={isArchived(thread.archivedAt)} />
               <DeleteThreadControl threadId={thread.id} />
             </>
           )}
         </div>
       </div>
+
+      {thread.spamStatus && (
+        <SpamBanner
+          threadId={thread.id}
+          spamStatus={thread.spamStatus}
+          senderEmail={contact.email}
+          // The evidence captured when the mail arrived, from the newest flagged
+          // inbound message (the reasons list is written by the inbound filter).
+          reasons={
+            [...messages]
+              .reverse()
+              .find((m) => m.direction === "inbound" && m.authResults?.reasons?.length)
+              ?.authResults?.reasons ?? []
+          }
+        />
+      )}
 
       {otherOwner && (
         <div className="flex shrink-0 items-center gap-2 border-b border-orange/30 bg-orange/5 px-5 py-1.5 text-[11px] text-ink">

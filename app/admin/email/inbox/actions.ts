@@ -207,6 +207,40 @@ export async function deleteThreadAction(threadId: string): Promise<{ ok: boolea
   return { ok: true };
 }
 
+// Spam triage. "Mark as spam" confirms the flag (and the conversation moves to
+// the Spam folder); blockSender also puts the sender's address on the blocked
+// list so their next mail lands in Spam automatically. "Not spam" clears the
+// flag AND unblocks the sender, so a wrong block is undone in the same click.
+export async function markSpamAction(
+  threadId: string,
+  blockSender: boolean,
+): Promise<{ ok: boolean; error?: string }> {
+  const repo = await getStaffRepo();
+  const detail = await repo.getThread(threadId);
+  if (!detail) return { ok: false, error: "Conversation not found." };
+  await repo.setSpamStatus(threadId, "confirmed");
+  if (blockSender && detail.contact.email) {
+    const me = (await getCurrentUserContext()).teamMember;
+    await repo.addBlockedSender(
+      detail.contact.email,
+      `Blocked from ${detail.thread.reference || "the inbox"} (Mark as spam)`,
+      me?.id ?? null,
+    );
+  }
+  revalidatePath("/admin/email/inbox");
+  return { ok: true };
+}
+
+export async function notSpamAction(threadId: string): Promise<{ ok: boolean; error?: string }> {
+  const repo = await getStaffRepo();
+  const detail = await repo.getThread(threadId);
+  if (!detail) return { ok: false, error: "Conversation not found." };
+  await repo.setSpamStatus(threadId, null);
+  if (detail.contact.email) await repo.removeBlockedSender(detail.contact.email);
+  revalidatePath("/admin/email/inbox");
+  return { ok: true };
+}
+
 export async function setFollowUpAction(threadId: string, followUpAtIso: string | null) {
   const repo = await getStaffRepo();
   await repo.setFollowUp(threadId, followUpAtIso);

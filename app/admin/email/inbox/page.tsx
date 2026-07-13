@@ -100,12 +100,15 @@ export default async function InboxPage({
         ? "trash"
         : folderParam === "sent"
           ? "sent"
-          : "active";
+          : folderParam === "spam"
+            ? "spam"
+            : "active";
   const folderId =
     folderParam !== "all" &&
     folderParam !== "archived" &&
     folderParam !== "trash" &&
-    folderParam !== "sent"
+    folderParam !== "sent" &&
+    folderParam !== "spam"
       ? folderParam
       : undefined;
   // Only the overview layouts (topdash/board/grid) need the all-status counts for

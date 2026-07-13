@@ -28,6 +28,36 @@ export type AuthorType = "customer" | "agent" | "ai_draft" | "ai_auto";
 // Outbound lifecycle. null for inbound messages (received mail has no send state).
 export type MessageState = "draft" | "approved" | "sent" | "failed" | null;
 
+// Spam verdict on a thread. null = clean. "suspected" = auto-flagged by the
+// inbound filter (failed sender authentication and similar hard evidence);
+// "confirmed" = a human marked it spam, or the sender was already blocked.
+// Suspected/confirmed threads live in the inbox Spam folder only.
+export type SpamStatus = "suspected" | "confirmed" | null;
+
+// Why an inbound mail was (or was not) flagged: the SES authentication verdicts
+// captured at arrival plus the filter's score and human-readable reasons.
+// Mirrors AuthResults in _lib/mail/spam.ts; stored as jsonb on the message.
+export interface MessageAuthResults {
+  spf?: string | null;
+  dkim?: string | null;
+  dmarc?: string | null;
+  sesSpam?: string | null;
+  sesVirus?: string | null;
+  score?: number;
+  reasons?: string[];
+}
+
+// One entry on the team's blocked-senders list. pattern is a full address
+// ("support@imgsafe.org") or a whole domain ("@imgsafe.org").
+export interface BlockedSender {
+  id: string;
+  pattern: string;
+  reason: string | null;
+  createdAt: string;
+  hitCount: number;
+  lastHitAt: string | null;
+}
+
 // "segment" tags belong to the person (VIP, Dealer) and live on the contact.
 // "topic" tags belong to one ticket (Quote, Warranty, Install, ...) and live on
 // the thread via support_thread_tags. The inbox shows topic tags on the ticket,
@@ -117,6 +147,9 @@ export interface Message {
   clickCount?: number;
   bouncedAt?: string | null;
   complainedAt?: string | null; // recipient marked it as spam
+  // Inbound only: the SES authentication verdicts + the spam filter's reasons
+  // captured when the mail arrived. Null on outbound and on pre-filter mail.
+  authResults?: MessageAuthResults | null;
 }
 
 export interface Thread {
@@ -133,6 +166,7 @@ export interface Thread {
   archivedAt?: string | null;
   followUpAt?: string | null;
   deletedAt?: string | null; // soft-deleted (in Trash) when set; restorable 30 days
+  spamStatus?: SpamStatus; // set = lives in the Spam folder, hidden everywhere else
 }
 
 export interface KbArticle {

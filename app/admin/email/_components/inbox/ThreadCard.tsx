@@ -57,6 +57,18 @@ export function ThreadCard({
           <span className={`h-1.5 w-1.5 rounded-full ${meta.dot}`} />
           {meta.label}
         </span>
+        {thread.spamStatus && (
+          <span
+            className="rounded-full bg-red/10 px-1.5 py-0.5 text-[10px] font-semibold text-red"
+            title={
+              thread.spamStatus === "confirmed"
+                ? "Marked as spam"
+                : "Flagged automatically: this mail failed sender checks"
+            }
+          >
+            {thread.spamStatus === "confirmed" ? "Spam" : "Suspected spam"}
+          </span>
+        )}
         {hasPendingDraft && (
           <span className="rounded-full bg-purple/10 px-1.5 py-0.5 text-[10px] font-semibold text-purple">
             AI draft

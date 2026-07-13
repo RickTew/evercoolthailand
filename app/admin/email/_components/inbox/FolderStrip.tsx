@@ -15,6 +15,7 @@ const SYSTEM_FOLDERS: { key: string; label: string }[] = [
   { key: "all", label: "All" },
   { key: "sent", label: "Sent" },
   { key: "archived", label: "Archived" },
+  { key: "spam", label: "Spam" },
   { key: "trash", label: "Trash" },
 ];
 
@@ -56,6 +57,13 @@ export function FolderStrip({
         );
       })}
       <FolderBar folders={folders} current={current} />
+      {folder === "spam" && (
+        <p className="w-full text-[11px] text-muted">
+          ⚠️ Suspicious mail lands here automatically (failed sender checks or a blocked
+          sender). Do not click links or open attachments in these. A real mail caught by
+          mistake: open it and press &ldquo;Not spam&rdquo;.
+        </p>
+      )}
       {folder === "trash" && (
         <p className="w-full text-[11px] text-muted">
           🗑️ Items in Trash are kept for {trashRetentionDays}{" "}

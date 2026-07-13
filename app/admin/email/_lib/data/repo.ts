@@ -1,6 +1,8 @@
 import type {
+  BlockedSender,
   CannedResponse,
   Folder,
+  MessageAuthResults,
   PendingAttachment,
   StaffPrefs,
   Tag,
@@ -25,10 +27,11 @@ export interface ThreadFilter {
   // an owner. Wins over assigneeId when set.
   deskId?: string;
   // Folder view: active (not archived, the default), follow-ups only, archived,
-  // trash (soft-deleted, restorable until purge), or sent (threads with at
-  // least one outbound message we actually sent). Trashed threads are hidden
-  // from every other view.
-  view?: "active" | "followups" | "archived" | "trash" | "sent";
+  // trash (soft-deleted, restorable until purge), sent (threads with at
+  // least one outbound message we actually sent), or spam (threads the filter
+  // or a human flagged). Trashed threads are hidden from every other view, and
+  // so are spam threads (they show ONLY in the spam view).
+  view?: "active" | "followups" | "archived" | "trash" | "sent" | "spam";
   // Only tickets with a saved reply draft still waiting to be sent.
   pendingDraft?: boolean;
   // Only tickets in this custom folder. Replaces the active/archived axis.
@@ -178,6 +181,12 @@ export interface SupportRepo {
     toAddress?: string; // the full original To list (joined); the inbox pill + filter read it
     ccAddress?: string; // the full original Cc list (joined), so staff can see + reply to all
     attachments?: PendingAttachment[];
+    // The spam filter's verdict (see _lib/mail/spam.ts). A set spamStatus files
+    // the new ticket into the Spam folder and skips topic auto-tagging (a phish
+    // must not arrive dressed as "Billing"); authResults is stored on the
+    // message either way so staff can see the evidence.
+    spamStatus?: "suspected" | "confirmed" | null;
+    authResults?: MessageAuthResults | null;
   }): Promise<string>;
   // Inbound threading: when a reply's subject carries the ticket's EC-#####
   // reference, append the message to that existing thread instead of opening a
@@ -195,8 +204,20 @@ export interface SupportRepo {
       toAddress?: string;
       ccAddress?: string;
       attachments?: PendingAttachment[];
+      authResults?: MessageAuthResults | null; // arrival evidence, stored on the message
     },
   ): Promise<string | null>;
+  // Spam triage: "Mark as spam" (confirmed), "Not spam" (null; also clears a
+  // suspected flag). Suspected is only ever set by the inbound filter itself.
+  setSpamStatus(threadId: string, status: "confirmed" | null): Promise<void>;
+  // The team's blocked-senders list. Patterns are a full address or "@domain"
+  // (see _lib/mail/spam.ts). matchBlockedSender returns the matching entry for
+  // an inbound sender (and the webhook then bumps its hit counter), or null.
+  listBlockedSenders(): Promise<BlockedSender[]>;
+  addBlockedSender(pattern: string, reason: string, createdBy: string | null): Promise<{ ok: boolean; error?: string }>;
+  removeBlockedSender(pattern: string): Promise<void>;
+  matchBlockedSender(email: string): Promise<BlockedSender | null>;
+  recordBlockedHit(id: string): Promise<void>;
   // Test Lab cleanup: delete every contact with a test address (@example.* /
   // *.test) and, via FK cascade, all their threads/messages/attachments/notes.
   clearTestData(): Promise<void>;

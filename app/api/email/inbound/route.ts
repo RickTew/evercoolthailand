@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 import { getRepo } from "@/app/admin/email/_lib/data/repo";
 import { extractReference } from "@/app/admin/email/_lib/mail/inbound";
+import { assessInboundSpam, type SpamVerdict } from "@/app/admin/email/_lib/mail/spam";
 import { putAttachment } from "@/app/admin/email/_lib/storage/attachments";
 import type { PendingAttachment } from "@/app/admin/email/_lib/types";
 
@@ -215,14 +216,40 @@ export async function POST(request: NextRequest) {
   const bodyHtml = full.html?.trim() ? full.html : null;
   const attachments = await fetchInboundAttachments(apiKey, emailId);
 
+  // Spam / phishing check. SES (Resend's receiving MTA) stamps every message
+  // with SPF/DKIM/DMARC verdicts and its own spam + virus scan results; score
+  // them (see _lib/mail/spam.ts), then let the team's blocklist escalate. The
+  // mail is ALWAYS stored either way; a flag only decides which folder it
+  // lands in, so a false positive is one click away, never lost.
+  const assessment = assessInboundSpam({
+    headers: (full as { headers?: Record<string, unknown> }).headers,
+    fromEmail: email,
+    replyTo: addressList((full as { reply_to?: unknown }).reply_to),
+  });
+  let spamStatus: SpamVerdict = assessment.verdict;
+  const authResults = { ...assessment.auth };
+
   try {
     const repo = await getRepo();
 
+    const blocked = await repo.matchBlockedSender(email);
+    if (blocked) {
+      spamStatus = "confirmed";
+      authResults.reasons = [
+        `The sender matches the blocked list (${blocked.pattern}).`,
+        ...authResults.reasons,
+      ];
+      await repo.recordBlockedHit(blocked.id);
+    }
+
     // Threading: if the subject carries an EC-##### reference, append the
     // reply to that existing thread. Fall back to a new ticket when there is no
-    // reference, or the referenced thread no longer exists.
+    // reference, or the referenced thread no longer exists. Flagged mail never
+    // threads: a forged From (DMARC fail) could otherwise pass the ownership
+    // check and inject into a real conversation, and a blocked sender's mail
+    // belongs in Spam, not appended to an open ticket.
     const reference = extractReference(subject);
-    if (reference) {
+    if (reference && !spamStatus) {
       const appended = await repo.appendInboundToThreadByReference(reference, {
         name,
         email,
@@ -231,6 +258,7 @@ export async function POST(request: NextRequest) {
         toAddress,
         ccAddress,
         attachments,
+        authResults,
       });
       if (appended) {
         console.log(`[inbound] ${email} -> appended to ${reference} (thread ${appended})`);
@@ -247,12 +275,20 @@ export async function POST(request: NextRequest) {
       toAddress,
       ccAddress,
       attachments,
+      spamStatus,
+      authResults,
       note: inboxAddress
         ? `Created from an inbound email to ${inboxAddress}.`
         : "Created from an inbound email to Evercool.",
     });
-    console.log(`[inbound] ${email} -> support thread ${threadId}`);
-    return NextResponse.json({ ok: true, threadId });
+    if (spamStatus) {
+      console.log(
+        `[inbound] ${email} -> support thread ${threadId} flagged as ${spamStatus} spam: ${authResults.reasons.join(" | ")}`,
+      );
+    } else {
+      console.log(`[inbound] ${email} -> support thread ${threadId}`);
+    }
+    return NextResponse.json({ ok: true, threadId, spam: spamStatus ?? undefined });
   } catch (err) {
     console.error("[inbound] failed to create support ticket:", err);
     return NextResponse.json({ error: "could not create ticket" }, { status: 500 });
