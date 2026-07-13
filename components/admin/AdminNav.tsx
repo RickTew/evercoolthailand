@@ -24,7 +24,11 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/admin/quotes",     label: "Quotes",     roles: ["admin", "sales", "manager", "owner"] },
   { href: "/admin/bookings",   label: "Bookings",   roles: ["admin", "sales", "manager", "owner"] },
   { href: "/admin/customers",  label: "Customers",  roles: ["admin", "sales", "manager", "owner"] },
-  { href: "/admin/jobs",       label: "Jobs",       roles: ["admin", "sales", "manager", "owner", "technician"] },
+  // Projects (quotation pipeline) + Service (Service & Maintenance) are the
+  // eq-tracker sections consolidated into the portal (13 Jul). They replace
+  // the blank Jobs stub; Reports below is eq-tracker's analytics dashboard.
+  { href: "/admin/projects",   label: "Projects",   roles: ["admin", "sales", "manager", "owner"] },
+  { href: "/admin/service",    label: "Service",    roles: ["admin", "manager", "owner", "technician"] },
   { href: "/admin/team",       label: "Team",       roles: ["admin", "manager", "owner"] },
   { href: "/admin/reports",    label: "Reports",    roles: ["admin", "manager", "owner"] },
   { href: "/admin/users",      label: "Users",      roles: ["admin"] },

@@ -1,13 +1,14 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient, createAdminClient } from "@/lib/supabase/server";
 import { I18nProvider } from "@/lib/eqt/i18n";
-import DashboardClient from "@/components/eqt-dashboard/DashboardClient";
+import ProjectsClient from "@/components/projects/ProjectsClient";
 
 export const dynamic = "force-dynamic";
 
-const ALLOWED_ROLES = ["admin", "manager", "owner"];
+const ALLOWED_ROLES = ["admin", "manager", "owner", "sales"];
 
-export default async function ReportsPage() {
+export default async function ProjectsPage() {
   const supabase = await createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
@@ -30,8 +31,19 @@ export default async function ReportsPage() {
 
   return (
     <div className="eqt">
+      {/* Pipeline structure (stages, quarters) is portal-admin only. */}
+      {profile.role === "admin" && (
+        <div className="mb-3 flex justify-end">
+          <Link
+            href="/admin/projects/pipeline"
+            className="rounded-lg border border-border px-2.5 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+          >
+            Pipeline settings
+          </Link>
+        </div>
+      )}
       <I18nProvider>
-        <DashboardClient
+        <ProjectsClient
           initialProjects={projects ?? []}
           stages={stages ?? []}
           isAdmin={isAdmin}
