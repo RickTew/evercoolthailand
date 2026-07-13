@@ -10,6 +10,7 @@ import type { StaffPrefs } from "@/app/admin/email/_lib/types";
 // EMPTY means all, so nobody is locked out until they are deliberately scoped.
 export const CARE_SECTIONS = [
   { key: "inbox", label: "Inbox", href: "/admin/email/inbox" },
+  { key: "contacts", label: "Customers", href: "/admin/email/customers" },
   { key: "labels", label: "Labels", href: "/admin/email/labels" },
   { key: "settings", label: "Settings", href: "/admin/email/settings" },
   { key: "test", label: "Test Lab", href: "/admin/email/test" },

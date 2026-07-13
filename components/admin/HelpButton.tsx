@@ -60,7 +60,7 @@ export default function HelpButton() {
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h2 className="text-sm font-bold text-ec-text">Message Admin</h2>
-                <p className="text-xs text-ec-text-muted">Send a note — admin will see it in their inbox</p>
+                <p className="text-xs text-ec-text-muted">Send a note: admin will see it in their inbox</p>
               </div>
               <button
                 onClick={() => setOpen(false)}

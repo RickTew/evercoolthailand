@@ -3,6 +3,8 @@ import type {
   BlockedSender,
   CannedResponse,
   Contact,
+  ContactProfile,
+  ContactSearchResult,
   Message,
   MessageAuthResults,
   PendingAttachment,
@@ -1085,6 +1087,174 @@ export class SupabaseRepo implements SupportRepo {
     return Boolean(data?.unsubscribed_at);
   }
 
+  // Builds search results from a set of contact rows: attaches segments, thread
+  // count, last-contact time, and any message-match snippet.
+  private async buildContactResults(
+    rows: ContactRow[],
+    snippetByContact: Map<string, string>,
+  ): Promise<ContactSearchResult[]> {
+    if (rows.length === 0) return [];
+    const db = await this.db();
+    const ids = rows.map((r) => r.id);
+    const [{ data: threadRows }, { data: ctRows }, tags] = await Promise.all([
+      db.from("support_threads").select("contact_id, last_message_at").in("contact_id", ids),
+      db.from("contact_tags").select("contact_id, tag_id").in("contact_id", ids),
+      this.listTags(),
+    ]);
+    const results = rows.map((row) => {
+      const myThreads = (threadRows ?? []).filter((t) => t.contact_id === row.id);
+      const last = myThreads
+        .map((t) => t.last_message_at)
+        .sort()
+        .at(-1) ?? null;
+      const tagIds = (ctRows ?? []).filter((x) => x.contact_id === row.id).map((x) => x.tag_id);
+      return {
+        contact: mapContact(row, tagIds),
+        segments: tags.filter((t) => tagIds.includes(t.id) && t.kind === "segment"),
+        threadCount: myThreads.length,
+        lastContactAt: last,
+        matchedSnippet: snippetByContact.get(row.id) ?? null,
+      };
+    });
+    return results.sort((a, b) => (b.lastContactAt ?? "").localeCompare(a.lastContactAt ?? ""));
+  }
+
+  async searchContacts(
+    query: string,
+    opts?: { inboxes?: string[] | null; mode?: "all" | "contact" | "text" },
+  ): Promise<ContactSearchResult[]> {
+    const db = await this.db();
+    // Search scope (mirrors the inbox): "contact" hits only name/email, "text" only
+    // message body, "all" both (plus notes). A ticket reference is not relevant here.
+    const mode = opts?.mode ?? "all";
+    const wantFields = mode === "all" || mode === "contact";
+    const wantText = mode === "all" || mode === "text";
+    // Strip characters that would break the PostgREST or() / ilike filters.
+    const q = query.trim().replace(/[%(),*]/g, " ").trim();
+
+    // Per-staff inbox scope: when set, restrict the directory to contacts who have
+    // written to one of the staffer's inboxes (resolve those contact ids up front,
+    // then filter every result through them). EMPTY allowed set => sees nothing.
+    let scopedContactIds: Set<string> | null = null;
+    if (opts?.inboxes) {
+      if (opts.inboxes.length === 0) return [];
+      const tids = await this.threadIdsForInboxes(opts.inboxes);
+      if (tids.size === 0) return [];
+      const { data: scopeThreads } = await db
+        .from("support_threads")
+        .select("contact_id")
+        .in("id", [...tids]);
+      scopedContactIds = new Set((scopeThreads ?? []).map((t) => t.contact_id));
+      if (scopedContactIds.size === 0) return [];
+    }
+    const inScope = (rows: ContactRow[]) =>
+      scopedContactIds ? rows.filter((r) => scopedContactIds!.has(r.id)) : rows;
+
+    if (q === "") {
+      // No search term: show the WHOLE customer directory (A-Z), not just the 25
+      // most-recent. The cap is a generous safety bound; if it is ever hit the
+      // caller should switch to paging rather than silently truncating.
+      const { data } = await db
+        .from("contacts")
+        .select("*")
+        .order("full_name", { ascending: true })
+        .limit(5000);
+      return this.buildContactResults(inScope((data ?? []) as ContactRow[]), new Map());
+    }
+
+    const like = `%${q}%`;
+    // Field matches. "all" includes the internal note; "contact" narrows to the
+    // identity fields (name + email) so it matches the inbox's "Name / email" scope.
+    const fieldOr = mode === "contact"
+      ? `full_name.ilike.${like},email.ilike.${like}`
+      : `full_name.ilike.${like},email.ilike.${like},notes.ilike.${like}`;
+    const fieldRows = wantFields
+      ? (await db.from("contacts").select("*").or(fieldOr)).data
+      : [];
+
+    // Message-text matches: find messages, map thread -> contact, attach a snippet.
+    // Generous cap: a search dedupes to one snippet per contact, so a low row cap
+    // would quietly hide matches once the mailbox grows. Switch to paging if this
+    // is ever hit rather than silently truncating.
+    const msgRows = wantText
+      ? (await db.from("support_messages").select("thread_id, body_text").ilike("body_text", like).limit(5000)).data
+      : [];
+
+    const byId = new Map<string, ContactRow>();
+    for (const r of (fieldRows ?? []) as ContactRow[]) byId.set(r.id, r);
+
+    const snippetByContact = new Map<string, string>();
+    if (msgRows && msgRows.length) {
+      const threadIds = [...new Set(msgRows.map((m) => m.thread_id))];
+      const { data: threadRows } = await db
+        .from("support_threads")
+        .select("id, contact_id")
+        .in("id", threadIds);
+      const contactByThread = new Map((threadRows ?? []).map((t) => [t.id, t.contact_id]));
+      const missing = new Set<string>();
+      for (const m of msgRows) {
+        const cId = contactByThread.get(m.thread_id);
+        if (!cId) continue;
+        if (!snippetByContact.has(cId)) snippetByContact.set(cId, snippetAround(m.body_text, q));
+        if (!byId.has(cId)) missing.add(cId);
+      }
+      if (missing.size) {
+        const { data: more } = await db.from("contacts").select("*").in("id", [...missing]);
+        for (const r of (more ?? []) as ContactRow[]) byId.set(r.id, r);
+      }
+    }
+    return this.buildContactResults(inScope([...byId.values()]), snippetByContact);
+  }
+
+  async getContactDetail(contactId: string, opts?: { inboxes?: string[] | null }): Promise<ContactProfile | null> {
+    const db = await this.db();
+    const { data: cRow } = await db
+      .from("contacts")
+      .select("*")
+      .eq("id", contactId)
+      .maybeSingle();
+    if (!cRow) return null;
+    // contact_tags and threads both key only on contactId, so fetch them together.
+    const [{ data: ctRows }, { data: threadRows }] = await Promise.all([
+      db.from("contact_tags").select("tag_id").eq("contact_id", contactId),
+      db
+        .from("support_threads")
+        .select("*")
+        .eq("contact_id", contactId)
+        .order("last_message_at", { ascending: false }),
+    ]);
+    const tagIds = (ctRows ?? []).map((x) => x.tag_id);
+    const threads = ((threadRows ?? []) as ThreadRow[]).map(mapThread);
+
+    // Per-staff inbox scope: a scoped staffer can't open an out-of-scope contact by
+    // URL either. The contact is in scope only if at least one of their threads
+    // received inbound mail at one of the allowed addresses (mirrors the inbox
+    // detail's scope gate). Empty allowed set => sees nothing.
+    if (opts?.inboxes) {
+      if (opts.inboxes.length === 0) return null;
+      const clean = cleanInboxAddresses(opts.inboxes);
+      const threadIds = threads.map((t) => t.id);
+      if (clean.length === 0 || threadIds.length === 0) return null;
+      const orFilter = clean.flatMap((a) => [`to_address.ilike.%${a}%`, `cc_address.ilike.%${a}%`]).join(",");
+      const { data: hit } = await db
+        .from("support_messages")
+        .select("thread_id")
+        .eq("direction", "inbound")
+        .in("thread_id", threadIds)
+        .or(orFilter)
+        .limit(1);
+      if (!hit || hit.length === 0) return null;
+    }
+    const tags = await this.listTags();
+    return {
+      contact: mapContact(cRow as ContactRow, tagIds),
+      segments: tags.filter((t) => tagIds.includes(t.id) && t.kind === "segment"),
+      threads,
+      openCount: threads.filter((t) => t.status === "open").length,
+      lastContactAt: threads[0]?.lastMessageAt ?? null,
+    };
+  }
+
   async createInboundMessage(input: {
     name: string;
     email: string;
@@ -1486,9 +1656,19 @@ export class SupabaseRepo implements SupportRepo {
 // The addresses come from our own config or a confirmed personal address, so this
 // is belt-and-braces: strip the characters (%, parens, comma, *) that would break
 // the filter, lower-case, and drop blanks. Shared by every place that enforces the
-// per-staff inbox scope so the matching is identical (list, tiles).
+// per-staff inbox scope so the matching is identical (list, tiles, contacts).
 function cleanInboxAddresses(addresses: string[]): string[] {
   return addresses
     .map((a) => a.toLowerCase().replace(/[%(),*]/g, "").trim())
     .filter(Boolean);
+}
+
+// A short excerpt of `text` around the first occurrence of `q`, for the customer
+// directory's message-text search results.
+function snippetAround(text: string, q: string): string {
+  const i = text.toLowerCase().indexOf(q.toLowerCase());
+  if (i < 0) return text.slice(0, 120);
+  const start = Math.max(0, i - 40);
+  const end = Math.min(text.length, i + q.length + 60);
+  return `${start > 0 ? "..." : ""}${text.slice(start, end).trim()}${end < text.length ? "..." : ""}`;
 }

@@ -1,6 +1,8 @@
 import type {
   BlockedSender,
   CannedResponse,
+  ContactProfile,
+  ContactSearchResult,
   Folder,
   MessageAuthResults,
   PendingAttachment,
@@ -99,6 +101,18 @@ export interface SupportRepo {
   // Staff-editable contact display name: inbound mail with no From name shows
   // the email address, so let a human set the real name.
   updateContactName(contactId: string, fullName: string): Promise<void>;
+  // The customer directory: search every contact by name/email/notes, or by
+  // anything they wrote in a message. An empty query lists the whole directory
+  // A-Z. `inboxes` is the per-staff inbox scope (null = unscoped, sees all;
+  // an EMPTY array = sees nothing), the same allowed slice the inbox enforces.
+  searchContacts(
+    query: string,
+    opts?: { inboxes?: string[] | null; mode?: "all" | "contact" | "text" },
+  ): Promise<ContactSearchResult[]>;
+  // The full customer profile: contact + segments + their whole ticket history.
+  // Returns null for an unknown id OR for a contact outside the caller's inbox
+  // scope, so a scoped staffer's URL guess 404s like any missing contact.
+  getContactDetail(contactId: string, opts?: { inboxes?: string[] | null }): Promise<ContactProfile | null>;
   // Topic tags carried on the ticket (support_thread_tags), distinct from
   // contact segments.
   addThreadTag(threadId: string, tagId: string): Promise<void>;

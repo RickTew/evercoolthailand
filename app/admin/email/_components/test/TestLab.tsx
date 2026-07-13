@@ -29,7 +29,7 @@ function Explainer() {
       <p className="mb-1 font-semibold text-teal">What this sandbox is for</p>
       <p>
         Pretend a customer emailed in. Fill out the message below and it appears as a
-        new conversation in the Inbox, so you can practice answering it — replies,
+        new conversation in the Inbox, so you can practice answering it: replies,
         attachments, labels, folders, and Trash all behave exactly like real mail.
         No real email is sent or received here. Tip: put a ticket reference like
         [EC-10001] in the subject to test that a reply lands on the existing
@@ -61,7 +61,7 @@ function ClearTestData() {
       <p className="mb-3 text-xs text-muted">
         Removes everything created by playing here (simulated messages and loaded
         practice emails, plus their test contacts). Real customer mail is never
-        touched — only test addresses (@example.*) match. Admin only.
+        touched; only test addresses (@example.*) match. Admin only.
       </p>
       <div className="flex items-center gap-2">
         {confirming ? (
@@ -117,7 +117,7 @@ function PracticeEmails() {
       <h2 className="text-sm font-semibold text-ink">Load a batch of practice emails</h2>
       <p className="mb-3 text-xs text-muted">
         Drops ~19 varied customer questions (quotes, bookings, repairs,
-        installations, warranty, billing, complaints — in English and Thai) into
+        installations, warranty, billing, complaints, in English and Thai) into
         the inbox as new conversations, so the team has plenty to practice
         answering and the auto-labels get exercised. Click again any time you
         want fresh ones.

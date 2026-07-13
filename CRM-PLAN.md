@@ -50,9 +50,10 @@ Complaint, Filter change, Maintenance plan. Editable in CRM > Labels.
 - Settings: LIVE 13 Jul (You panel: signature, pick-up-where-you-left-off,
   personal-address request; Trash panel: retention + empty, admin only).
 - Test Lab: LIVE (admin).
-- Customers: NEXT (port newnei `app/support/customers/*`: searchable contact
-  directory + per-customer history, scoped like the inbox). Distinct from the
-  portal's existing Customers page; decide merge direction when porting.
+- Customers: LIVE 13 Jul (ported from newnei): searchable contact directory +
+  per-customer profile with full ticket history, scoped like the inbox for
+  assigned staff. The portal's Customers nav tab now redirects here (the old
+  stub read an empty `customers` table).
 - Wisdom (knowledge base): LATER (pure CRUD port, powers AI answers later).
 
 ## 5. Channels into the CRM
@@ -67,11 +68,10 @@ Complaint, Filter change, Maintenance plan. Editable in CRM > Labels.
 
 ## 6. Phase 4 remainder (from newnei, in port order)
 
-1. Customers section (pure CRUD, no dependencies).
-2. Aide: deterministic draft templates + style settings (no API cost).
-3. Wisdom KB + canned-responses admin.
-4. AI drafts/after-hours agent (needs ANTHROPIC_API_KEY + usage plumbing).
-5. Phone/voice + WhatsApp: investigate infra first; panels stay stubbed.
+1. Aide: deterministic draft templates + style settings (no API cost).
+2. Wisdom KB + canned-responses admin.
+3. AI drafts/after-hours agent (needs ANTHROPIC_API_KEY + usage plumbing).
+4. Phone/voice + WhatsApp: investigate infra first; panels stay stubbed.
 
 ## 7. App consolidation (CONFIRMED with Rick 13 Jul)
 

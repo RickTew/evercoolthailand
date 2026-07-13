@@ -10,6 +10,7 @@ import { usePathname } from "next/navigation";
 // The keys match CARE_SECTIONS in _lib/sections.ts.
 const ITEMS = [
   { href: "/admin/email/inbox", label: "Inbox", section: "inbox" },
+  { href: "/admin/email/customers", label: "Customers", section: "contacts" },
   { href: "/admin/email/labels", label: "Labels", section: "labels" },
   { href: "/admin/email/settings", label: "Settings", section: "settings" },
   { href: "/admin/email/test", label: "Test Lab", section: "test" },

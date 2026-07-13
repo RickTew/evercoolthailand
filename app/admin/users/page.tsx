@@ -239,7 +239,7 @@ export default function UsersPage() {
                     {((u.name || u.email || "?")[0] ?? "?").toUpperCase()}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-ec-text truncate">{u.name ?? "—"}</p>
+                    <p className="text-sm font-semibold text-ec-text truncate">{u.name ?? "-"}</p>
                     <p className="text-xs text-ec-text-muted truncate">{u.email}{u.department ? ` · ${u.department}` : ""}</p>
                   </div>
                   <span className={`text-[10px] font-bold px-2 py-0.5 rounded border uppercase tracking-wide shrink-0 ${ROLE_BADGE[u.role]}`}>{u.role}</span>
@@ -271,7 +271,7 @@ export default function UsersPage() {
                       {((u.name || u.email || "?")[0] ?? "?").toUpperCase()}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-ec-text-muted truncate">{u.name ?? "—"}</p>
+                      <p className="text-sm font-semibold text-ec-text-muted truncate">{u.name ?? "-"}</p>
                       <p className="text-xs text-ec-text-muted truncate">{u.email}</p>
                     </div>
                     <span className="text-[10px] text-ec-text-muted border border-ec-border rounded px-2 py-0.5 uppercase">inactive</span>

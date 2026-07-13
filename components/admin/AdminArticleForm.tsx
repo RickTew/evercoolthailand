@@ -55,12 +55,12 @@ export default function AdminArticleForm({ article }: { article?: Article }) {
       });
       if (!res.ok) {
         const data = await res.json().catch(() => null);
-        setError(data?.error ?? `Save failed (${res.status}). Your text is still here — try again.`);
+        setError(data?.error ?? `Save failed (${res.status}). Your text is still here, try again.`);
         setSaving(false);
         return;
       }
     } catch {
-      setError("Network error. Your text is still here — try again.");
+      setError("Network error. Your text is still here, try again.");
       setSaving(false);
       return;
     }

@@ -116,7 +116,7 @@ export default async function DashboardPage({
           </div>
           {isPreviewing && (
             <p className="text-[10px] text-ec-text-muted mt-2">
-              Previewing as <span className="font-semibold capitalize">{role}</span> —{" "}
+              Previewing as <span className="font-semibold capitalize">{role}</span>:{" "}
               <Link href="/admin/dashboard" className="text-ec-teal hover:underline">back to your view</Link>
             </p>
           )}
@@ -210,12 +210,12 @@ export default async function DashboardPage({
         </div>
       )}
 
-      {/* Staff inbox — admin only */}
+      {/* Staff inbox: admin only */}
       {actualRole === "admin" && !isPreviewing && staffMessages && staffMessages.length > 0 && (
         <StaffInbox initial={staffMessages as never} />
       )}
 
-      {/* Recent quotes + messages — admin, sales, manager, owner */}
+      {/* Recent quotes + messages: admin, sales, manager, owner */}
       {["admin", "sales", "manager", "owner"].includes(role) && (
         <div className="grid sm:grid-cols-2 gap-6">
           <div>

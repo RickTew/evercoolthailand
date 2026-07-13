@@ -38,7 +38,7 @@ export default function DeleteButton({
   if (confirming) {
     return (
       <div className="flex items-center gap-2">
-        <span className="text-xs text-ec-text-muted">{failed ? "Delete failed — retry?" : "Sure?"}</span>
+        <span className="text-xs text-ec-text-muted">{failed ? "Delete failed. Retry?" : "Sure?"}</span>
         <button
           onClick={handleDelete}
           disabled={loading}

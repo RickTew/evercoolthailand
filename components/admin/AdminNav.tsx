@@ -93,7 +93,7 @@ export default function AdminNav({
             <Link
               key={item.href}
               href={item.href}
-              className={`shrink-0 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all ${
+              className={`shrink-0 px-2 py-1.5 rounded-lg text-xs font-medium transition-all ${
                 pathname.startsWith(item.href)
                   ? "bg-ec-teal text-white"
                   : "text-white/60 hover:text-white hover:bg-white/10"
@@ -111,7 +111,7 @@ export default function AdminNav({
           <div className="relative shrink-0">
             <button
               onClick={() => setWebsiteOpen((o) => !o)}
-              className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all ${
+              className={`flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-medium transition-all ${
                 websiteActive
                   ? "bg-ec-teal text-white"
                   : "text-white/60 hover:text-white hover:bg-white/10"
@@ -152,7 +152,7 @@ export default function AdminNav({
             href={EQ_TRACKER_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="shrink-0 px-2.5 py-1.5 rounded-lg text-xs font-medium text-white/60 hover:text-white hover:bg-white/10 transition-all"
+            className="shrink-0 px-2 py-1.5 rounded-lg text-xs font-medium text-white/60 hover:text-white hover:bg-white/10 transition-all"
             title="Equipment + Service & Maintenance (opens the EQ Tracker app)"
           >
             EQ Tracker <span aria-hidden className="text-[10px]">↗</span>

@@ -20,8 +20,8 @@ export function splitAddresses(value: string | null | undefined): string[] {
   return out;
 }
 
-// Is this one of OUR own inbox addresses (every @evercoolthailand.com — root or
-// subdomain, e.g. the test.evercoolthailand.com rehearsal inbox — lands back in
+// Is this one of OUR own inbox addresses (every @evercoolthailand.com address, root or
+// subdomain, e.g. the test.evercoolthailand.com rehearsal inbox, lands back in
 // the shared queue, so they are never a "reply to all" target)?
 const OWN_DOMAIN_RE = /@(?:[a-z0-9-]+\.)*evercoolthailand\.com$/i;
 
