@@ -14,6 +14,41 @@ import { CARE_SECTIONS } from "@/app/admin/email/_lib/sections";
 // CareAccessEditor): the checkbox options that decide which mailboxes and
 // which CRM sections this staffer can open. Loaded on expand, saved as one
 // patch. NOTE: role 'admin' bypasses all of this and always sees everything.
+
+// Native <select> with the browser arrow replaced by our own chevron, inset
+// from the edge (the default arrow sat flush against the rounded border and
+// long labels ran into it).
+function Select({
+  value,
+  onChange,
+  children,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <span className="relative mt-1.5 block w-full max-w-sm">
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full appearance-none rounded-xl border border-ec-border bg-ec-bg px-3 py-2 pr-10 text-sm text-ec-text focus:outline-none focus:border-ec-teal"
+      >
+        {children}
+      </select>
+      <svg
+        aria-hidden
+        viewBox="0 0 20 20"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={1.8}
+        className="pointer-events-none absolute right-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-ec-text-muted"
+      >
+        <path strokeLinecap="round" strokeLinejoin="round" d="M6 8l4 4 4-4" />
+      </svg>
+    </span>
+  );
+}
 export function CareAccessEditor({
   userId,
   userName,
@@ -142,17 +177,19 @@ export function CareAccessEditor({
             <p className="text-[11px] text-ec-text-muted">
               Which Evercool mailboxes they see in the shared CRM queue.
             </p>
-            <select
+            <Select
               value={access.inboxScope}
-              onChange={(e) =>
-                setAccess((a) => (a ? { ...a, inboxScope: e.target.value as CareAccess["inboxScope"] } : a))
-              }
-              className="mt-1.5 w-full max-w-sm rounded-xl border border-ec-border bg-ec-bg px-3 py-2 text-sm text-ec-text focus:outline-none focus:border-ec-teal"
+              onChange={(v) => setAccess((a) => (a ? { ...a, inboxScope: v as CareAccess["inboxScope"] } : a))}
             >
               <option value="all">All inboxes</option>
-              <option value="shared">All company mail (hide other people&apos;s personal mailboxes)</option>
+              <option value="shared">All company mail</option>
               <option value="assigned">Only the ones I assign</option>
-            </select>
+            </Select>
+            {access.inboxScope === "shared" && (
+              <p className="mt-1 text-[11px] text-ec-text-muted">
+                Sees everything except other people&apos;s personal mailboxes.
+              </p>
+            )}
             {access.inboxScope === "assigned" && (
               <div className="mt-2 grid grid-cols-1 gap-1.5 sm:grid-cols-2">
                 {[...EVERCOOL_INBOXES, ...personalOptions].map((i) => (
@@ -178,23 +215,22 @@ export function CareAccessEditor({
 
           <div>
             <p className="text-xs font-bold text-ec-text">CRM sections they can open</p>
-            <select
+            <Select
               value={access.careSections.length === 0 ? "all" : "some"}
-              onChange={(e) =>
+              onChange={(v) =>
                 setAccess((a) =>
                   a
                     ? {
                         ...a,
-                        careSections: e.target.value === "all" ? [] : a.careSections.length ? a.careSections : ["inbox"],
+                        careSections: v === "all" ? [] : a.careSections.length ? a.careSections : ["inbox"],
                       }
                     : a,
                 )
               }
-              className="mt-1.5 w-full max-w-sm rounded-xl border border-ec-border bg-ec-bg px-3 py-2 text-sm text-ec-text focus:outline-none focus:border-ec-teal"
             >
               <option value="all">All sections</option>
               <option value="some">Only selected</option>
-            </select>
+            </Select>
             {access.careSections.length > 0 && (
               <div className="mt-2 flex flex-wrap gap-3">
                 {CARE_SECTIONS.map((s) => (
