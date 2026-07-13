@@ -23,11 +23,12 @@ export const EVERCOOL_INBOXES = [
   { address: "quotes@evercoolthailand.com", label: "Quotes" },
   { address: "service@evercoolthailand.com", label: "Service" },
   { address: "billing@evercoolthailand.com", label: "Billing" },
+  // Staff personal addresses (current staff only; jakkrit@ and theerachai@
+  // removed 13 Jul when they left the company. Mail to a removed address still
+  // arrives via the domain catch-all and is visible to admin + manager).
   { address: "blancheli@evercoolthailand.com", label: "Blancheli" },
-  { address: "jakkrit@evercoolthailand.com", label: "Jakkrit" },
   { address: "kongnatee@evercoolthailand.com", label: "Kongnatee" },
   { address: "tassanee@evercoolthailand.com", label: "Tassanee" },
-  { address: "theerachai@evercoolthailand.com", label: "Theerachai" },
   { address: "wanrawee@evercoolthailand.com", label: "Wanrawee" },
 ] as const;
 

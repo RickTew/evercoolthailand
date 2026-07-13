@@ -98,59 +98,62 @@ export default function AdminNav({
               {item.label}
             </Link>
           ))}
-
-          {role === "admin" && (
-            <div className="relative shrink-0">
-              <button
-                onClick={() => setWebsiteOpen((o) => !o)}
-                className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                  websiteActive
-                    ? "bg-ec-teal text-white"
-                    : "text-white/60 hover:text-white hover:bg-white/10"
-                }`}
-              >
-                Website
-                <svg aria-hidden viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={2} className="h-3 w-3">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 8l4 4 4-4" />
-                </svg>
-              </button>
-              {websiteOpen && (
-                <>
-                  {/* click-away backdrop */}
-                  <div className="fixed inset-0 z-40" onClick={() => setWebsiteOpen(false)} />
-                  <div className="absolute left-0 top-full z-50 mt-1 w-36 rounded-xl border border-white/10 bg-ec-navy p-1 shadow-lg">
-                    {WEBSITE_ITEMS.map((w) => (
-                      <Link
-                        key={w.href}
-                        href={w.href}
-                        onClick={() => setWebsiteOpen(false)}
-                        className={`block rounded-lg px-2.5 py-1.5 text-xs font-medium ${
-                          pathname.startsWith(w.href)
-                            ? "bg-ec-teal text-white"
-                            : "text-white/60 hover:text-white hover:bg-white/10"
-                        }`}
-                      >
-                        {w.label}
-                      </Link>
-                    ))}
-                  </div>
-                </>
-              )}
-            </div>
-          )}
-
-          {EQ_TRACKER_ROLES.includes(role) && (
-            <a
-              href={EQ_TRACKER_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="shrink-0 px-2.5 py-1.5 rounded-lg text-xs font-medium text-white/60 hover:text-white hover:bg-white/10 transition-all"
-              title="Equipment + Service & Maintenance (opens the EQ Tracker app)"
-            >
-              EQ Tracker <span aria-hidden className="text-[10px]">↗</span>
-            </a>
-          )}
         </div>
+
+        {/* Website dropdown + EQ Tracker live OUTSIDE the scrolling link strip:
+            an absolutely positioned menu inside an overflow-x-auto container
+            gets clipped by it, which made the dropdown look dead. */}
+        {role === "admin" && (
+          <div className="relative shrink-0">
+            <button
+              onClick={() => setWebsiteOpen((o) => !o)}
+              className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                websiteActive
+                  ? "bg-ec-teal text-white"
+                  : "text-white/60 hover:text-white hover:bg-white/10"
+              }`}
+            >
+              Website
+              <svg aria-hidden viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={2} className="h-3 w-3">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 8l4 4 4-4" />
+              </svg>
+            </button>
+            {websiteOpen && (
+              <>
+                {/* click-away backdrop */}
+                <div className="fixed inset-0 z-40" onClick={() => setWebsiteOpen(false)} />
+                <div className="absolute right-0 top-full z-50 mt-1 w-36 rounded-xl border border-white/10 bg-ec-navy p-1 shadow-lg">
+                  {WEBSITE_ITEMS.map((w) => (
+                    <Link
+                      key={w.href}
+                      href={w.href}
+                      onClick={() => setWebsiteOpen(false)}
+                      className={`block rounded-lg px-2.5 py-1.5 text-xs font-medium ${
+                        pathname.startsWith(w.href)
+                          ? "bg-ec-teal text-white"
+                          : "text-white/60 hover:text-white hover:bg-white/10"
+                      }`}
+                    >
+                      {w.label}
+                    </Link>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        )}
+
+        {EQ_TRACKER_ROLES.includes(role) && (
+          <a
+            href={EQ_TRACKER_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="shrink-0 px-2.5 py-1.5 rounded-lg text-xs font-medium text-white/60 hover:text-white hover:bg-white/10 transition-all"
+            title="Equipment + Service & Maintenance (opens the EQ Tracker app)"
+          >
+            EQ Tracker <span aria-hidden className="text-[10px]">↗</span>
+          </a>
+        )}
 
         {/* User info + sign out */}
         <div className="flex items-center gap-2 shrink-0">
