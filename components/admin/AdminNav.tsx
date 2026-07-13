@@ -12,23 +12,36 @@ interface NavItem {
   roles: UserRole[];
 }
 
+// Nav diet (Rick, 13 Jul): Messages folded into the CRM (contact-form
+// submissions now open CRM tickets), and the website-content pages (Services,
+// Gallery, Articles) live under one "Website" dropdown so daily operations
+// keep the bar. /admin/messages still exists by URL as the pre-CRM archive.
 const NAV_ITEMS: NavItem[] = [
   { href: "/admin/dashboard",  label: "Dashboard",  roles: ["admin", "sales", "manager", "owner", "technician", "staff"] },
-  { href: "/admin/quotes",     label: "Quotes",     roles: ["admin", "sales", "manager", "owner"] },
-  { href: "/admin/bookings",   label: "Bookings",   roles: ["admin", "sales", "manager", "owner"] },
-  { href: "/admin/messages",   label: "Messages",   roles: ["admin", "sales", "manager", "owner"] },
   // The Care/CRM module (shared inbox, labels, later customers + settings).
   // Renamed from "Email" (Rick, 13 Jul): it is the CRM, mail is just the channel.
   { href: "/admin/email/inbox", label: "CRM",       roles: ["admin", "sales", "manager", "owner", "technician", "staff"] },
+  { href: "/admin/quotes",     label: "Quotes",     roles: ["admin", "sales", "manager", "owner"] },
+  { href: "/admin/bookings",   label: "Bookings",   roles: ["admin", "sales", "manager", "owner"] },
   { href: "/admin/customers",  label: "Customers",  roles: ["admin", "sales", "manager", "owner"] },
   { href: "/admin/jobs",       label: "Jobs",       roles: ["admin", "sales", "manager", "owner", "technician"] },
   { href: "/admin/team",       label: "Team",       roles: ["admin", "manager", "owner"] },
   { href: "/admin/reports",    label: "Reports",    roles: ["admin", "manager", "owner"] },
-  { href: "/admin/services",   label: "Services",   roles: ["admin"] },
-  { href: "/admin/gallery",    label: "Gallery",    roles: ["admin"] },
-  { href: "/admin/articles",   label: "Articles",   roles: ["admin"] },
   { href: "/admin/users",      label: "Users",      roles: ["admin"] },
 ];
+
+// Website content management, grouped under one dropdown (admin-only, as the
+// individual pages always were).
+const WEBSITE_ITEMS = [
+  { href: "/admin/services", label: "Services" },
+  { href: "/admin/gallery", label: "Gallery" },
+  { href: "/admin/articles", label: "Articles" },
+];
+
+// The separate eq-tracker app (equipment + Service & Maintenance). Shares the
+// same database; a nav bridge until it is consolidated into this portal.
+const EQ_TRACKER_URL = "https://eq-tracker-theta.vercel.app";
+const EQ_TRACKER_ROLES: UserRole[] = ["admin", "manager", "owner", "technician"];
 
 const ROLE_BADGE: Record<UserRole, string> = {
   admin:      "bg-red-500/20 text-red-400",
@@ -51,8 +64,10 @@ export default function AdminNav({
   const pathname = usePathname();
   const [signingOut, setSigningOut] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [websiteOpen, setWebsiteOpen] = useState(false);
 
   const visibleLinks = NAV_ITEMS.filter((item) => item.roles.includes(role));
+  const websiteActive = WEBSITE_ITEMS.some((w) => pathname.startsWith(w.href));
 
   async function handleSignOut() {
     setSigningOut(true);
@@ -83,6 +98,58 @@ export default function AdminNav({
               {item.label}
             </Link>
           ))}
+
+          {role === "admin" && (
+            <div className="relative shrink-0">
+              <button
+                onClick={() => setWebsiteOpen((o) => !o)}
+                className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                  websiteActive
+                    ? "bg-ec-teal text-white"
+                    : "text-white/60 hover:text-white hover:bg-white/10"
+                }`}
+              >
+                Website
+                <svg aria-hidden viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={2} className="h-3 w-3">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 8l4 4 4-4" />
+                </svg>
+              </button>
+              {websiteOpen && (
+                <>
+                  {/* click-away backdrop */}
+                  <div className="fixed inset-0 z-40" onClick={() => setWebsiteOpen(false)} />
+                  <div className="absolute left-0 top-full z-50 mt-1 w-36 rounded-xl border border-white/10 bg-ec-navy p-1 shadow-lg">
+                    {WEBSITE_ITEMS.map((w) => (
+                      <Link
+                        key={w.href}
+                        href={w.href}
+                        onClick={() => setWebsiteOpen(false)}
+                        className={`block rounded-lg px-2.5 py-1.5 text-xs font-medium ${
+                          pathname.startsWith(w.href)
+                            ? "bg-ec-teal text-white"
+                            : "text-white/60 hover:text-white hover:bg-white/10"
+                        }`}
+                      >
+                        {w.label}
+                      </Link>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+          )}
+
+          {EQ_TRACKER_ROLES.includes(role) && (
+            <a
+              href={EQ_TRACKER_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="shrink-0 px-2.5 py-1.5 rounded-lg text-xs font-medium text-white/60 hover:text-white hover:bg-white/10 transition-all"
+              title="Equipment + Service & Maintenance (opens the EQ Tracker app)"
+            >
+              EQ Tracker <span aria-hidden className="text-[10px]">↗</span>
+            </a>
+          )}
         </div>
 
         {/* User info + sign out */}

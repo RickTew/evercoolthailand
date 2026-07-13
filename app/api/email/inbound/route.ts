@@ -171,6 +171,10 @@ export async function POST(request: NextRequest) {
     process.env.SUPPORT_FROM_ADDRESS,
     process.env.SUPPORT_NOTIFY_ADDRESS,
     "hi@evercoolthailand.com",
+    // The transactional sender (lib/email/send.ts): booking/quote/contact-form
+    // notifications go out from here TO our own addresses, so without this they
+    // would loop back in as junk tickets.
+    "hello@evercoolthailand.com",
   ]
     .map((a) => (a ? (a.match(/<([^>]+)>/)?.[1] ?? a).trim().toLowerCase() : ""))
     .filter(Boolean);

@@ -38,6 +38,38 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Failed to save message" }, { status: 500 });
     }
 
+    // The form is a CRM channel (Rick, 13 Jul): every submission opens a ticket
+    // in the shared queue, like an inbound email, so staff work ONE list and
+    // replies land on the contact's history. Blocked senders file straight to
+    // the Spam folder. Failure here must not lose the submission (it is already
+    // in contact_messages above), so this block only logs.
+    try {
+      const { getRepo } = await import("@/app/admin/email/_lib/data/repo");
+      const repo = await getRepo();
+      const senderEmail = (email || "").trim().toLowerCase();
+      // A contact record needs an email; a phone-only submission gets a
+      // clearly-fake placeholder (".invalid" never routes) so staff can see
+      // there is no address to reply to.
+      const contactEmail =
+        senderEmail || `phone-${String(phone).replace(/\D/g, "") || "unknown"}@no-email.invalid`;
+      const blocked = senderEmail ? await repo.matchBlockedSender(senderEmail) : null;
+      if (blocked) await repo.recordBlockedHit(blocked.id);
+      await repo.createInboundMessage({
+        name,
+        email: contactEmail,
+        subject: subject || "General Inquiry",
+        body: `${message}\n\nPhone: ${phone}`,
+        toAddress: "info@evercoolthailand.com",
+        note: "Created from the website contact form.",
+        spamStatus: blocked ? "confirmed" : null,
+        authResults: blocked
+          ? { reasons: [`The sender matches the blocked list (${blocked.pattern}).`] }
+          : null,
+      });
+    } catch (e) {
+      console.error("[contact] could not open a CRM ticket:", e);
+    }
+
     // Non-blocking email notification
     try {
       const { sendEmail, escapeHtml } = await import("@/lib/email/send");

@@ -55,7 +55,17 @@ Complaint, Filter change, Maintenance plan. Editable in CRM > Labels.
   portal's existing Customers page; decide merge direction when porting.
 - Wisdom (knowledge base): LATER (pure CRUD port, powers AI answers later).
 
-## 5. Phase 4 remainder (from newnei, in port order)
+## 5. Channels into the CRM
+
+- Email: LIVE (all 17 addresses, domain-wide catch-all).
+- Website contact form: LIVE 13 Jul. Every submission opens a CRM ticket
+  (blocked senders file to Spam); the 14 historical Messages were imported
+  (migration 0006) and the Messages nav tab retired (/admin/messages stays
+  reachable by URL as the archive).
+- Booking + quote forms: still notification-email only; fold into the CRM the
+  same way when wanted.
+
+## 6. Phase 4 remainder (from newnei, in port order)
 
 1. Customers section (pure CRUD, no dependencies).
 2. Aide: deterministic draft templates + style settings (no API cost).
@@ -63,7 +73,14 @@ Complaint, Filter change, Maintenance plan. Editable in CRM > Labels.
 4. AI drafts/after-hours agent (needs ANTHROPIC_API_KEY + usage plumbing).
 5. Phone/voice + WhatsApp: investigate infra first; panels stay stubbed.
 
-## 6. Standing decisions
+## 7. App consolidation (CONFIRMED with Rick 13 Jul)
+
+eq-tracker (equipment, filters, Service & Maintenance) merges INTO this
+portal after CRM parity: one login, one nav, one deploy. Until then the nav
+carries an "EQ Tracker" link to eq-tracker-theta.vercel.app (same database
+already, so the merge is UI + auth + routing work, not a data migration).
+
+## 8. Standing decisions
 
 - No em dashes anywhere (golden rule).
 - One Supabase project shared with eq-tracker; app consolidation later.
@@ -71,7 +88,7 @@ Complaint, Filter change, Maintenance plan. Editable in CRM > Labels.
 - Public auth signup stays OFF (bots found it; nothing uses it).
 - Every fix: commit AND push.
 
-## 7. Testing gates
+## 9. Testing gates
 
 - Any inbound-pipeline change: send a real external email, watch it become a
   ticket with the right pill/labels (Test Lab covers simulated cases).
