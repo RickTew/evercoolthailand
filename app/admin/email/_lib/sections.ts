@@ -11,6 +11,7 @@ import type { StaffPrefs } from "@/app/admin/email/_lib/types";
 export const CARE_SECTIONS = [
   { key: "inbox", label: "Inbox", href: "/admin/email/inbox" },
   { key: "labels", label: "Labels", href: "/admin/email/labels" },
+  { key: "settings", label: "Settings", href: "/admin/email/settings" },
   { key: "test", label: "Test Lab", href: "/admin/email/test" },
 ] as const;
 

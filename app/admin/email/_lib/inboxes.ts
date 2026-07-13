@@ -15,6 +15,14 @@ export const EVERCOOL_INBOXES = [
   { address: "office@evercoolthailand.com", label: "Office" },
   { address: "sales@evercoolthailand.com", label: "Sales" },
   { address: "support@evercoolthailand.com", label: "Support" },
+  // Function addresses for the CRM (added 13 Jul, matching the portal's own
+  // modules: Quotes, Bookings, Service & Maintenance, invoicing). Domain-wide
+  // receiving means these already collect mail; listing them here gives them
+  // a filter entry + label, and replies go out FROM the address written to.
+  { address: "bookings@evercoolthailand.com", label: "Bookings" },
+  { address: "quotes@evercoolthailand.com", label: "Quotes" },
+  { address: "service@evercoolthailand.com", label: "Service" },
+  { address: "billing@evercoolthailand.com", label: "Billing" },
   { address: "blancheli@evercoolthailand.com", label: "Blancheli" },
   { address: "jakkrit@evercoolthailand.com", label: "Jakkrit" },
   { address: "kongnatee@evercoolthailand.com", label: "Kongnatee" },

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { CareAccessEditor } from "@/app/admin/users/CareAccessEditor";
 
 type Role = "admin" | "sales" | "manager" | "owner" | "technician" | "staff";
 
@@ -232,18 +233,26 @@ export default function UsersPage() {
           </div>
           <div className="flex flex-col gap-2 mb-8">
             {active.map(u => (
-              <div key={u.id} className="bg-ec-card border border-ec-border rounded-2xl px-4 py-3 flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-ec-teal/20 flex items-center justify-center text-ec-teal font-bold text-sm shrink-0">
-                  {((u.name || u.email || "?")[0] ?? "?").toUpperCase()}
+              <div key={u.id} className="bg-ec-card border border-ec-border rounded-2xl px-4 py-3 flex flex-col gap-2">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-ec-teal/20 flex items-center justify-center text-ec-teal font-bold text-sm shrink-0">
+                    {((u.name || u.email || "?")[0] ?? "?").toUpperCase()}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-ec-text truncate">{u.name ?? "—"}</p>
+                    <p className="text-xs text-ec-text-muted truncate">{u.email}{u.department ? ` · ${u.department}` : ""}</p>
+                  </div>
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded border uppercase tracking-wide shrink-0 ${ROLE_BADGE[u.role]}`}>{u.role}</span>
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <button onClick={() => setEditUser(u)} className="text-xs text-ec-text-muted hover:text-ec-teal border border-ec-border hover:border-ec-teal/40 rounded-lg px-2.5 py-1 transition-colors">Edit</button>
+                    <button onClick={() => handleDeactivate(u.id, u.name)} className="text-xs text-ec-text-muted hover:text-red-400 border border-ec-border hover:border-red-500/30 rounded-lg px-2.5 py-1 transition-colors">Deactivate</button>
+                  </div>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-ec-text truncate">{u.name ?? "—"}</p>
-                  <p className="text-xs text-ec-text-muted truncate">{u.email}{u.department ? ` · ${u.department}` : ""}</p>
-                </div>
-                <span className={`text-[10px] font-bold px-2 py-0.5 rounded border uppercase tracking-wide shrink-0 ${ROLE_BADGE[u.role]}`}>{u.role}</span>
-                <div className="flex items-center gap-1.5 shrink-0">
-                  <button onClick={() => setEditUser(u)} className="text-xs text-ec-text-muted hover:text-ec-teal border border-ec-border hover:border-ec-teal/40 rounded-lg px-2.5 py-1 transition-colors">Edit</button>
-                  <button onClick={() => handleDeactivate(u.id, u.name)} className="text-xs text-ec-text-muted hover:text-red-400 border border-ec-border hover:border-red-500/30 rounded-lg px-2.5 py-1 transition-colors">Deactivate</button>
+                {/* The per-staff mailbox + section checkboxes (the CARE access
+                    panel ported from newnei). Admin roles bypass scoping, so
+                    the editor renders read-only for them. */}
+                <div className="pl-11">
+                  <CareAccessEditor userId={u.id} userName={u.name ?? u.email ?? "this user"} isAdminRole={u.role === "admin"} />
                 </div>
               </div>
             ))}

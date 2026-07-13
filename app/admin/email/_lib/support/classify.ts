@@ -16,6 +16,11 @@ export const TOPIC_TAG_NAMES = [
   "Warranty",
   "Billing",
   "Complaint",
+  // Added 13 Jul for the CRM, mirroring the eq-tracker Service & Maintenance
+  // world (equipment filters, PM contracts): filter swaps and maintenance
+  // plans are their own workstreams, not generic "service".
+  "Filter change",
+  "Maintenance plan",
 ] as const;
 
 export type TopicTagName = (typeof TOPIC_TAG_NAMES)[number];
@@ -54,6 +59,16 @@ const RULES: { tag: TopicTagName; re: RegExp; th?: RegExp }[] = [
     tag: "Billing",
     re: /\b(invoices?|receipts?|vat|tax invoice|billing|payments?|paid|bank transfer|payment slip)\b/i,
     th: /(ใบเสร็จ|ใบกำกับภาษี|ชำระเงิน|โอนเงิน|สลิป)/,
+  },
+  {
+    tag: "Filter change",
+    re: /\b(filters?( change| replacement| swap)?|change (the |my )?filters?|replace (the |my )?filters?|air filters?|hepa)\b/i,
+    th: /(ไส้กรอง|ฟิลเตอร์|แผ่นกรอง|เปลี่ยนกรอง|กรองอากาศ)/,
+  },
+  {
+    tag: "Maintenance plan",
+    re: /\b(maintenance (plan|contract|package|agreement)s?|service (contract|plan|package)s?|annual (service|maintenance)|pm (visit|plan|contract)|preventive maintenance)\b/i,
+    th: /(สัญญาบำรุงรักษา|แพ็คเกจล้างแอร์|รายปี|บำรุงรักษาเชิงป้องกัน)/,
   },
   {
     tag: "Complaint",
