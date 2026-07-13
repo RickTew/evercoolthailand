@@ -52,25 +52,39 @@ export default async function DashboardPage({
 
   const admin = createAdminClient();
 
+  // "Messages" on this dashboard = the CRM queue (contact-form submissions and
+  // email both open CRM tickets since 13 Jul). Spam, archived and trashed
+  // conversations do not count; this mirrors the CRM inbox's own Open tile.
+  const openCrmFilter = (q: ReturnType<typeof admin.from>) =>
+    q.eq("status", "open").is("deleted_at", null).is("spam_status", null).is("archived_at", null);
+
   const [
     { count: newQuotes },
-    { count: newMessages },
+    { count: openConversations },
     { count: totalQuotes },
     { count: acceptedQuotes },
     { data: recentQuotes },
-    { data: recentMessages },
+    { data: recentThreads },
     { data: staffMessages },
   ] = await Promise.all([
     admin.from("quotes").select("*", { count: "exact", head: true }).eq("status", "new"),
-    admin.from("contact_messages").select("*", { count: "exact", head: true }).eq("status", "new"),
+    openCrmFilter(admin.from("support_threads")).select("*", { count: "exact", head: true }),
     admin.from("quotes").select("*", { count: "exact", head: true }),
     admin.from("quotes").select("*", { count: "exact", head: true }).eq("status", "accepted"),
     admin.from("quotes").select("id, name, service_type, status, created_at, property_type").order("created_at", { ascending: false }).limit(6),
-    admin.from("contact_messages").select("id, name, subject, status, created_at").order("created_at", { ascending: false }).limit(5),
+    admin
+      .from("support_threads")
+      .select("id, subject, status, last_message_at, contacts(full_name)")
+      .is("deleted_at", null)
+      .is("spam_status", null)
+      .is("archived_at", null)
+      .order("last_message_at", { ascending: false })
+      .limit(5),
     actualRole === "admin"
       ? admin.from("staff_messages").select("*").order("created_at", { ascending: false }).limit(20)
       : Promise.resolve({ data: [] }),
   ]);
+  const newMessages = openConversations;
 
   const greeting = profile.name ? `Welcome back, ${profile.name.split(" ")[0]}` : "Welcome back";
 
@@ -119,7 +133,7 @@ export default async function DashboardPage({
         <>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
             <StatCard label="New Quotes" value={newQuotes ?? 0} href="/admin/quotes" color="text-blue-400" />
-            <StatCard label="New Messages" value={newMessages ?? 0} href="/admin/messages" color="text-purple-400" />
+            <StatCard label="CRM Inbox" value={newMessages ?? 0} href="/admin/email/inbox" color="text-purple-400" />
             <StatCard label="Total Quotes" value={totalQuotes ?? 0} href="/admin/quotes" color="text-ec-teal" />
             <StatCard label="Accepted Quotes" value={acceptedQuotes ?? 0} href="/admin/quotes" color="text-green-400" />
           </div>
@@ -145,7 +159,7 @@ export default async function DashboardPage({
             <StatCard label="Total Quotes" value={totalQuotes ?? 0} href="/admin/quotes" color="text-ec-teal" />
             <StatCard label="Accepted" value={acceptedQuotes ?? 0} href="/admin/quotes" color="text-green-400" />
             <StatCard label="New Leads" value={newQuotes ?? 0} href="/admin/quotes" color="text-blue-400" />
-            <StatCard label="New Messages" value={newMessages ?? 0} href="/admin/messages" color="text-purple-400" />
+            <StatCard label="CRM Inbox" value={newMessages ?? 0} href="/admin/email/inbox" color="text-purple-400" />
           </div>
           <div className="bg-ec-card border border-ec-border rounded-2xl p-5 mb-6">
             <p className="text-xs font-bold text-ec-text-muted uppercase tracking-widest mb-3">Pipeline Overview</p>
@@ -160,7 +174,7 @@ export default async function DashboardPage({
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
             <StatCard label="New Quotes" value={newQuotes ?? 0} href="/admin/quotes" color="text-blue-400" />
             <StatCard label="Accepted" value={acceptedQuotes ?? 0} href="/admin/quotes" color="text-green-400" />
-            <StatCard label="New Messages" value={newMessages ?? 0} href="/admin/messages" color="text-purple-400" />
+            <StatCard label="CRM Inbox" value={newMessages ?? 0} href="/admin/email/inbox" color="text-purple-400" />
             <StatCard label="Total Quotes" value={totalQuotes ?? 0} href="/admin/quotes" color="text-ec-teal" />
           </div>
           <div className="grid sm:grid-cols-2 gap-3 mb-6">
@@ -181,7 +195,7 @@ export default async function DashboardPage({
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-8">
           <StatCard label="New Quotes" value={newQuotes ?? 0} href="/admin/quotes" color="text-blue-400" />
           <StatCard label="Accepted" value={acceptedQuotes ?? 0} href="/admin/quotes" color="text-green-400" />
-          <StatCard label="New Messages" value={newMessages ?? 0} href="/admin/messages" color="text-purple-400" />
+          <StatCard label="CRM Inbox" value={newMessages ?? 0} href="/admin/email/inbox" color="text-purple-400" />
         </div>
       )}
 
@@ -225,19 +239,31 @@ export default async function DashboardPage({
 
           <div>
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-bold text-ec-text">Recent Messages</h2>
-              <Link href="/admin/messages" className="text-xs text-ec-teal hover:underline">View all</Link>
+              <h2 className="text-sm font-bold text-ec-text">Recent Conversations</h2>
+              <Link href="/admin/email/inbox" className="text-xs text-ec-teal hover:underline">Open CRM</Link>
             </div>
             <div className="flex flex-col gap-2">
-              {(recentMessages ?? []).map((m) => (
-                <div key={m.id} className="bg-ec-card rounded-xl border border-ec-border px-3 py-2.5 flex items-center justify-between gap-2">
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold text-ec-text truncate">{m.name}</p>
-                    <p className="text-xs text-ec-text-muted truncate">{m.subject}</p>
-                  </div>
-                  <span className={`text-xs font-semibold px-2 py-0.5 rounded-lg shrink-0 ${m.status === "new" ? "bg-purple-500/15 text-purple-400" : "bg-gray-500/15 text-gray-400"}`}>{m.status as string}</span>
-                </div>
-              ))}
+              {(recentThreads ?? []).map((t) => {
+                // The embedded contact row (FK join); PostgREST types it loosely.
+                const contact = t.contacts as unknown as { full_name?: string } | null;
+                return (
+                  <Link
+                    key={t.id}
+                    href={`/admin/email/inbox?thread=${t.id}`}
+                    className="bg-ec-card rounded-xl border border-ec-border px-3 py-2.5 flex items-center justify-between gap-2 hover:border-ec-teal/30 transition-all"
+                  >
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-ec-text truncate">{contact?.full_name ?? "Unknown"}</p>
+                      <p className="text-xs text-ec-text-muted truncate">{t.subject}</p>
+                    </div>
+                    <span className={`text-xs font-semibold px-2 py-0.5 rounded-lg shrink-0 capitalize ${
+                      t.status === "open" ? "bg-blue-500/15 text-blue-400" :
+                      t.status === "pending" ? "bg-amber-500/15 text-amber-400" :
+                      "bg-gray-500/15 text-gray-400"
+                    }`}>{t.status === "pending" ? "waiting" : (t.status as string)}</span>
+                  </Link>
+                );
+              })}
             </div>
           </div>
         </div>
