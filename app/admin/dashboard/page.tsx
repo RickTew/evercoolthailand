@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient, createAdminClient } from "@/lib/supabase/server";
 import StaffInbox from "@/components/admin/StaffInbox";
+import { PortalGuide } from "@/components/admin/PortalGuide";
 
 export const metadata: Metadata = { title: "Dashboard | Evercool Portal" };
 export const dynamic = "force-dynamic";
@@ -202,13 +203,10 @@ export default async function DashboardPage({
         </div>
       )}
 
-      {/* ── TECHNICIAN / STAFF view ────────────────────── */}
-      {(role === "technician" || role === "staff") && (
-        <div className="bg-ec-card border border-ec-border rounded-2xl p-6 text-center">
-          <p className="text-sm font-semibold text-ec-text mb-2">Your workspace is being set up</p>
-          <p className="text-xs text-ec-text-muted">Job assignments and field tools will appear here shortly.</p>
-        </div>
-      )}
+      {/* The orientation map: every role sees THEIR portal, so "check the
+          dashboard" is the one instruction a new person needs. For technicians
+          and staff this IS the main dashboard content. */}
+      <PortalGuide role={role} />
 
       {/* Staff inbox: admin only */}
       {actualRole === "admin" && !isPreviewing && staffMessages && staffMessages.length > 0 && (

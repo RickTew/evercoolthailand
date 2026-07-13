@@ -1,6 +1,5 @@
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient, createAdminClient } from "@/lib/supabase/server";
-import { I18nProvider } from "@/lib/eqt/i18n";
 import DashboardClient from "@/components/eqt-dashboard/DashboardClient";
 
 export const dynamic = "force-dynamic";
@@ -30,14 +29,12 @@ export default async function ReportsPage() {
 
   return (
     <div className="eqt">
-      <I18nProvider>
         <DashboardClient
           initialProjects={projects ?? []}
           stages={stages ?? []}
           isAdmin={isAdmin}
           displayName={displayName}
         />
-      </I18nProvider>
     </div>
   );
 }

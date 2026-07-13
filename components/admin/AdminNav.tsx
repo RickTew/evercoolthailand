@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { useI18n } from "@/lib/eqt/i18n";
 
 export type UserRole = "admin" | "sales" | "manager" | "owner" | "technician" | "staff";
 
@@ -42,8 +43,11 @@ const WEBSITE_ITEMS = [
   { href: "/admin/articles", label: "Articles" },
 ];
 
-// The separate eq-tracker app (equipment + Service & Maintenance). Shares the
-// same database; a nav bridge until it is consolidated into this portal.
+// The old separate eq-tracker app. HIDDEN since 13 Jul (Rick: staff would get
+// confused and enter data there); its Projects/Service/Reports now live in
+// this portal, reading the same tables. Flip SHOW_EQ_TRACKER to true to bring
+// the link back if something turns out to be missing.
+const SHOW_EQ_TRACKER = false;
 const EQ_TRACKER_URL = "https://eq-tracker-theta.vercel.app";
 const EQ_TRACKER_ROLES: UserRole[] = ["admin", "manager", "owner", "technician"];
 
@@ -66,6 +70,7 @@ export default function AdminNav({
   role: UserRole;
 }) {
   const pathname = usePathname();
+  const { locale, setLocale } = useI18n();
   const [signingOut, setSigningOut] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [websiteOpen, setWebsiteOpen] = useState(false);
@@ -147,7 +152,7 @@ export default function AdminNav({
           </div>
         )}
 
-        {EQ_TRACKER_ROLES.includes(role) && (
+        {SHOW_EQ_TRACKER && EQ_TRACKER_ROLES.includes(role) && (
           <a
             href={EQ_TRACKER_URL}
             target="_blank"
@@ -158,6 +163,17 @@ export default function AdminNav({
             EQ Tracker <span aria-hidden className="text-[10px]">↗</span>
           </a>
         )}
+
+        {/* TH/EN toggle. The staff are Thai; Projects, Service and Reports are
+            fully bilingual (the eq-tracker translations), so the switch lives
+            here where every page can reach it. */}
+        <button
+          onClick={() => setLocale(locale === "th" ? "en" : "th")}
+          className="shrink-0 rounded-lg border border-white/20 px-2 py-1 text-[11px] font-semibold text-white/70 hover:text-white transition-colors"
+          title={locale === "th" ? "Switch to English" : "เปลี่ยนเป็นภาษาไทย"}
+        >
+          {locale === "th" ? "TH" : "EN"}
+        </button>
 
         {/* User info + sign out */}
         <div className="flex items-center gap-2 shrink-0">

@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient, createAdminClient } from "@/lib/supabase/server";
-import { I18nProvider } from "@/lib/eqt/i18n";
 import ProjectsClient from "@/components/projects/ProjectsClient";
 
 export const dynamic = "force-dynamic";
@@ -42,14 +41,12 @@ export default async function ProjectsPage() {
           </Link>
         </div>
       )}
-      <I18nProvider>
         <ProjectsClient
           initialProjects={projects ?? []}
           stages={stages ?? []}
           isAdmin={isAdmin}
           displayName={displayName}
         />
-      </I18nProvider>
     </div>
   );
 }

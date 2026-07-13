@@ -2,7 +2,6 @@ import { redirect } from "next/navigation";
 import type { Metadata } from "next";
 import { createSupabaseServerClient, createAdminClient } from "@/lib/supabase/server";
 import ServiceClient from "@/components/service/ServiceClient";
-import { I18nProvider } from "@/lib/eqt/i18n";
 
 export const metadata: Metadata = { title: "Service & Maintenance | Evercool Portal" };
 export const dynamic = "force-dynamic";
@@ -59,7 +58,6 @@ export default async function ServicePage() {
 
   return (
     <div className="eqt">
-      <I18nProvider>
         <ServiceClient
           initialRecords={records ?? []}
           initialEquipment={equipment ?? []}
@@ -69,7 +67,6 @@ export default async function ServicePage() {
           isAdmin={isAdmin}
           displayName={displayName}
         />
-      </I18nProvider>
     </div>
   );
 }

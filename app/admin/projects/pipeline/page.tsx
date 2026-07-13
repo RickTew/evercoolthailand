@@ -1,6 +1,5 @@
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient, createAdminClient } from "@/lib/supabase/server";
-import { I18nProvider } from "@/lib/eqt/i18n";
 import PipelineClient from "@/components/eqt-admin/PipelineClient";
 
 export const dynamic = "force-dynamic";
@@ -23,9 +22,7 @@ export default async function PipelinePage() {
 
   return (
     <div className="eqt">
-      <I18nProvider>
         <PipelineClient initialStages={stages ?? []} />
-      </I18nProvider>
     </div>
   );
 }
