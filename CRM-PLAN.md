@@ -73,6 +73,14 @@ Complaint, Filter change, Maintenance plan. Editable in CRM > Labels.
 3. AI drafts/after-hours agent (needs ANTHROPIC_API_KEY + usage plumbing).
 4. Phone/voice + WhatsApp: investigate infra first; panels stay stubbed.
 
+Known gaps (not urgent, tracked):
+- Trash purge cron: repo.purgeTrash exists but nothing schedules it, so the
+  "kept N days then permanently deleted" promise is not enforced yet.
+- RLS hardening: the eq-tracker tables allow any authenticated user full CRUD
+  via PostgREST even where the UI is role-hidden (inherited model).
+- Full Thai translation of the CRM module (Projects/Service/Reports are
+  bilingual; the CRM UI is English with Thai only in the dashboard guide).
+
 ## 7. App consolidation (CONFIRMED with Rick 13 Jul)
 
 eq-tracker (equipment, filters, Service & Maintenance) merges INTO this
