@@ -55,9 +55,6 @@ export default async function DashboardPage({
   // "Messages" on this dashboard = the CRM queue (contact-form submissions and
   // email both open CRM tickets since 13 Jul). Spam, archived and trashed
   // conversations do not count; this mirrors the CRM inbox's own Open tile.
-  const openCrmFilter = (q: ReturnType<typeof admin.from>) =>
-    q.eq("status", "open").is("deleted_at", null).is("spam_status", null).is("archived_at", null);
-
   const [
     { count: newQuotes },
     { count: openConversations },
@@ -68,7 +65,13 @@ export default async function DashboardPage({
     { data: staffMessages },
   ] = await Promise.all([
     admin.from("quotes").select("*", { count: "exact", head: true }).eq("status", "new"),
-    openCrmFilter(admin.from("support_threads")).select("*", { count: "exact", head: true }),
+    admin
+      .from("support_threads")
+      .select("*", { count: "exact", head: true })
+      .eq("status", "open")
+      .is("deleted_at", null)
+      .is("spam_status", null)
+      .is("archived_at", null),
     admin.from("quotes").select("*", { count: "exact", head: true }),
     admin.from("quotes").select("*", { count: "exact", head: true }).eq("status", "accepted"),
     admin.from("quotes").select("id, name, service_type, status, created_at, property_type").order("created_at", { ascending: false }).limit(6),
