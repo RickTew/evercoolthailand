@@ -150,18 +150,36 @@ export default async function InboxPage({
         ]),
       )
     : null;
+  // The manager's 'shared' scope is the INVERSE: see everything (including mail
+  // to addresses nobody has listed, so company mail can never hide) EXCEPT
+  // threads that went only to another staffer's personal address. The excluded
+  // set is every OTHER person's confirmed personal address.
+  const sharedScope = prefs.inboxScope === "shared" && !userCtx.isAdmin;
+  const excludeInboxes = sharedScope
+    ? (await repo.listPersonalAddresses())
+        .filter((p) => p.profileId !== (me?.id ?? ""))
+        .map((p) => p.address)
+    : undefined;
   // The filter passed to listThreads: the allowed set (scoped, narrowed to the
-  // chosen one when it's in scope) or the single dropdown value (unscoped).
+  // chosen one when it's in scope) or the single dropdown value (unscoped). A
+  // shared-scope user may still pick any non-excluded inbox from the dropdown.
   const inboxesFilter = myAddresses
     ? chosenInbox && myAddresses.includes(chosenInbox)
       ? [chosenInbox]
       : myAddresses
     : undefined;
-  const inboxFilter = myAddresses ? undefined : chosenInbox;
+  const inboxFilter = myAddresses
+    ? undefined
+    : chosenInbox && excludeInboxes?.includes(chosenInbox)
+      ? undefined
+      : chosenInbox;
   // The dropdown options for this person.
   const inboxOptions: InboxOption[] = myAddresses
     ? myAddresses.map((a) => ({ address: a, label: inboxLabel(a) }))
-    : EVERCOOL_INBOXES.map((i) => ({ address: i.address, label: i.label }));
+    : EVERCOOL_INBOXES.filter((i) => !excludeInboxes?.includes(i.address)).map((i) => ({
+        address: i.address,
+        label: i.label,
+      }));
 
   // When a specific thread is in the URL (the usual "clicked a conversation"
   // case), fetch its detail in the SAME batch as the lists instead of after
@@ -172,13 +190,13 @@ export default async function InboxPage({
   const listStatus = view === "board" ? "all" : status;
 
   const [items, counts, tags, preDetail, folders] = await Promise.all([
-    repo.listThreads({ status: listStatus, assigneeId, deskId, view: folderView, pendingDraft, folderId, topicId, segmentId, inbox: inboxFilter, inboxes: inboxesFilter, q, qmode }),
+    repo.listThreads({ status: listStatus, assigneeId, deskId, view: folderView, pendingDraft, folderId, topicId, segmentId, inbox: inboxFilter, inboxes: inboxesFilter, excludeInboxes, q, qmode }),
     // The overview tiles reflect the same topic/segment scope (but all statuses),
     // and the same per-staff inbox scope as the list (inboxesFilter): a scoped
     // person's tiles count only their inboxes, never the whole queue. Unscoped
     // users pass undefined here, so their tiles stay global as before.
     needsCounts
-      ? repo.countThreads({ topicId, segmentId, inbox: inboxFilter, inboxes: inboxesFilter })
+      ? repo.countThreads({ topicId, segmentId, inbox: inboxFilter, inboxes: inboxesFilter, excludeInboxes })
       : Promise.resolve({ total: 0, open: 0, pending: 0, closed: 0, unassigned: 0, awaiting: 0 }),
     repo.listTags(),
     sp.thread ? repo.getThread(sp.thread) : Promise.resolve(null),
@@ -225,6 +243,21 @@ export default async function InboxPage({
       (m) => m.direction === "inbound" && allow.some((a) => (m.toAddress ?? "").toLowerCase().includes(a)),
     );
     if (!inScope) {
+      detail = null;
+      selectedId = null;
+    }
+  }
+  // Same by-URL guard for the shared scope: an opened thread is blocked when its
+  // inbound Evercool recipients are all other staffers' personal addresses
+  // (mirrors the list exclusion; anything else stays reachable).
+  if (sharedScope && excludeInboxes?.length && detail) {
+    const OWN_INBOX_RE = /@(?:[a-z0-9-]+\.)*evercoolthailand\.com$/i;
+    const recipients = detail.messages
+      .filter((m) => m.direction === "inbound")
+      .flatMap((m) => `${m.toAddress ?? ""},${m.ccAddress ?? ""}`.split(","))
+      .map((s) => (s.match(/<([^>]+)>/)?.[1] ?? s).trim().toLowerCase())
+      .filter((a) => OWN_INBOX_RE.test(a));
+    if (recipients.length > 0 && recipients.every((a) => excludeInboxes.includes(a))) {
       detail = null;
       selectedId = null;
     }

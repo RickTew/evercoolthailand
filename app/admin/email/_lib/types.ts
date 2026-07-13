@@ -185,7 +185,10 @@ export interface KbArticle {
 export interface StaffPrefs {
   profileId: string;
   signature: string;
-  inboxScope: "all" | "assigned"; // 'all' sees every inbox; 'assigned' restricts to the list below
+  // 'all' sees every inbox; 'assigned' restricts to the list below; 'shared'
+  // (the manager) sees everything EXCEPT mail that went only to another
+  // staffer's personal address, so unlisted/typo company addresses never hide.
+  inboxScope: "all" | "assigned" | "shared";
   assignedInboxes: string[]; // @evercoolthailand.com addresses this person may see (when scope = assigned)
   personalAddress: string | null; // their confirmed own address (e.g. rick@evercoolthailand.com), or null
   requestedAddress: string | null; // a pending request from their settings, awaiting an admin's confirm

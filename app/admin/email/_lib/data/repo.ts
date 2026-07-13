@@ -49,6 +49,11 @@ export interface ThreadFilter {
   // server-side regardless of the `inbox` dropdown. An empty array = see nothing.
   // (Access model v1: admin sees all, so pages pass null.)
   inboxes?: string[];
+  // The manager's "shared" scope, the inverse of `inboxes`: HIDE tickets whose
+  // inbound mail went ONLY to these (other staffers' personal) addresses, and
+  // show everything else, including mail to addresses nobody has listed. A
+  // ticket that touched both a personal and a company address stays visible.
+  excludeInboxes?: string[];
   // Free-text search: matches across contact name/email, the subject, the
   // EC-##### reference, and message body. Layered as an AND on the other filters.
   q?: string;
@@ -81,7 +86,11 @@ export interface SupportRepo {
     segmentId?: string;
     inbox?: string;
     inboxes?: string[] | null;
+    excludeInboxes?: string[] | null;
   }): Promise<InboxCounts>;
+  // Every staffer's confirmed personal address (support_staff_prefs). The
+  // manager's "shared" scope excludes OTHER people's entries from this list.
+  listPersonalAddresses(): Promise<{ profileId: string; address: string }[]>;
   getThread(threadId: string): Promise<ThreadDetail | null>;
   setStatus(threadId: string, status: ThreadStatus): Promise<void>;
   setAssignee(threadId: string, assigneeId: string | null): Promise<void>;

@@ -44,6 +44,10 @@ export function normalizeTrashRetentionDays(raw: unknown): number {
 
 const DEFAULT_FROM = "Evercool <hi@evercoolthailand.com>";
 
+// An @evercoolthailand.com address (root or subdomain), matching the inbound
+// webhook's own-domain test, so scope checks agree with what gets ingested.
+const OWN_INBOX_RE = /@(?:[a-z0-9-]+\.)*evercoolthailand\.com$/i;
+
 // Row shapes (snake_case) as stored in Postgres.
 type ContactRow = {
   id: string;
@@ -293,6 +297,36 @@ export class SupabaseRepo implements SupportRepo {
     return new Set((data ?? []).map((r) => r.thread_id));
   }
 
+  // The inverse of threadIdsForInboxes, for the manager's "shared" scope:
+  // threads whose inbound mail went ONLY to the given (other staffers'
+  // personal) addresses. A thread that also touched any company address, or
+  // carries no @evercoolthailand.com recipient at all (test/mock data), is NOT
+  // excluded; the exclusion is strictly "someone else's personal mailbox".
+  private async threadIdsOnlyForInboxes(addresses: string[]): Promise<Set<string>> {
+    const excluded = new Set(cleanInboxAddresses(addresses));
+    if (excluded.size === 0) return new Set();
+    const db = await this.db();
+    const { data } = await db
+      .from("support_messages")
+      .select("thread_id, to_address, cc_address")
+      .eq("direction", "inbound");
+    // All Evercool recipients per thread, across every inbound message.
+    const ownByThread = new Map<string, string[]>();
+    for (const r of data ?? []) {
+      const own = `${r.to_address ?? ""},${r.cc_address ?? ""}`
+        .split(",")
+        .map((s) => (s.match(/<([^>]+)>/)?.[1] ?? s).trim().toLowerCase())
+        .filter((a) => OWN_INBOX_RE.test(a));
+      if (own.length === 0) continue;
+      ownByThread.set(r.thread_id, [...(ownByThread.get(r.thread_id) ?? []), ...own]);
+    }
+    const out = new Set<string>();
+    for (const [threadId, own] of ownByThread) {
+      if (own.every((a) => excluded.has(a))) out.add(threadId);
+    }
+    return out;
+  }
+
   async listThreads(filter?: ThreadFilter): Promise<ThreadListItem[]> {
     const db = await this.db();
     let query = db.from("support_threads").select("*").order("last_message_at", { ascending: false });
@@ -350,6 +384,13 @@ export class SupabaseRepo implements SupportRepo {
       if (inboxMatch.length === 0) return []; // scoped to no inbox => sees nothing
       inboxThreadIds = await this.threadIdsForInboxes(inboxMatch);
       if (inboxThreadIds.size === 0) return [];
+    }
+
+    // The manager's "shared" scope: hide threads whose inbound mail went ONLY
+    // to other staffers' personal addresses; everything else stays visible.
+    let excludedThreadIds: Set<string> | null = null;
+    if (filter?.excludeInboxes?.length) {
+      excludedThreadIds = await this.threadIdsOnlyForInboxes(filter.excludeInboxes);
     }
 
     // Sent view: restrict to threads that have at least one outbound message we
@@ -411,6 +452,7 @@ export class SupabaseRepo implements SupportRepo {
       if (topicThreadIds && !topicThreadIds.has(t.id)) return false;
       if (segmentContactIds && !segmentContactIds.has(t.contact_id)) return false;
       if (inboxThreadIds && !inboxThreadIds.has(t.id)) return false;
+      if (excludedThreadIds?.has(t.id)) return false;
       // Free-text search: keep the thread if the query hits an in-scope axis.
       // The EC-##### reference always matches (a handle lookup must never
       // fail); the subject counts as message text (only in "all"/"text" scope);
@@ -511,7 +553,7 @@ export class SupabaseRepo implements SupportRepo {
     return filter?.pendingDraft ? items.filter((i) => i.hasPendingDraft) : items;
   }
 
-  async countThreads(filter?: { topicId?: string; segmentId?: string; inbox?: string; inboxes?: string[] | null }): Promise<InboxCounts> {
+  async countThreads(filter?: { topicId?: string; segmentId?: string; inbox?: string; inboxes?: string[] | null; excludeInboxes?: string[] | null }): Promise<InboxCounts> {
     const db = await this.db();
     const empty: InboxCounts = { total: 0, open: 0, pending: 0, closed: 0, unassigned: 0, awaiting: 0 };
 
@@ -525,6 +567,12 @@ export class SupabaseRepo implements SupportRepo {
       if (inboxMatch.length === 0) return empty;
       inboxThreadIds = await this.threadIdsForInboxes(inboxMatch);
       if (inboxThreadIds.size === 0) return empty;
+    }
+
+    // Same "shared" scope exclusion as listThreads, so the tiles match the list.
+    let excludedThreadIds: Set<string> | null = null;
+    if (filter?.excludeInboxes?.length) {
+      excludedThreadIds = await this.threadIdsOnlyForInboxes(filter.excludeInboxes);
     }
 
     // Same topic / segment scoping as listThreads(), so the tiles match the list.
@@ -562,6 +610,7 @@ export class SupabaseRepo implements SupportRepo {
       contact_id: string;
     }[]).filter((t) => {
       if (inboxThreadIds && !inboxThreadIds.has(t.id)) return false;
+      if (excludedThreadIds?.has(t.id)) return false;
       if (topicThreadIds && !topicThreadIds.has(t.id)) return false;
       if (segmentContactIds && !segmentContactIds.has(t.contact_id)) return false;
       if (t.deleted_at) return false; // trashed threads are off the active axis
@@ -1196,6 +1245,22 @@ export class SupabaseRepo implements SupportRepo {
     return thread.id;
   }
 
+  // Every staffer's confirmed personal address. The manager's "shared" scope
+  // excludes OTHER people's entries; the page filters out the caller's own.
+  async listPersonalAddresses(): Promise<{ profileId: string; address: string }[]> {
+    const db = await this.db();
+    const { data } = await db
+      .from("support_staff_prefs")
+      .select("profile_id, personal_address")
+      .not("personal_address", "is", null);
+    return (data ?? [])
+      .map((r) => ({
+        profileId: r.profile_id as string,
+        address: ((r.personal_address as string | null) ?? "").trim().toLowerCase(),
+      }))
+      .filter((r) => r.address);
+  }
+
   // Spam triage. Humans only ever set 'confirmed' (Mark as spam) or null (Not
   // spam); 'suspected' is written exclusively by the inbound filter at arrival.
   async setSpamStatus(threadId: string, status: "confirmed" | null): Promise<void> {
@@ -1370,7 +1435,7 @@ export class SupabaseRepo implements SupportRepo {
     return {
       profileId,
       signature: (r.signature ?? "").toString(),
-      inboxScope: r.inbox_scope === "assigned" ? "assigned" : "all",
+      inboxScope: r.inbox_scope === "assigned" ? "assigned" : r.inbox_scope === "shared" ? "shared" : "all",
       assignedInboxes: Array.isArray(r.assigned_inboxes) ? (r.assigned_inboxes as string[]) : [],
       personalAddress: (r.personal_address as string | null) ?? null,
       requestedAddress: (r.requested_address as string | null) ?? null,
@@ -1400,7 +1465,8 @@ export class SupabaseRepo implements SupportRepo {
       updated_at: new Date().toISOString(),
     };
     if (patch.signature !== undefined) row.signature = patch.signature.slice(0, 2000);
-    if (patch.inboxScope !== undefined) row.inbox_scope = patch.inboxScope === "assigned" ? "assigned" : "all";
+    if (patch.inboxScope !== undefined)
+      row.inbox_scope = ["assigned", "shared"].includes(patch.inboxScope) ? patch.inboxScope : "all";
     if (patch.assignedInboxes !== undefined) row.assigned_inboxes = patch.assignedInboxes;
     if (patch.personalAddress !== undefined) row.personal_address = patch.personalAddress;
     if (patch.requestedAddress !== undefined) row.requested_address = patch.requestedAddress;

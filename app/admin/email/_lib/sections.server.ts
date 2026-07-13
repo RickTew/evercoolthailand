@@ -25,8 +25,10 @@ export const getMyStaffPrefs = cache(async function getMyStaffPrefs(): Promise<S
 // scoped), nobody signed in, or scope = 'all' (sees every inbox). This is the
 // SAME allowed slice the inbox list + detail enforce. A non-null EMPTY array
 // means scope = 'assigned' with nothing assigned, i.e. "sees nothing". Cached
-// per request. (Access model v1: everyone is scope 'all', so this returns null;
-// the seam stays live for the per-staff privacy wall if Rick turns it on.)
+// per request. NOTE: the manager's 'shared' scope is an EXCLUSION (everything
+// except other people's personal mail) and cannot be expressed as an allowed
+// list, so it also returns null here; inbox/page.tsx enforces it via
+// excludeInboxes. Do not use this helper alone to gate shared-scope users.
 export const getMyInboxScope = cache(async function getMyInboxScope(): Promise<string[] | null> {
   const profile = await getSessionProfile();
   if (!profile || profile.role === "admin") return null;

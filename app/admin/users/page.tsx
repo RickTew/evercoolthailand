@@ -84,12 +84,28 @@ export default function UsersPage() {
   }
 
   async function handleUpdate(id: string, updates: Partial<UserProfile>) {
-    const res = await fetch("/api/admin/users", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, ...updates }),
-    });
-    if (res.ok) { loadUsers(); setEditUser(null); }
+    // A failed save must SAY so: this used to swallow errors silently, so a
+    // rejected role change just looked like a button that did nothing.
+    setError("");
+    setSaving(true);
+    try {
+      const res = await fetch("/api/admin/users", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, ...updates }),
+      });
+      if (res.ok) {
+        loadUsers();
+        setEditUser(null);
+        return;
+      }
+      const data = await res.json().catch(() => null);
+      setError(data?.error ?? `Save failed (${res.status}). Refresh and try again.`);
+    } catch {
+      setError("Save failed: could not reach the server. Check your connection and try again.");
+    } finally {
+      setSaving(false);
+    }
   }
 
   async function handleDeactivate(id: string, name: string | null) {
@@ -158,7 +174,7 @@ export default function UsersPage() {
               <div>
                 <label className="text-xs font-semibold text-ec-text-muted block mb-1">Role *</label>
                 <select required value={form.role} onChange={e => setForm(f => ({ ...f, role: e.target.value as Role }))} className="w-full rounded-xl border border-ec-border bg-ec-bg px-3 py-2.5 text-sm text-ec-text focus:outline-none focus:border-ec-teal transition-colors">
-                  {ROLES.map(r => <option key={r} value={r}>{r.charAt(0).toUpperCase() + r.slice(1)} — {ROLE_DESC[r]}</option>)}
+                  {ROLES.map(r => <option key={r} value={r}>{r.charAt(0).toUpperCase() + r.slice(1)}: {ROLE_DESC[r]}</option>)}
                 </select>
               </div>
               <div>
@@ -195,9 +211,10 @@ export default function UsersPage() {
                 <label className="text-xs font-semibold text-ec-text-muted block mb-1">Department</label>
                 <input value={editUser.department ?? ""} onChange={e => setEditUser(u => u ? { ...u, department: e.target.value } : u)} className="w-full rounded-xl border border-ec-border bg-ec-bg px-3 py-2.5 text-sm text-ec-text focus:outline-none focus:border-ec-teal transition-colors" />
               </div>
+              {error && <p className="text-xs text-red-400 bg-red-500/10 rounded-lg px-3 py-2">{error}</p>}
               <div className="flex gap-2 pt-1">
-                <button onClick={() => setEditUser(null)} className="flex-1 border border-ec-border text-ec-text-muted text-sm font-semibold rounded-xl py-2.5 hover:border-ec-teal/40 transition-colors">Cancel</button>
-                <button onClick={() => handleUpdate(editUser.id, { name: editUser.name, role: editUser.role, department: editUser.department })} className="flex-1 bg-ec-teal hover:bg-ec-teal-light text-white text-sm font-semibold rounded-xl py-2.5 transition-colors">Save</button>
+                <button onClick={() => { setEditUser(null); setError(""); }} className="flex-1 border border-ec-border text-ec-text-muted text-sm font-semibold rounded-xl py-2.5 hover:border-ec-teal/40 transition-colors">Cancel</button>
+                <button disabled={saving} onClick={() => handleUpdate(editUser.id, { name: editUser.name, role: editUser.role, department: editUser.department })} className="flex-1 bg-ec-teal hover:bg-ec-teal-light text-white text-sm font-semibold rounded-xl py-2.5 transition-colors disabled:opacity-50">{saving ? "Saving..." : "Save"}</button>
               </div>
             </div>
           </div>
