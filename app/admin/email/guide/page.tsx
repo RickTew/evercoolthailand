@@ -32,6 +32,10 @@ const SECTIONS: GuideSection[] = [
         en: "Mail is labelled automatically as it arrives: Quote, Purchase order, Shipping, Supplier, Billing, Service & repair and more. A subject with an EQ project number (for example EQ068-07-26) gets the Project label, so a project's whole paper trail is one click away.",
         th: "ระบบติดป้ายกำกับให้อัตโนมัติเมื่ออีเมลเข้ามา เช่น Quote, Purchase order, Shipping, Supplier, Billing, Service & repair หากหัวข้อมีเลขโครงการ EQ (เช่น EQ068-07-26) จะได้ป้าย Project ทำให้ดูเอกสารทั้งหมดของโครงการได้ในคลิกเดียว",
       },
+      {
+        en: "When a conversation mentions an EQ project number, a small project chip appears under the subject showing the number and the project name. Click it to jump straight to that project in the Projects section (for the roles that can open Projects).",
+        th: "เมื่อบทสนทนามีเลขโครงการ EQ จะมีปุ่มเล็ก ๆ ใต้หัวข้อ แสดงเลขและชื่อโครงการ กดเพื่อไปที่โครงการนั้นในหน้า Projects ได้ทันที (เฉพาะผู้ที่มีสิทธิ์เข้าหน้า Projects)",
+      },
     ],
   },
   {

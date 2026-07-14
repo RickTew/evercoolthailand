@@ -44,7 +44,11 @@ Auto-tagger: `_lib/support/classify.ts` (EN + Thai cues), seeds in migrations
 Billing, Complaint, Filter change, Maintenance plan, and (14 Jul, from scanning
 the real traffic: the mail is B2B industrial HVAC) Purchase order, Shipping,
 Supplier, Project (fires on EQ project refs like EQ068-07-26, tying mail to the
-eq-tracker world). Editable in CRM > Labels.
+eq-tracker world). Editable in CRM > Labels. Conversations mentioning an EQ ref
+also get a project chip in the thread header (14 Jul): code + project name,
+deep-linking to /admin/projects?q=CODE (ProjectsClient accepts initialSearch;
+chips only for roles that can open Projects; DB stores base codes like EQ068
+while mail says EQ068-07-26, so matching is on the base code).
 
 ## 4. CRM sections
 

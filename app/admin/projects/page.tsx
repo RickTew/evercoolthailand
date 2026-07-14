@@ -7,10 +7,16 @@ export const dynamic = "force-dynamic";
 
 const ALLOWED_ROLES = ["admin", "manager", "owner", "sales"];
 
-export default async function ProjectsPage() {
+export default async function ProjectsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>;
+}) {
   const supabase = await createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
+  // ?q= prefills the search box (the CRM's project chips deep-link here).
+  const { q } = await searchParams;
 
   const admin = createAdminClient();
   const [{ data: projects }, { data: stages }, { data: profile }] = await Promise.all([
@@ -46,6 +52,7 @@ export default async function ProjectsPage() {
           stages={stages ?? []}
           isAdmin={isAdmin}
           displayName={displayName}
+          initialSearch={q?.trim() || undefined}
         />
     </div>
   );

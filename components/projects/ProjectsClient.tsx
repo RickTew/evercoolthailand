@@ -21,15 +21,20 @@ interface Props {
   stages: Stage[]
   isAdmin: boolean
   displayName: string | null
+  // Prefill for the search box (?q= in the URL), so the CRM's project chips can
+  // deep-link straight to a project code.
+  initialSearch?: string
 }
 
-export default function ProjectsClient({ initialProjects, stages, isAdmin, displayName }: Props) {
+export default function ProjectsClient({ initialProjects, stages, isAdmin, displayName, initialSearch }: Props) {
   const { t } = useI18n()
   const supabase = createClient()
   const [projects, setProjects] = useState(initialProjects)
-  const [search, setSearch] = useState('')
+  const [search, setSearch] = useState(initialSearch ?? '')
   const [statusFilter, setStatusFilter] = useState<ProjectStatus | ''>('')
-  const [myProjectsOnly, setMyProjectsOnly] = useState(!!displayName && !isAdmin)
+  // A deep link must always find its project, so it starts with the
+  // "my projects" filter off.
+  const [myProjectsOnly, setMyProjectsOnly] = useState(!!displayName && !isAdmin && !initialSearch)
   const [sortKey, setSortKey] = useState<SortKey>('code')
   const [sortAsc, setSortAsc] = useState(true)
   const [page, setPage] = useState(0)

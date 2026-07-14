@@ -18,6 +18,8 @@ import { findActionLink } from "@/app/admin/email/_lib/actionLink";
 import { splitAddresses, isOwnInbox, otherThreadRecipients } from "@/app/admin/email/_lib/mail/recipients";
 import { getRepo } from "@/app/admin/email/_lib/data/repo";
 import { getSessionProfile } from "@/app/admin/email/_lib/auth";
+import { extractEqRefs } from "@/app/admin/email/_lib/support/projectRefs";
+import { createAdminClient } from "@/lib/supabase/server";
 
 export async function ThreadView({
   detail,
@@ -58,6 +60,28 @@ export async function ThreadView({
   // Everyone else who was on the customer's mail (the To/Cc people, minus our own
   // inboxes and the contact themselves), so the composer can offer "reply to all".
   const replyAllRecipients = otherThreadRecipients(detail);
+
+  // EQ project refs quoted anywhere in this conversation (subject or bodies),
+  // shown as chips linking into the Projects section so a project's mail and its
+  // pipeline record are one click apart. Only for roles that can open Projects
+  // (mirrors /admin/projects' gate); the DB stores the BASE code (EQ068) while
+  // mail says EQ068-07-26, so lookup is by base code.
+  const canOpenProjects = ["admin", "manager", "owner", "sales"].includes(profile?.role ?? "");
+  let projectChips: { code: string; ref: string; name: string | null }[] = [];
+  if (canOpenProjects) {
+    const refs = extractEqRefs([thread.subject, ...messages.map((m) => m.bodyText)]);
+    if (refs.length > 0) {
+      const { data } = await createAdminClient()
+        .from("projects")
+        .select("code,name")
+        .in("code", refs.map((r) => r.code));
+      const names = new Map<string, string | null>();
+      for (const row of (data ?? []) as { code: string; name: string | null }[]) {
+        if (!names.has(row.code)) names.set(row.code, row.name);
+      }
+      projectChips = refs.map((r) => ({ ...r, name: names.get(r.code) ?? null }));
+    }
+  }
 
   return (
     <div className="@container flex min-h-0 flex-1 flex-col">
@@ -111,6 +135,26 @@ export async function ThreadView({
                 >
                   {t.name}
                 </span>
+              ))}
+            </div>
+          )}
+          {projectChips.length > 0 && (
+            <div className="mt-1 flex flex-wrap items-center gap-1.5">
+              {projectChips.map((p) => (
+                <Link
+                  key={p.code}
+                  href={`/admin/projects?q=${p.code}`}
+                  title={
+                    p.name
+                      ? `This mail mentions project ${p.ref}. Open ${p.code} (${p.name}) in Projects.`
+                      : `This mail mentions ${p.ref}. Search Projects for ${p.code}.`
+                  }
+                  className="inline-flex max-w-[18rem] items-center gap-1.5 rounded-md border border-line bg-canvas px-1.5 py-0.5 text-[10px] font-semibold text-navy hover:border-teal hover:text-teal"
+                >
+                  <span className="font-mono">{p.ref}</span>
+                  {p.name && <span className="truncate font-normal text-muted">{p.name}</span>}
+                  <span aria-hidden>↗</span>
+                </Link>
               ))}
             </div>
           )}
