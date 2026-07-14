@@ -1,9 +1,11 @@
+import Link from "next/link";
 import { getRepo } from "@/app/admin/email/_lib/data/repo";
-import { getCurrentUserContext } from "@/app/admin/email/_lib/auth";
+import { getCurrentUserContext, getSessionProfile } from "@/app/admin/email/_lib/auth";
 import { getMyStaffPrefs, requireCareSection } from "@/app/admin/email/_lib/sections.server";
 import { defaultStaffPrefs } from "@/app/admin/email/_lib/sections";
 import { SupportSubBar } from "@/app/admin/email/_components/SupportSubBar";
 import { YouPanel } from "@/app/admin/email/_components/settings/YouPanel";
+import { SavedRepliesPanel } from "@/app/admin/email/_components/settings/SavedRepliesPanel";
 import { TrashPanel } from "@/app/admin/email/_components/settings/TrashPanel";
 
 // CRM Settings (ported from newnei Care Settings, trimmed to what Evercool
@@ -16,14 +18,18 @@ export default async function EmailSettingsPage() {
   await requireCareSection("settings");
 
   const repo = await getRepo();
-  const [userCtx, prefsOrNull, retentionDays, trashCount] = await Promise.all([
+  const [userCtx, profile, prefsOrNull, retentionDays, trashCount, savedReplies] = await Promise.all([
     getCurrentUserContext(),
+    getSessionProfile(),
     getMyStaffPrefs(),
     repo.getTrashRetentionDays(),
     repo.countTrash(),
+    repo.listCannedResponses(),
   ]);
   const me = userCtx.teamMember;
   const prefs = prefsOrNull ?? defaultStaffPrefs(me?.id ?? "");
+  // Saved replies are the team's shared voice: admin and manager curate them.
+  const canManageReplies = profile?.role === "admin" || profile?.role === "manager";
 
   // Plain-language description of this person's real inbox visibility.
   const scopeSummary = userCtx.isAdmin
@@ -41,12 +47,30 @@ export default async function EmailSettingsPage() {
       <SupportSubBar />
       <div className="min-h-0 flex-1 overflow-y-auto p-4">
         <div className="mx-auto flex max-w-2xl flex-col gap-4">
+          {/* The manual, right where people change their setup (Rick, 14 Jul:
+              "a simple how to use it that they can access in Settings"). */}
+          <section className="flex items-center justify-between gap-3 rounded-lg border border-teal/40 bg-teal/5 p-4">
+            <div>
+              <h2 className="text-sm font-semibold text-ink">New here? Read the guide</h2>
+              <p className="mt-0.5 text-xs text-muted">
+                Step-by-step instructions for the whole CRM: reading, replying, Compose,
+                signatures and labels. คู่มือวิธีใช้ระบบ CRM ทีละขั้นตอน มีภาษาไทยทุกหัวข้อ
+              </p>
+            </div>
+            <Link
+              href="/admin/email/guide"
+              className="shrink-0 rounded-md bg-teal px-3 py-1.5 text-xs font-semibold text-white hover:bg-teal/90"
+            >
+              How to use
+            </Link>
+          </section>
           <YouPanel
             prefs={prefs}
             isAdmin={userCtx.isAdmin}
             scopeSummary={scopeSummary}
             displayName={me?.displayName ?? ""}
           />
+          <SavedRepliesPanel replies={savedReplies} canManage={canManageReplies} />
           {userCtx.isAdmin && <TrashPanel retentionDays={retentionDays} trashCount={trashCount} />}
         </div>
       </div>

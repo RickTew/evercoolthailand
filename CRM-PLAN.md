@@ -40,8 +40,11 @@ list, warning banners.
 ## 3. Topic labels (LIVE)
 
 Auto-tagger: `_lib/support/classify.ts` (EN + Thai cues), seeds in migrations
-0002 + 0005: Quote, Booking, Service & repair, Installation, Warranty, Billing,
-Complaint, Filter change, Maintenance plan. Editable in CRM > Labels.
+0002 + 0005 + 0007: Quote, Booking, Service & repair, Installation, Warranty,
+Billing, Complaint, Filter change, Maintenance plan, and (14 Jul, from scanning
+the real traffic: the mail is B2B industrial HVAC) Purchase order, Shipping,
+Supplier, Project (fires on EQ project refs like EQ068-07-26, tying mail to the
+eq-tracker world). Editable in CRM > Labels.
 
 ## 4. CRM sections
 
@@ -49,6 +52,13 @@ Complaint, Filter change, Maintenance plan. Editable in CRM > Labels.
 - Labels: LIVE.
 - Settings: LIVE 13 Jul (You panel: signature, pick-up-where-you-left-off,
   personal-address request; Trash panel: retention + empty, admin only).
+  14 Jul: "How to use" guide banner, company signature format button, and the
+  Saved replies panel (library visible to all, admin + manager curate; 9
+  bilingual starters seeded in migration 0007 covering quotations, POs,
+  supplier catalogue requests and service scheduling). This delivers the
+  canned-responses admin from Phase 4 item 2 early; Wisdom KB remains.
+- Guide: LIVE 14 Jul (/admin/email/guide, bilingual EN+TH how-to for the whole
+  CRM; "How to use" tab always visible, linked from Settings + the dashboard).
 - Test Lab: LIVE (admin).
 - Customers: LIVE 13 Jul (ported from newnei): searchable contact directory +
   per-customer profile with full ticket history, scoped like the inbox for

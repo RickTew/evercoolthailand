@@ -71,6 +71,41 @@ export async function cancelMyAddressRequestAction(): Promise<{ ok: boolean }> {
   return { ok: true };
 }
 
+// ---- Saved replies panel (admin + manager manage; everyone uses them) ----
+
+// Saved replies are shared team-wide (the composer's "Saved replies" menu), so
+// editing is limited to the roles that own the team's voice.
+async function canManageSavedReplies(): Promise<boolean> {
+  const profile = await requireStaff();
+  return profile.role === "admin" || profile.role === "manager";
+}
+
+export async function addSavedReplyAction(
+  title: string,
+  body: string,
+  language: string,
+): Promise<{ ok: boolean; error?: string }> {
+  if (!(await canManageSavedReplies())) return { ok: false, error: "Admin or manager only." };
+  const t = title.trim();
+  const b = body.trim();
+  if (!t || !b) return { ok: false, error: "Give the reply a title and a message." };
+  const lang = language === "th" ? "th" : "en";
+  const repo = await getRepo();
+  await repo.addCannedResponse(t.slice(0, 120), b.slice(0, 4000), lang);
+  revalidatePath(SETTINGS_PATH);
+  revalidatePath("/admin/email/inbox");
+  return { ok: true };
+}
+
+export async function deleteSavedReplyAction(id: string): Promise<{ ok: boolean; error?: string }> {
+  if (!(await canManageSavedReplies())) return { ok: false, error: "Admin or manager only." };
+  const repo = await getRepo();
+  await repo.deleteCannedResponse(id);
+  revalidatePath(SETTINGS_PATH);
+  revalidatePath("/admin/email/inbox");
+  return { ok: true };
+}
+
 // ---- Trash panel (admin only) ----
 
 export async function setTrashRetentionAction(days: number): Promise<{ ok: boolean; error?: string }> {

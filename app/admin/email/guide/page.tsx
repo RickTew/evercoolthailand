@@ -28,6 +28,10 @@ const SECTIONS: GuideSection[] = [
         en: "Each conversation has a status: New (the customer is waiting for us), Waiting (we replied and are waiting for them), Resolved (finished).",
         th: "แต่ละบทสนทนามีสถานะ: New (ลูกค้ากำลังรอเรา), Waiting (เราตอบแล้วและรอลูกค้า), Resolved (จบงานแล้ว)",
       },
+      {
+        en: "Mail is labelled automatically as it arrives: Quote, Purchase order, Shipping, Supplier, Billing, Service & repair and more. A subject with an EQ project number (for example EQ068-07-26) gets the Project label, so a project's whole paper trail is one click away.",
+        th: "ระบบติดป้ายกำกับให้อัตโนมัติเมื่ออีเมลเข้ามา เช่น Quote, Purchase order, Shipping, Supplier, Billing, Service & repair หากหัวข้อมีเลขโครงการ EQ (เช่น EQ068-07-26) จะได้ป้าย Project ทำให้ดูเอกสารทั้งหมดของโครงการได้ในคลิกเดียว",
+      },
     ],
   },
   {
@@ -73,8 +77,8 @@ const SECTIONS: GuideSection[] = [
         th: "ติ๊ก Reply all เพื่อส่งสำเนา (Cc) ถึงทุกคนที่อยู่ในอีเมลต้นฉบับของลูกค้าด้วย",
       },
       {
-        en: "Saved replies are pre-written answers for common questions: insert one, adjust it, and send.",
-        th: "Saved replies คือคำตอบสำเร็จรูปสำหรับคำถามที่พบบ่อย เลือกมาใช้ ปรับแก้ แล้วส่งได้เลย",
+        en: "Saved replies are pre-written answers for the common cases: quotation received, need more details, purchase order confirmed, supplier catalogue request, service visit scheduling. Insert one (English or Thai), fill in the [bracketed] parts, and send. The library lives in Settings.",
+        th: "Saved replies คือคำตอบสำเร็จรูปสำหรับกรณีที่พบบ่อย เช่น รับคำขอใบเสนอราคา ขอข้อมูลเพิ่ม รับใบสั่งซื้อ ขอแคตตาล็อกจากซัพพลายเออร์ นัดหมายช่าง เลือกมาใช้ (มีทั้งอังกฤษและไทย) เติมข้อมูลในวงเล็บ [ ] แล้วส่ง จัดการรายการได้ในแท็บ Settings",
       },
       {
         en: "Whoever replies first becomes the owner of that conversation automatically, so the team always knows who is handling it.",
@@ -147,6 +151,24 @@ const SECTIONS: GuideSection[] = [
       {
         en: "Deleted conversations go to Trash and are cleaned out automatically after a few days, so Trash is not a place to store anything.",
         th: "บทสนทนาที่ลบจะไปอยู่ใน Trash และถูกลบถาวรอัตโนมัติภายในไม่กี่วัน จึงไม่ควรใช้ Trash เก็บอะไรไว้",
+      },
+    ],
+  },
+  {
+    title: "A good daily routine",
+    titleTh: "กิจวัตรประจำวันที่แนะนำ",
+    steps: [
+      {
+        en: "Open the Inbox and look at New: these are the people waiting for us. Deal with the oldest first.",
+        th: "เปิด Inbox แล้วดูรายการ New ก่อน นี่คือคนที่กำลังรอเรา จัดการรายการที่เก่าที่สุดก่อน",
+      },
+      {
+        en: "For each one: reply if it is yours, or leave it for the right person if a colleague already owns it. Junk goes to Spam; newsletters and vendor advertising can be Archived.",
+        th: "แต่ละฉบับ: ตอบถ้าเป็นงานของคุณ หรือปล่อยให้เจ้าของงานดูแลถ้ามีคนรับผิดชอบแล้ว อีเมลขยะกด Spam ส่วนจดหมายข่าวหรือโฆษณาจากผู้ขายกด Archive ได้",
+      },
+      {
+        en: "When a deal or question is finished, set the conversation to Resolved. A tidy inbox means the New list really is the to-do list.",
+        th: "เมื่อจบงานหรือตอบครบแล้ว ให้ตั้งสถานะเป็น Resolved กล่องที่เป็นระเบียบทำให้รายการ New คือรายการงานที่ต้องทำจริง ๆ",
       },
     ],
   },

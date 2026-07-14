@@ -21,6 +21,14 @@ export const TOPIC_TAG_NAMES = [
   // plans are their own workstreams, not generic "service".
   "Filter change",
   "Maintenance plan",
+  // Added 14 Jul after scanning the real traffic: Evercool's mail is B2B
+  // industrial HVAC. Most threads are supplier quotations tied to EQ project
+  // refs, purchase orders, freight, and vendor introductions, none of which the
+  // consumer-leaning topics above could catch.
+  "Purchase order",
+  "Shipping",
+  "Supplier",
+  "Project",
 ] as const;
 
 export type TopicTagName = (typeof TOPIC_TAG_NAMES)[number];
@@ -69,6 +77,36 @@ const RULES: { tag: TopicTagName; re: RegExp; th?: RegExp }[] = [
     tag: "Maintenance plan",
     re: /\b(maintenance (plan|contract|package|agreement)s?|service (contract|plan|package)s?|annual (service|maintenance)|pm (visit|plan|contract)|preventive maintenance)\b/i,
     th: /(สัญญาบำรุงรักษา|แพ็คเกจล้างแอร์|รายปี|บำรุงรักษาเชิงป้องกัน)/,
+  },
+  {
+    // Real subjects seen: "RE Revised PO-01469", "R: PO6032240 ORDER MORETTI",
+    // "PO EQ034-03-26", Thai "ใบสั่งซื้อ 4100014184". The PO+digits form needs
+    // the digits so "potential"/"po box" cannot fire it.
+    tag: "Purchase order",
+    re: /\b(purchase orders?|p\/o|po[\s#-]*\d{3,}|po[\s#-]*eq\d+)\b/i,
+    th: /(ใบสั่งซื้อ)/,
+  },
+  {
+    // Freight and delivery traffic (ICON FREIGHT price lists, container
+    // bookings, customs). Incoterms and document names are high-precision cues.
+    tag: "Shipping",
+    re: /\b(shipping|shipments?|freight|forwarders?|logistics|etd|eta|bill of lading|b\/l|awb|air waybill|containers?|customs( clearance)?|incoterms?|fob|cif|exw|ddp|dap)\b/i,
+    th: /(ขนส่ง|ค่าส่งสินค้า|ตู้คอนเทนเนอร์|ศุลกากร|เฟรท|เรือออก)/,
+  },
+  {
+    // Vendor self-introductions (coil factories, AHU makers, one-stop HVAC/R
+    // solution pitches). Phrases sellers use about THEMSELVES, so a customer
+    // asking to buy never trips it.
+    tag: "Supplier",
+    re: /\b(we are an? (leading )?(manufacturer|supplier|factory)|our factory|product catalogu?es?|company profile|distributor(ship)?s?|oem|odm|cooperation (opportunity|discussion)|one[- ]stop solution)\b/i,
+    th: /(โรงงานผลิต|ตัวแทนจำหน่าย|ขอแนะนำบริษัท|นำเสนอสินค้า)/,
+  },
+  {
+    // Anything carrying an eq-tracker project reference (EQ056, EQ068-07-26)
+    // is part of a tracked project's paper trail; the tag groups the whole
+    // correspondence for that world in one click.
+    tag: "Project",
+    re: /\beq\d{3}(-\d{2}){0,2}\b/i,
   },
   {
     tag: "Complaint",
