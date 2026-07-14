@@ -365,7 +365,9 @@ export async function sendReplyAction(
     // When asked, quote the whole conversation under the reply in the email the
     // customer receives. The in-app record keeps the clean new reply (the thread
     // shows the history right above it), so the staff view never double-quotes.
-    const outgoingText = includeHistory ? `${bodyText}${buildQuotedHistory(detail)}` : bodyText;
+    // Passed separately from the fresh text so the sender can place the company
+    // logo between the signature and the quote.
+    const quotedText = includeHistory ? buildQuotedHistory(detail) : undefined;
     // Reply to all: Cc everyone else who was on the customer's mail (computed
     // server-side from the thread, never trusting the client), so the whole
     // original group stays in the loop. Empty unless the toggle was on.
@@ -375,7 +377,8 @@ export async function sendReplyAction(
       to: detail.contact.email,
       cc: cc.length ? cc : undefined,
       subject: `Re: ${detail.thread.subject}${ref}`,
-      text: outgoingText,
+      text: bodyText,
+      quotedText,
       from,
       attachments: sendAttachments.length ? sendAttachments : undefined,
     });

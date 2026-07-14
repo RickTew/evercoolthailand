@@ -15,6 +15,10 @@ export interface SendInput {
   bcc?: string[];
   subject: string;
   text: string;
+  // Quoted "previous messages" transcript, kept separate from the fresh text so
+  // the HTML version can place the company logo AFTER the signature but BEFORE
+  // the quote (like a normal mail client), and render the quote muted.
+  quotedText?: string;
   from?: string; // override the sender (reply from the inbox the mail came to)
   attachments?: SendAttachment[];
 }
@@ -39,13 +43,44 @@ function escapeHtml(s: string): string {
     .replace(/>/g, "&gt;");
 }
 
+// The EVERCOOL logo shown under the signature on every outgoing email (the same
+// mark Wanrawee's Apple Mail signature carries). Hosted on the website so mail
+// clients load it; 360px wide, displayed at 180 so it stays crisp on retina.
+const SIGNATURE_LOGO_URL = "https://evercoolthailand.com/images/email/evercool-logo.png";
+const SIGNATURE_LOGO_HTML = `<img src="${SIGNATURE_LOGO_URL}" alt="EVERCOOL" width="180" style="display:block;margin-top:14px;width:180px;height:auto;border:0;">`;
+
+const BODY_STYLE =
+  "font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;font-size:15px;line-height:1.6;color:#1f2933;white-space:normal;";
+
+function textToHtmlBlock(text: string, style: string): string {
+  const body = escapeHtml(text).replace(/\r?\n/g, "<br>");
+  return `<div style="${style}">${body}</div>`;
+}
+
 // Wrap the plain reply text in a minimal HTML body. Sending HTML (not just text)
 // makes the message render as one clean block, so attachments land AFTER the
 // reply as proper files instead of being injected into the middle of the text
-// (the "image sits funny in the signature" bug).
-function textToHtml(text: string): string {
-  const body = escapeHtml(text).replace(/\r?\n/g, "<br>");
-  return `<div style="font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;font-size:15px;line-height:1.6;color:#1f2933;white-space:normal;">${body}</div>`;
+// (the "image sits funny in the signature" bug). Order: message (which ends with
+// the person's signature), the company logo, then any quoted history, muted.
+function buildHtml(input: SendInput): string {
+  const parts = [textToHtmlBlock(input.text, BODY_STYLE), SIGNATURE_LOGO_HTML];
+  const quoted = input.quotedText?.trim();
+  if (quoted) {
+    parts.push(
+      textToHtmlBlock(
+        quoted,
+        "font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;font-size:13px;line-height:1.6;color:#6b7280;white-space:normal;margin-top:18px;border-left:3px solid #e5e7eb;padding-left:12px;",
+      ),
+    );
+  }
+  return parts.join("");
+}
+
+// The plain-text alternative: fresh text plus the quoted transcript (the logo is
+// HTML-only; text-mode clients just see the written signature).
+function buildText(input: SendInput): string {
+  const quoted = input.quotedText ?? "";
+  return `${input.text}${quoted}`;
 }
 
 class ResendSender implements MailSender {
@@ -69,8 +104,8 @@ class ResendSender implements MailSender {
       cc,
       bcc,
       subject: input.subject,
-      text: input.text,
-      html: textToHtml(input.text),
+      text: buildText(input),
+      html: buildHtml(input),
       attachments: input.attachments?.map((a) => ({
         filename: a.filename,
         content: a.content,

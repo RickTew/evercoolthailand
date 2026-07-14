@@ -81,6 +81,13 @@ const GUIDE: {
     roles: ["admin", "sales", "manager", "owner", "technician", "staff"],
   },
   {
+    href: "/admin/email/guide",
+    label: "CRM how-to guide",
+    en: "Step-by-step instructions for the CRM: reading, replying, Compose, signatures and the logo.",
+    th: "คู่มือการใช้ CRM ทีละขั้นตอน อ่านอีเมล ตอบกลับ ส่งใหม่ ลายเซ็น และโลโก้",
+    roles: ["admin", "sales", "manager", "owner", "technician", "staff"],
+  },
+  {
     href: "/admin/users",
     label: "Users",
     en: "Create accounts and set each person's CRM access (admin only).",

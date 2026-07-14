@@ -14,6 +14,8 @@ const ITEMS = [
   { href: "/admin/email/labels", label: "Labels", section: "labels" },
   { href: "/admin/email/settings", label: "Settings", section: "settings" },
   { href: "/admin/email/test", label: "Test Lab", section: "test" },
+  // The help page is never scoped away: everyone can always read the manual.
+  { href: "/admin/email/guide", label: "How to use", section: "guide" },
 ];
 
 export function SupportSubnav({
@@ -24,7 +26,9 @@ export function SupportSubnav({
   allowed?: string[];
 }) {
   const pathname = usePathname();
-  const items = allowed ? ITEMS.filter((it) => allowed.includes(it.section)) : ITEMS;
+  const items = allowed
+    ? ITEMS.filter((it) => it.section === "guide" || allowed.includes(it.section))
+    : ITEMS;
 
   return (
     <nav className="flex items-center gap-1 overflow-x-auto scrollbar-hide">

@@ -41,7 +41,12 @@ export default async function EmailSettingsPage() {
       <SupportSubBar />
       <div className="min-h-0 flex-1 overflow-y-auto p-4">
         <div className="mx-auto flex max-w-2xl flex-col gap-4">
-          <YouPanel prefs={prefs} isAdmin={userCtx.isAdmin} scopeSummary={scopeSummary} />
+          <YouPanel
+            prefs={prefs}
+            isAdmin={userCtx.isAdmin}
+            scopeSummary={scopeSummary}
+            displayName={me?.displayName ?? ""}
+          />
           {userCtx.isAdmin && <TrashPanel retentionDays={retentionDays} trashCount={trashCount} />}
         </div>
       </div>
