@@ -44,6 +44,17 @@ Verification state: tsc + eslint clean, next build green, /admin/build present
 in the route list, anonymous request 307s to /login, public home 200s. NOT yet
 verified: the page rendered in a signed-in staff session on the deployed site.
 
+Also this session (infra, outside the repo):
+- Hosting notification emails: the per-build failure email turned OFF in the
+  hosting dashboard's notification settings (success emails were already off;
+  in-dashboard notifications kept). Exact locations recorded privately.
+- EQ Tracker retired from service: parity checklist passed (code folder = repo
+  = deployed cdf68b9, data all in the shared database, settings are the shared
+  credentials only, no schedules/domains/references), then the old deployment
+  PAUSED via the hosting API. Old URL 503s, portal unaffected. Unpause is one
+  API call (details recorded privately). Delete deferred; code kept for a
+  possible future EQ tracker product.
+
 Feedback round 1 (Rick, same day, from live screenshots; commit a976ccf):
 removed the "Until truly done" meter (we do not know the true total), removed
 the "Still to be done" board from Rick's Proof, removed the old-host

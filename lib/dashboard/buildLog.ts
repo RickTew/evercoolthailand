@@ -31,6 +31,19 @@ export type BuildLogEntry = {
 export const BUILD_LOG: BuildLogEntry[] = [
   {
     "date": "2026-07-15",
+    "title": "EQ Tracker's separate deployment paused: the portal is now the only door",
+    "type": "infra",
+    "summary": "The old standalone EQ Tracker app was retired from service. Before pausing, a full check confirmed nothing lives only there: the code is identical in the private repo and the local folder, all data sits in the shared database the portal already reads, the only settings are the same shared credentials the portal uses, and no schedules or domains hang off it. The deployment is paused, not deleted: it costs nothing, staff can no longer enter data in the old app by accident, and it can be switched back on in one step if anything turns out to be missing. The code stays kept for a possible future EQ tracker for another company.",
+    "hours": 0.25,
+    "changes": [
+      "Parity checklist passed: code synced (folder = repo = deployed build), data all in the shared database, no unique settings, no schedules, no custom domain, no references from the portal",
+      "Deployment paused via the hosting API; the old URL now answers 503 deployment-paused",
+      "Evercool portal verified unaffected after the pause",
+      "Reversal path: one unpause call restores it instantly; full deletion deferred on purpose"
+    ]
+  },
+  {
+    "date": "2026-07-15",
     "title": "This page: the Build board and Rick's Proof ported from newnei, the whole history researched and logged",
     "type": "feature",
     "summary": "The page you are reading. The newnei Build page and its Rick's Proof section were ported into the portal and restyled, and the complete work record was researched and reconstructed: three parallel agents mined the 122 commits of this repo, the 36 commits of the EQ Tracker repo, and the non-git record (work log, plan docs, the old-site build brief, the reference library, and the hosting and email facts), then the results were merged, deduplicated and dated into 41 entries with 331 individual changes back to the original 2023 site. The token figure on this entry covers only the research agents (actually measured); the session around them was not instrumented.",
