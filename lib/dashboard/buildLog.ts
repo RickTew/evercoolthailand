@@ -56,7 +56,8 @@ export const BUILD_LOG: BuildLogEntry[] = [
       "lib/dashboard/buildPlan.ts: the Live / Building / Planned board, standing cards, layered stack and honest completion meter",
       "/admin/build page with hero stats, status chips, Rick's Proof in the Pudding collapsible and the expandable receipts list, in the portal's own palette",
       "Build tab added to the admin nav for every staff role; the public site never links here and anonymous visits bounce to /login (verified)",
-      "WORK-LOG.md rule extended: every session entry is mirrored into this page's log"
+      "WORK-LOG.md rule extended: every session entry is mirrored into this page's log",
+      "Feedback round the same afternoon, from Rick's live screenshots: the completion meter removed (we do not know the true total), the todo board removed from Rick's Proof, three internal tiles dropped from Planned, the intro made full width, and provider names kept out of everything the page shows"
     ]
   },
   {

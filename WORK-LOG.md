@@ -38,11 +38,17 @@ Work:
   Not reachable or linked from the public site (auth wall bounces to /login,
   verified).
 
-Duration: estimate ~1h wall clock (no timer instrumentation yet).
-Tokens: not fully recorded; the three research agents alone logged ~175k.
+Duration: estimate ~2.5h wall clock across the afternoon (build page ~1h,
+feedback round ~45m, notifications + EQ Tracker pause ~30m, wrap ~15m; no
+timer instrumentation yet).
+Tokens: not fully recorded; the three research agents alone logged ~175k
+(measured); the rest of the session is unmeasured.
 Verification state: tsc + eslint clean, next build green, /admin/build present
-in the route list, anonymous request 307s to /login, public home 200s. NOT yet
-verified: the page rendered in a signed-in staff session on the deployed site.
+in the route list, anonymous request 307s to /login, public home 200s; old EQ
+Tracker URL 503s after the pause, portal 200s. NOT yet verified: the Build
+page rendered in a signed-in staff session on the deployed site (Rick saw it
+live and sent feedback, so it renders; the post-feedback version is what needs
+a look).
 
 Also this session (infra, outside the repo):
 - Hosting notification emails: the per-build failure email turned OFF in the
