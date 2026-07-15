@@ -34,6 +34,12 @@ Also answered: roles stay the fixed baselines; the checkboxes personalize
 below them. One eslint cascading-render error left at repo parity
 (pre-existing pattern, also tolerated in ProjectsClient).
 
+Update, same evening: Rick approved and BOTH migrations were applied to
+production and verified (0008: support_compose_drafts table exists, Save
+draft live; 0009: portal_tabs column present, profiles_update_own policy
+gone, zero session write grants remain on profiles). Every feature from
+tonight is now fully live.
+
 ---
 
 ## 2026-07-15 (evening, part 4) - Wanrawee can hire: Users console opened to managers
