@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { getRepo } from "@/app/admin/email/_lib/data/repo";
-import { getMailSender } from "@/app/admin/email/_lib/mail/send";
+import { getMailSender, buildFrom } from "@/app/admin/email/_lib/mail/send";
 import { isEmailOptedOut } from "@/app/admin/email/_lib/mail/consent";
 import { otherThreadRecipients, splitAddresses, isOwnInbox } from "@/app/admin/email/_lib/mail/recipients";
 import { createUploadUrl, readBytes, BUCKET } from "@/app/admin/email/_lib/storage/attachments";
@@ -286,8 +286,8 @@ export async function rememberInboxStateAction(
 
 // Which Evercool inbox this conversation came to (hi@, later per-staff addresses),
 // from the most recent inbound message's recipient. Used to reply FROM that same
-// address, so a mail to hi@ is answered by hi@. Returns a Resend-ready
-// "Evercool <addr>" string, or undefined to fall back to the default sender.
+// address, so a mail to hi@ is answered by hi@. Returns the bare address, or
+// undefined to fall back to the default sender; buildFrom adds the display name.
 function replyFromInbox(detail: ThreadDetail): string | undefined {
   for (let i = detail.messages.length - 1; i >= 0; i--) {
     const m = detail.messages[i];
@@ -295,7 +295,7 @@ function replyFromInbox(detail: ThreadDetail): string | undefined {
     // The To/Cc may hold several addresses; reply FROM the first Evercool inbox
     // among them (To preferred, then Cc).
     const addr = [...splitAddresses(m.toAddress), ...splitAddresses(m.ccAddress)].find(isOwnInbox);
-    if (addr) return `Evercool <${addr}>`;
+    if (addr) return addr;
   }
   return undefined;
 }
@@ -349,7 +349,8 @@ export async function sendReplyAction(
     console.log(`[consent] transactional reply to opted-out contact ${detail.contact.email} (thread ${threadId})`);
   }
 
-  const actorId = (await getCurrentUserContext()).teamMember?.id ?? null;
+  const actor = (await getCurrentUserContext()).teamMember ?? null;
+  const actorId = actor?.id ?? null;
 
   try {
     // Pull the bytes for each attachment so they ride on the outgoing email.
@@ -372,7 +373,9 @@ export async function sendReplyAction(
     // server-side from the thread, never trusting the client), so the whole
     // original group stays in the loop. Empty unless the toggle was on.
     const cc = replyAll ? otherThreadRecipients(detail) : [];
-    const from = replyFromInbox(detail); // reply from the inbox the customer wrote to
+    // Reply from the inbox the customer wrote to, with the replying staff
+    // member's name in front so the customer sees who answered.
+    const from = buildFrom(actor?.displayName, replyFromInbox(detail));
     const sent = await sender.send({
       to: detail.contact.email,
       cc: cc.length ? cc : undefined,
@@ -471,8 +474,14 @@ export async function composeNewMailAction(input: {
   }
 
   // The staff member who starts an outbound conversation owns it from the off.
-  const actorId = (await getCurrentUserContext()).teamMember?.id ?? null;
-  if (actorId) await repo.setAssignee(created.threadId, actorId);
+  const actor = (await getCurrentUserContext()).teamMember ?? null;
+  if (actor) await repo.setAssignee(created.threadId, actor.id);
+
+  // Send from the person's own @evercoolthailand.com address when an admin has
+  // confirmed one, otherwise the shared default; either way their name rides in
+  // the From so the recipient sees more than just "Evercool".
+  const personalAddress = actor ? (await repo.getStaffPrefs(actor.id)).personalAddress : null;
+  const from = buildFrom(actor?.displayName, personalAddress);
 
   try {
     const sendAttachments = [];
@@ -489,12 +498,14 @@ export async function composeNewMailAction(input: {
       bcc: bccList.length ? bccList : undefined,
       subject: `${input.subject.trim()}${ref}`,
       text: input.body,
+      from,
       attachments: sendAttachments.length ? sendAttachments : undefined,
     });
     await repo.recordSentReply(created.threadId, input.body, sent.providerMessageId, input.attachments, {
       to: allowedTo,
       cc: ccList,
       bcc: bccList,
+      from,
     });
     revalidatePath("/admin/email/inbox");
     return { ok: true, threadId: created.threadId, via: sent.via };
@@ -528,6 +539,8 @@ export async function bulkReplyAction(
   if (!bodyText.trim()) return { ok: false, sent: 0, failed: 0, skipped: 0, error: "The message is empty." };
   const repo = await getStaffRepo();
   const sender = getMailSender();
+  // The broadcast goes out under the sender's own name too (same as replies).
+  const from = buildFrom((await getCurrentUserContext()).teamMember?.displayName);
   let sent = 0;
   let failed = 0;
   let skipped = 0;
@@ -551,9 +564,10 @@ export async function bulkReplyAction(
         to: detail.contact.email,
         subject: `Re: ${detail.thread.subject}${ref}`,
         text: bodyText,
+        from,
       });
       via = res.via;
-      await repo.recordSentReply(threadId, bodyText, res.providerMessageId);
+      await repo.recordSentReply(threadId, bodyText, res.providerMessageId, undefined, { from });
       sent += 1;
     } catch {
       failed += 1;

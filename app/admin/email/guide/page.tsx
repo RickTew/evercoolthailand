@@ -25,8 +25,8 @@ const SECTIONS: GuideSection[] = [
         th: "อีเมลทุกฉบับที่ส่งถึงบริษัท (hi@, sales@, info@ และที่อยู่ @evercoolthailand.com ของแต่ละคน) จะเข้ามารวมกันที่นี่ในกล่องเดียว ทั้งทีมเห็นรายการเดียวกัน งานจึงไม่ตกหล่นและทุกคนช่วยกันตอบได้",
       },
       {
-        en: "Each conversation has a status: New (the customer is waiting for us), Waiting (we replied and are waiting for them), Resolved (finished).",
-        th: "แต่ละบทสนทนามีสถานะ: New (ลูกค้ากำลังรอเรา), Waiting (เราตอบแล้วและรอลูกค้า), Resolved (จบงานแล้ว)",
+        en: "Each conversation has a status: New (the customer is waiting for us), Waiting for customer (we replied; the email was sent and we are waiting for their answer), Resolved (finished).",
+        th: "แต่ละบทสนทนามีสถานะ: New (ลูกค้ากำลังรอเรา), Waiting for customer (เราตอบแล้ว อีเมลถูกส่งเรียบร้อย กำลังรอลูกค้าตอบกลับ), Resolved (จบงานแล้ว)",
       },
       {
         en: "Mail is labelled automatically as it arrives: Quote, Purchase order, Shipping, Supplier, Billing, Service & repair and more. A subject with an EQ project number (for example EQ068-07-26) gets the Project label, so a project's whole paper trail is one click away.",

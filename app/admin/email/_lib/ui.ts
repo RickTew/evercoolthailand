@@ -13,8 +13,11 @@ export const STATUS_META: Record<
 > = {
   // Locked color map: teal = New/active, orange = Waiting, green = Resolved.
   // One source of truth, so the board, list, cards, filters, and detail agree.
+  // "Waiting for customer" (not just "Waiting"): staff read the bare word in the
+  // Sent folder as "this email is waiting to be sent". It means we replied and
+  // the ball is in the customer's court.
   open: { label: "New", dot: "bg-teal", chip: "bg-teal/10 text-teal" },
-  pending: { label: "Waiting", dot: "bg-orange", chip: "bg-orange/10 text-orange" },
+  pending: { label: "Waiting for customer", dot: "bg-orange", chip: "bg-orange/10 text-orange" },
   closed: { label: "Resolved", dot: "bg-green", chip: "bg-green/10 text-green" },
 };
 

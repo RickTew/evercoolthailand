@@ -36,6 +36,27 @@ function fromAddress(): string {
   return process.env.SUPPORT_FROM_ADDRESS ?? "Evercool <hi@evercoolthailand.com>";
 }
 
+// The bare email out of "Name <addr>" (or an already-bare address).
+export function bareAddress(value: string): string {
+  const m = value.match(/<([^>]+)>/);
+  return (m ? m[1] : value).trim();
+}
+
+// Build the From header so the recipient sees WHO wrote the email, not only the
+// company: "Wanrawee Sirianan, EVERCOOL <hi@evercoolthailand.com>". Wanrawee's
+// test send showed just "evercool" in Gmail, which read as anonymous. The
+// display name is quoted because it contains a comma (RFC 5322), and any quote
+// characters in a name are softened so they cannot break the header.
+export function buildFrom(
+  staffName: string | null | undefined,
+  address?: string | null,
+): string {
+  const addr = bareAddress((address ?? "").trim() || fromAddress());
+  const name = staffName?.trim().replace(/"/g, "'");
+  const display = name ? `${name}, EVERCOOL` : "EVERCOOL";
+  return `"${display}" <${addr}>`;
+}
+
 function escapeHtml(s: string): string {
   return s
     .replace(/&/g, "&amp;")
