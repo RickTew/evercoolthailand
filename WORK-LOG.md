@@ -14,6 +14,21 @@ feeds the staff-facing Build page at /admin/build (Rick's Proof in the Pudding).
 
 ---
 
+## 2026-07-15 (evening, part 6) - Cross-app inbound mail leak found and fixed (fix lives in the tewbedo repo)
+
+Rick spotted Evercool staff emails appearing as tickets in another of his
+apps. Investigated: the email provider fires its inbound event account-wide
+with no per-domain scoping, so every inbound app on the shared account gets
+every domain's mail and must filter its own. Verified: THIS app filters
+correctly and its database holds zero foreign-domain mail (nobody's mail
+leaked INTO the CRM, ever); one sibling app had no filter and was filing
+Evercool's mail as its own tickets. Fixed there with Rick's explicit
+approval (sibling-domain drop guard; that repo's commit f98dbbf), deployed.
+Still open in the sibling app: purging its already-ingested Evercool
+tickets (Rick to decide). No Evercool code changed for this.
+
+---
+
 ## 2026-07-15 (evening, part 5) - Per-user portal tabs + profiles security fix
 
 Rick: some workers must not use the CRM at all, others should not see the
