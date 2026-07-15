@@ -68,12 +68,13 @@ export async function setUserCareAccessAction(
     ? patch.inboxScope
     : "all";
 
-  // Only known addresses may be assigned: the shared registry plus this
-  // person's own confirmed personal address.
+  // Only assignable addresses may be saved: the shared/function registry plus
+  // this person's OWN confirmed personal address. Another staffer's personal
+  // mailbox is rejected here too, not just hidden in the UI.
   const repo = await getRepo();
   const prefs = await repo.getStaffPrefs(userId);
   const allowed = new Set<string>([
-    ...EVERCOOL_INBOXES.map((i) => i.address),
+    ...EVERCOOL_INBOXES.filter((i) => !("personal" in i && i.personal)).map((i) => i.address),
     ...(prefs.personalAddress ? [prefs.personalAddress.toLowerCase()] : []),
   ]);
   const assignedInboxes = [...new Set(patch.assignedInboxes.map((a) => a.trim().toLowerCase()))].filter((a) =>

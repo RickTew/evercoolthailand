@@ -26,10 +26,13 @@ export const EVERCOOL_INBOXES = [
   // Staff personal addresses (current staff only; jakkrit@ and theerachai@
   // removed 13 Jul when they left the company. Mail to a removed address still
   // arrives via the domain catch-all and is visible to admin + manager).
-  { address: "blancheli@evercoolthailand.com", label: "Blancheli" },
-  { address: "kongnatee@evercoolthailand.com", label: "Kongnatee" },
-  { address: "tassanee@evercoolthailand.com", label: "Tassanee" },
-  { address: "wanrawee@evercoolthailand.com", label: "Wanrawee" },
+  // `personal: true` keeps these out of the Users console's assignable
+  // checklist (Rick, 15 Jul: never offer one person another person's mailbox);
+  // they still get their filter entry and label in the inbox dropdown.
+  { address: "blancheli@evercoolthailand.com", label: "Blancheli", personal: true },
+  { address: "kongnatee@evercoolthailand.com", label: "Kongnatee", personal: true },
+  { address: "tassanee@evercoolthailand.com", label: "Tassanee", personal: true },
+  { address: "wanrawee@evercoolthailand.com", label: "Wanrawee", personal: true },
 ] as const;
 
 export type EvercoolInbox = (typeof EVERCOOL_INBOXES)[number]["address"];

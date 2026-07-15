@@ -7,7 +7,7 @@ import {
   resolveAddressRequestAction,
   type CareAccess,
 } from "@/app/admin/users/actions";
-import { EVERCOOL_INBOXES } from "@/app/admin/email/_lib/inboxes";
+import { EVERCOOL_INBOXES, inboxLabel } from "@/app/admin/email/_lib/inboxes";
 import { CARE_SECTIONS } from "@/app/admin/email/_lib/sections";
 
 // "CRM access" panel under each user row (ported from newnei's
@@ -110,10 +110,15 @@ export function CareAccessEditor({
     );
   }
 
-  const personalOptions = access?.personalAddress &&
-    !EVERCOOL_INBOXES.some((i) => i.address === access.personalAddress)
-      ? [{ address: access.personalAddress, label: "Personal" }]
-      : [];
+  // The assignable checklist: the shared/function mailboxes plus THIS person's
+  // own confirmed address. Other people's personal mailboxes are never offered
+  // (Rick, 15 Jul); the server action enforces the same allowed set.
+  const inboxOptions = [
+    ...EVERCOOL_INBOXES.filter((i) => !("personal" in i && i.personal)),
+    ...(access?.personalAddress
+      ? [{ address: access.personalAddress, label: `${inboxLabel(access.personalAddress)} (their own)` }]
+      : []),
+  ];
 
   return (
     <div className="w-full rounded-xl border border-ec-border bg-ec-bg p-4 text-left">
@@ -126,14 +131,16 @@ export function CareAccessEditor({
 
       {isAdminRole && (
         <p className="mt-2 text-[11px] text-ec-text-muted">
-          This person is an admin, so they always see every mailbox and section. Change their role first to scope them.
+          Admins always see every CRM section. For mail they can choose All inboxes
+          (everything, including personal mailboxes) or All company mail (other
+          people&apos;s personal mailboxes hidden).
         </p>
       )}
 
       {!access && !error && <p className="mt-3 text-xs text-ec-text-muted">Loading...</p>}
 
       {access && (
-        <div className={`mt-3 flex flex-col gap-4 ${isAdminRole ? "pointer-events-none opacity-50" : ""}`}>
+        <div className="mt-3 flex flex-col gap-4">
           {access.requestedAddress && (
             <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2">
               <p className="text-xs text-ec-text">
@@ -183,7 +190,9 @@ export function CareAccessEditor({
             >
               <option value="all">All inboxes</option>
               <option value="shared">All company mail</option>
-              <option value="assigned">Only the ones I assign</option>
+              {/* An admin can never be locked to a fixed list (the inbox
+                  ignores 'assigned' for admins), so don't offer it. */}
+              {!isAdminRole && <option value="assigned">Only the ones I assign</option>}
             </Select>
             {access.inboxScope === "shared" && (
               <p className="mt-1 text-[11px] text-ec-text-muted">
@@ -192,7 +201,7 @@ export function CareAccessEditor({
             )}
             {access.inboxScope === "assigned" && (
               <div className="mt-2 grid grid-cols-1 gap-1.5 sm:grid-cols-2">
-                {[...EVERCOOL_INBOXES, ...personalOptions].map((i) => (
+                {inboxOptions.map((i) => (
                   <label key={i.address} className="flex cursor-pointer items-center gap-2">
                     <input
                       type="checkbox"
@@ -213,7 +222,7 @@ export function CareAccessEditor({
             )}
           </div>
 
-          <div>
+          <div className={isAdminRole ? "hidden" : ""}>
             <p className="text-xs font-bold text-ec-text">CRM sections they can open</p>
             <Select
               value={access.careSections.length === 0 ? "all" : "some"}

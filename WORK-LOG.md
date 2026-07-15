@@ -14,6 +14,20 @@ feeds the staff-facing Build page at /admin/build (Rick's Proof in the Pudding).
 
 ---
 
+## 2026-07-15 (evening, part 3) - Users console: no more offering other people's mailboxes
+
+Rick's review of Users > CRM access: the assignable mailbox checklist offered
+every registry address, including other staffers' personal mailboxes. Now the
+checklist shows only the shared/function mailboxes plus that person's OWN
+confirmed address, and the server action rejects another person's mailbox
+too (was UI-only before). Personal registry entries carry a personal flag;
+their inbox-filter labels are unchanged. Admin rows are no longer frozen in
+the panel: an admin can be switched between "All inboxes" and "All company
+mail" right there ("Only the ones I assign" is not offered to admins, and the
+sections block stays admin-exempt).
+
+---
+
 ## 2026-07-15 (evening, part 2) - Admin can opt into the shared inbox scope
 
 Rick's report: his admin queue showed everyone's mail (41 unassigned threads,
