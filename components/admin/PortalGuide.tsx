@@ -90,9 +90,16 @@ const GUIDE: {
   {
     href: "/admin/users",
     label: "Users",
-    en: "Create accounts and set each person's CRM access (admin only).",
-    th: "สร้างบัญชีผู้ใช้และกำหนดสิทธิ์ CRM ของแต่ละคน (เฉพาะแอดมิน)",
-    roles: ["admin"],
+    en: "Create accounts and set each person's CRM access (admin and manager).",
+    th: "สร้างบัญชีผู้ใช้และกำหนดสิทธิ์ CRM ของแต่ละคน (แอดมินและผู้จัดการ)",
+    roles: ["admin", "manager"],
+  },
+  {
+    href: "/admin/users/checklist",
+    label: "New staff setup",
+    en: "The step-by-step checklist for setting up a new hire: account, email address, CRM access, signature.",
+    th: "เช็กลิสต์ทีละขั้นตอนสำหรับพนักงานใหม่ สร้างบัญชี อีเมล สิทธิ์ CRM และลายเซ็น",
+    roles: ["admin", "manager"],
   },
 ];
 

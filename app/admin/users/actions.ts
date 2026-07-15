@@ -8,11 +8,13 @@ import { CARE_SECTION_KEYS, type CareSectionKey } from "@/app/admin/email/_lib/s
 import type { StaffPrefs } from "@/app/admin/email/_lib/types";
 
 // Server actions for the Users console's "CRM access" panel (ported from
-// newnei's CareAccessEditor): the admin-side checkboxes that decide which
-// mailboxes and CRM sections each staffer can see. Admin only; Server Actions
-// are public HTTP endpoints, so the gate lives here, not just in the UI.
+// newnei's CareAccessEditor): the checkboxes that decide which mailboxes and
+// CRM sections each staffer can see. Admin AND manager (Rick, 15 Jul:
+// Wanrawee sets up new hires), but a manager can never touch an ADMIN's
+// access. Server Actions are public HTTP endpoints, so the gate lives here,
+// not just in the UI.
 
-async function requireAdminId(): Promise<string | null> {
+async function requireUserManagerId(targetUserId?: string): Promise<string | null> {
   const supabase = await createSupabaseServerClient();
   const {
     data: { user },
@@ -23,7 +25,18 @@ async function requireAdminId(): Promise<string | null> {
     .select("role")
     .eq("id", user.id)
     .maybeSingle();
-  return profile?.role === "admin" ? user.id : null;
+  if (profile?.role !== "admin" && profile?.role !== "manager") return null;
+  // The manager tier stops at admins: reading or writing an admin's access
+  // needs an admin caller.
+  if (profile.role === "manager" && targetUserId) {
+    const { data: target } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", targetUserId)
+      .maybeSingle();
+    if (target?.role === "admin") return null;
+  }
+  return user.id;
 }
 
 export interface CareAccess {
@@ -38,7 +51,7 @@ export interface CareAccess {
 export async function loadCareAccessAction(
   userId: string,
 ): Promise<{ ok: boolean; access?: CareAccess; error?: string }> {
-  if (!(await requireAdminId())) return { ok: false, error: "Admin only." };
+  if (!(await requireUserManagerId(userId))) return { ok: false, error: "Not allowed." };
   const repo = await getRepo();
   const prefs = await repo.getStaffPrefs(userId);
   return {
@@ -61,7 +74,7 @@ export async function setUserCareAccessAction(
     careSections: string[];
   },
 ): Promise<{ ok: boolean; error?: string }> {
-  if (!(await requireAdminId())) return { ok: false, error: "Admin only." };
+  if (!(await requireUserManagerId(userId))) return { ok: false, error: "Not allowed." };
   if (!userId) return { ok: false, error: "No user." };
 
   const scope = (["all", "shared", "assigned"] as const).includes(patch.inboxScope)
@@ -98,7 +111,7 @@ export async function resolveAddressRequestAction(
   userId: string,
   approve: boolean,
 ): Promise<{ ok: boolean; error?: string }> {
-  if (!(await requireAdminId())) return { ok: false, error: "Admin only." };
+  if (!(await requireUserManagerId(userId))) return { ok: false, error: "Not allowed." };
   const repo = await getRepo();
   const prefs = await repo.getStaffPrefs(userId);
   const requested = (prefs.requestedAddress ?? "").trim().toLowerCase();

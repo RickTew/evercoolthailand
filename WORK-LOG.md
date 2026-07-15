@@ -14,6 +14,25 @@ feeds the staff-facing Build page at /admin/build (Rick's Proof in the Pudding).
 
 ---
 
+## 2026-07-15 (evening, part 4) - Wanrawee can hire: Users console opened to managers
+
+Rick: Wanrawee is hiring and needs to create users, their email accounts and
+CRM access herself. Built: the Users console (nav tab, layout gate, API
+route, CRM-access server actions) now allows role manager, with hard server
+limits: a manager can never create an admin, grant the admin role, or
+edit/deactivate/touch the access of an admin account (UI hides those
+controls too; role values are now validated server-side, which they were
+not before). New-hire flow streamlined: creating a user with an
+@evercoolthailand.com login auto-sets their CRM mailbox (personal address +
+own-inbox scope + Inbox/Settings sections), since receiving is domain-wide
+and needs no provisioning. New bilingual "New staff setup" checklist page at
+/admin/users/checklist (8 steps: address, account, roles, extra mailboxes,
+handing over the password, signature, orientation, offboarding), linked from
+the dashboard map and the Users header. Rick's fallback idea (a request form
+emailed to him) not needed with direct access.
+
+---
+
 ## 2026-07-15 (evening, part 3) - Users console: no more offering other people's mailboxes
 
 Rick's review of Users > CRM access: the assignable mailbox checklist offered

@@ -32,7 +32,7 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/admin/service",    label: "Service",    roles: ["admin", "manager", "owner", "technician"] },
   { href: "/admin/team",       label: "Team",       roles: ["admin", "manager", "owner"] },
   { href: "/admin/reports",    label: "Reports",    roles: ["admin", "manager", "owner"] },
-  { href: "/admin/users",      label: "Users",      roles: ["admin"] },
+  { href: "/admin/users",      label: "Users",      roles: ["admin", "manager"] },
   // The Build page (Rick's Proof): the record of what got built and what it
   // took. Staff-facing on purpose; never linked from the public site.
   { href: "/admin/build",      label: "Build",      roles: ["admin", "sales", "manager", "owner", "technician", "staff"] },

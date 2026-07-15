@@ -1,20 +1,34 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient, createAdminClient } from "@/lib/supabase/server";
 
-// Only admin can manage users
-async function requireAdmin() {
+// User management is open to admin AND manager (Rick, 15 Jul: Wanrawee hires
+// and sets up new people). A manager's power stops at the admin tier: they can
+// never create an admin, grant the admin role, or touch an admin's account.
+// Server Actions/route handlers are public HTTP endpoints, so every rule is
+// enforced here, not just hidden in the UI.
+const KNOWN_ROLES = ["admin", "owner", "manager", "sales", "technician", "staff"] as const;
+type KnownRole = (typeof KNOWN_ROLES)[number];
+
+async function requireUserManager(): Promise<{ id: string; role: "admin" | "manager" } | null> {
   const supabase = await createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
   const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle();
-  if (profile?.role !== "admin") return null;
-  return user;
+  if (profile?.role !== "admin" && profile?.role !== "manager") return null;
+  return { id: user.id, role: profile.role };
+}
+
+// The target's current role, for the manager-cannot-touch-admins rule.
+async function targetRole(id: string): Promise<string | null> {
+  const admin = createAdminClient();
+  const { data } = await admin.from("profiles").select("role").eq("id", id).maybeSingle();
+  return data?.role ?? null;
 }
 
 // GET — list all staff profiles
 export async function GET() {
-  const user = await requireAdmin();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+  const caller = await requireUserManager();
+  if (!caller) return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
 
   const admin = createAdminClient();
   const { data, error } = await admin
@@ -28,12 +42,19 @@ export async function GET() {
 
 // POST — create a new user
 export async function POST(request: Request) {
-  const caller = await requireAdmin();
+  const caller = await requireUserManager();
   if (!caller) return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
 
   const { name, email, password, role, department } = await request.json();
   if (!email || !password || !role) {
     return NextResponse.json({ error: "Email, password and role are required" }, { status: 400 });
+  }
+  // Only known roles may ever reach the database (the type is erased at runtime).
+  if (!KNOWN_ROLES.includes(role as KnownRole)) {
+    return NextResponse.json({ error: "Unknown role" }, { status: 400 });
+  }
+  if (caller.role === "manager" && role === "admin") {
+    return NextResponse.json({ error: "Only an admin can create another admin." }, { status: 403 });
   }
 
   const admin = createAdminClient();
@@ -65,16 +86,45 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: profileError.message }, { status: 500 });
   }
 
+  // New hire's mailbox, set up on the spot: when the login email is their
+  // @evercoolthailand.com address, it becomes their confirmed personal address
+  // and their starting CRM scope (own mailbox only, Inbox + Settings), matching
+  // how the existing staff are set up. Receiving needs no provisioning (inbound
+  // is domain-wide), and replies/Compose go out From this address. The CRM
+  // access panel can widen it any time. Admins are never scoped, so skip them.
+  const addr = String(email).trim().toLowerCase();
+  if (role !== "admin" && /@evercoolthailand\.com$/.test(addr)) {
+    await admin.from("support_staff_prefs").upsert({
+      profile_id: authData.user.id,
+      personal_address: addr,
+      inbox_scope: "assigned",
+      assigned_inboxes: [addr],
+      care_sections: ["inbox", "settings"],
+      updated_at: new Date().toISOString(),
+    });
+  }
+
   return NextResponse.json({ success: true, id: authData.user.id });
 }
 
 // PATCH — update role / active status / department
 export async function PATCH(request: Request) {
-  const caller = await requireAdmin();
+  const caller = await requireUserManager();
   if (!caller) return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
 
   const { id, role, is_active, department, name } = await request.json();
   if (!id) return NextResponse.json({ error: "User ID required" }, { status: 400 });
+  if (role !== undefined && !KNOWN_ROLES.includes(role as KnownRole)) {
+    return NextResponse.json({ error: "Unknown role" }, { status: 400 });
+  }
+  if (caller.role === "manager") {
+    if (role === "admin") {
+      return NextResponse.json({ error: "Only an admin can grant the admin role." }, { status: 403 });
+    }
+    if ((await targetRole(id)) === "admin") {
+      return NextResponse.json({ error: "Only an admin can change an admin's account." }, { status: 403 });
+    }
+  }
 
   const admin = createAdminClient();
   const updates: Record<string, unknown> = { updated_at: new Date().toISOString() };
@@ -91,16 +141,17 @@ export async function PATCH(request: Request) {
 
 // DELETE — deactivate (soft delete) a user
 export async function DELETE(request: Request) {
-  const caller = await requireAdmin();
+  const caller = await requireUserManager();
   if (!caller) return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
 
   const { id } = await request.json();
   if (!id) return NextResponse.json({ error: "User ID required" }, { status: 400 });
 
   // Prevent self-deletion
-  const supabase = await createSupabaseServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (user?.id === id) return NextResponse.json({ error: "Cannot deactivate your own account" }, { status: 400 });
+  if (caller.id === id) return NextResponse.json({ error: "Cannot deactivate your own account" }, { status: 400 });
+  if (caller.role === "manager" && (await targetRole(id)) === "admin") {
+    return NextResponse.json({ error: "Only an admin can deactivate an admin." }, { status: 403 });
+  }
 
   const admin = createAdminClient();
   const { error } = await admin.from("profiles").update({ is_active: false, updated_at: new Date().toISOString() }).eq("id", id);
