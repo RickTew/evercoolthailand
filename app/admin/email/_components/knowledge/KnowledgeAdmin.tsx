@@ -35,18 +35,18 @@ export function KnowledgeAdmin({
 function Explainer() {
   return (
     <section className="rounded-lg border border-teal/30 bg-teal/5 p-4 text-xs text-ink">
-      <p className="mb-1 font-semibold text-teal">Teach the Draft button</p>
+      <p className="mb-1 font-semibold text-teal">Teach the AIDE button</p>
       <p>
-        The <strong>Draft</strong> button in the reply box writes its answer from the verified
+        The <strong>AIDE</strong> button in the reply box writes its answer from the verified
         answers below, nothing else. Add an answer directly, or approve a reply the team
         already sent (it appears in the review list). Write answers exactly the way a
-        customer should read them. Nothing is ever sent automatically: Draft only fills
+        customer should read them. Nothing is ever sent automatically: AIDE only fills
         the reply box for a person to edit and send.
       </p>
       <p className="mt-1.5">
-        ปุ่ม <strong>Draft</strong> ในช่องตอบกลับจะเขียนคำตอบจากคำตอบที่ยืนยันแล้วด้านล่างเท่านั้น
+        ปุ่ม <strong>AIDE</strong> ในช่องตอบกลับจะเขียนคำตอบจากคำตอบที่ยืนยันแล้วด้านล่างเท่านั้น
         เพิ่มคำตอบเองโดยตรง หรืออนุมัติคำตอบที่ทีมเคยส่งไปแล้ว (จะปรากฏในรายการรอตรวจ)
-        เขียนคำตอบแบบที่อยากให้ลูกค้าอ่าน ระบบไม่ส่งอะไรอัตโนมัติ: Draft เพียงเติมข้อความในช่องตอบกลับ
+        เขียนคำตอบแบบที่อยากให้ลูกค้าอ่าน ระบบไม่ส่งอะไรอัตโนมัติ: AIDE เพียงเติมข้อความในช่องตอบกลับ
         ให้คนแก้ไขและกดส่งเอง
       </p>
     </section>
@@ -59,7 +59,7 @@ function ReviewQueue({ reviews }: { reviews: AnswerReview[] }) {
       <h2 className="text-sm font-semibold text-ink">Answers to review ({reviews.length})</h2>
       <p className="mb-3 text-xs text-muted">
         Replies the team has sent. Promote the good ones into the Knowledge base below so
-        the Draft button learns them. คำตอบที่ทีมส่งแล้ว กด Add to Knowledge เพื่อให้ปุ่ม Draft
+        the AIDE button learns them. คำตอบที่ทีมส่งแล้ว กด Add to Knowledge เพื่อให้ปุ่ม AIDE
         เรียนรู้คำตอบที่ดี
       </p>
       {reviews.length === 0 ? (
@@ -185,8 +185,8 @@ function KnowledgeBase({ articles }: { articles: KbArticle[] }) {
     <section className="rounded-lg border border-line bg-white p-5">
       <h2 className="text-sm font-semibold text-ink">Knowledge base ({articles.length})</h2>
       <p className="mb-3 text-xs text-muted">
-        The verified answers the Draft button writes from. Add an answer directly, or
-        promote a reviewed reply above. คำตอบที่ยืนยันแล้วซึ่งปุ่ม Draft ใช้เขียนคำตอบ
+        The verified answers the AIDE button writes from. Add an answer directly, or
+        promote a reviewed reply above. คำตอบที่ยืนยันแล้วซึ่งปุ่ม AIDE ใช้เขียนคำตอบ
       </p>
 
       <form onSubmit={add} className="mb-4 space-y-2 rounded-lg border border-line p-3">
@@ -263,7 +263,7 @@ function KbRow({ article }: { article: KbArticle }) {
     });
   }
   function remove() {
-    if (!window.confirm(`Delete "${article.title}"? The Draft button will stop using it.`)) return;
+    if (!window.confirm(`Delete "${article.title}"? The AIDE button will stop using it.`)) return;
     startTransition(async () => {
       await deleteKbArticleAction(article.id);
       router.refresh();
@@ -314,7 +314,7 @@ function KbRow({ article }: { article: KbArticle }) {
       <div className="flex flex-wrap items-center gap-2">
         <label className="flex items-center gap-1.5 text-xs text-ink">
           <input type="checkbox" checked={verified} onChange={(e) => setVerified(e.target.checked)} />
-          Verified (the Draft button uses it)
+          Verified (the AIDE button uses it)
         </label>
         {err && <span className="text-xs text-red">{err}</span>}
         <div className="ml-auto flex items-center gap-2">

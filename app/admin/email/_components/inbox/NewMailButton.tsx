@@ -5,11 +5,15 @@ import { useRouter } from "next/navigation";
 import {
   composeNewMailAction,
   createAttachmentUploadAction,
+  generateComposeDraftAction,
+  saveComposeDraftAction,
+  listComposeDraftsAction,
+  deleteComposeDraftAction,
 } from "@/app/admin/email/inbox/actions";
 import { buildInboxHref } from "@/app/admin/email/_lib/inbox-url";
 import { createClient } from "@/lib/supabase/client";
 import { formatBytes } from "@/app/admin/email/_lib/ui";
-import type { PendingAttachment } from "@/app/admin/email/_lib/types";
+import type { ComposeDraft, PendingAttachment } from "@/app/admin/email/_lib/types";
 
 const MAX_FILE_BYTES = 10 * 1024 * 1024; // keep in sync with the server action
 
@@ -33,6 +37,13 @@ export function NewMailButton({ signature = "" }: { signature?: string }) {
   const [attachments, setAttachments] = useState<PendingAttachment[]>([]);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
+  // Saved Compose drafts (server-side, personal). draftId is set while a saved
+  // draft is open in the form: saving again updates it, sending deletes it.
+  const [drafts, setDrafts] = useState<ComposeDraft[]>([]);
+  const [showDrafts, setShowDrafts] = useState(false);
+  const [draftId, setDraftId] = useState<string | null>(null);
+  const [busy, setBusy] = useState<null | "aide" | "save">(null);
   const [pending, startTransition] = useTransition();
   const [supabase] = useState(() => createClient());
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -49,6 +60,18 @@ export function NewMailButton({ signature = "" }: { signature?: string }) {
     setBody(sigBody);
     setAttachments([]);
     setError(null);
+    setNotice(null);
+    setDraftId(null);
+    setShowDrafts(false);
+  }
+
+  // Opening the modal also refreshes the personal saved-drafts drawer, so the
+  // "Drafts (n)" toggle is accurate the moment the card appears.
+  function openModal() {
+    setOpen(true);
+    startTransition(async () => {
+      setDrafts(await listComposeDraftsAction());
+    });
   }
 
   // Uploads each file straight to storage via a one-time signed URL (the bytes
@@ -128,10 +151,81 @@ export function NewMailButton({ signature = "" }: { signature?: string }) {
     reset();
   }
 
+  // AIDE: scaffolds the message from the verified Knowledge base (greeting +
+  // best-matching article for the subject + the staffer's sign-off). Free, no
+  // AI call; the person always edits before sending. Anything already typed
+  // beyond the signature prefill is guarded by a confirm.
+  function runAide() {
+    if (body.trim() !== "" && body.trim() !== sigBody.trim() &&
+        !window.confirm("Replace what you have written with a fresh AIDE draft?")) {
+      return;
+    }
+    setBusy("aide");
+    setError(null);
+    setNotice(null);
+    startTransition(async () => {
+      const res = await generateComposeDraftAction({ name, subject, body: "" });
+      setBusy(null);
+      if (!res.ok || !res.bodyText) {
+        setError(res.error ?? "Could not write a draft.");
+        return;
+      }
+      setBody(res.bodyText);
+      setNotice(
+        res.citations && res.citations.length > 0
+          ? `AIDE wrote this from: ${res.citations.join(", ")}. Edit it, then press Send.`
+          : "No matching answer in Knowledge for this subject, so AIDE set up the greeting and sign-off. Write the middle, then press Send.",
+      );
+    });
+  }
+
+  // Save draft: persists the whole form server-side (like a normal email
+  // client's Drafts). Attachments are not kept with a draft; re-attach on send.
+  function saveDraft() {
+    setBusy("save");
+    setError(null);
+    setNotice(null);
+    startTransition(async () => {
+      const res = await saveComposeDraftAction({ id: draftId, name, email, cc, bcc, subject, body });
+      setBusy(null);
+      if (!res.ok) {
+        setError(res.error ?? "Could not save the draft.");
+        return;
+      }
+      setDraftId(res.id ?? null);
+      setDrafts(await listComposeDraftsAction());
+      setNotice("Draft saved. You can close this window; it is under Drafts when you come back.");
+    });
+  }
+
+  // Load a saved draft back into the form for editing/sending.
+  function openDraft(d: ComposeDraft) {
+    setEmail(d.toText);
+    setName(d.nameText);
+    setCc(d.ccText);
+    setBcc(d.bccText);
+    setShowCc(!!(d.ccText || d.bccText));
+    setSubject(d.subject);
+    setBody(d.bodyText);
+    setDraftId(d.id);
+    setShowDrafts(false);
+    setError(null);
+    setNotice(null);
+  }
+
+  function discardDraft(d: ComposeDraft) {
+    if (!window.confirm(`Delete the draft "${d.subject || "(no subject)"}"? This cannot be undone.`)) return;
+    startTransition(async () => {
+      await deleteComposeDraftAction(d.id);
+      if (draftId === d.id) setDraftId(null);
+      setDrafts(await listComposeDraftsAction());
+    });
+  }
+
   function send() {
     setError(null);
     startTransition(async () => {
-      const res = await composeNewMailAction({ name, email, cc, bcc, subject, body, attachments });
+      const res = await composeNewMailAction({ name, email, cc, bcc, subject, body, attachments, draftId });
       if (!res.ok) {
         setError(res.error ?? "Could not send the message.");
         return;
@@ -149,7 +243,7 @@ export function NewMailButton({ signature = "" }: { signature?: string }) {
     <>
       <button
         type="button"
-        onClick={() => setOpen(true)}
+        onClick={openModal}
         title="Start a new outbound conversation from scratch."
         className="rounded-md bg-teal px-3 py-1.5 text-xs font-semibold text-white hover:bg-teal/90"
       >
@@ -176,7 +270,19 @@ export function NewMailButton({ signature = "" }: { signature?: string }) {
               </div>
             )}
             <div className="mb-3 flex items-center justify-between">
-              <h2 className="text-sm font-semibold text-navy">Compose</h2>
+              <div className="flex items-center gap-2.5">
+                <h2 className="text-sm font-semibold text-navy">Compose</h2>
+                {drafts.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setShowDrafts((v) => !v)}
+                    title="Your saved unsent emails. Open one to keep writing or send it."
+                    className="rounded-md border border-line px-2 py-0.5 text-[11px] font-medium text-navy hover:bg-canvas"
+                  >
+                    Drafts ({drafts.length}) {showDrafts ? "▴" : "▾"}
+                  </button>
+                )}
+              </div>
               <button
                 type="button"
                 onClick={close}
@@ -187,6 +293,38 @@ export function NewMailButton({ signature = "" }: { signature?: string }) {
                 &times;
               </button>
             </div>
+
+            {showDrafts && drafts.length > 0 && (
+              <div className="mb-3 max-h-40 overflow-y-auto rounded-lg border border-line bg-canvas p-1.5">
+                {drafts.map((d) => (
+                  <div key={d.id} className="flex items-center gap-2 rounded-md px-2 py-1.5 hover:bg-white">
+                    <button
+                      type="button"
+                      onClick={() => openDraft(d)}
+                      className="min-w-0 flex-1 text-left"
+                      title="Open this draft to keep writing or send it."
+                    >
+                      <span className="block truncate text-[11px] font-semibold text-ink">
+                        {d.subject || "(no subject)"}
+                      </span>
+                      <span className="block truncate text-[10px] text-muted">
+                        {d.toText || "no recipient yet"} &middot; saved {new Date(d.updatedAt).toLocaleString()}
+                      </span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => discardDraft(d)}
+                      disabled={pending}
+                      className="leading-none text-muted hover:text-red"
+                      aria-label={`Delete draft ${d.subject || "(no subject)"}`}
+                      title="Delete this draft."
+                    >
+                      &times;
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
 
             <div className="space-y-2.5">
               <div className="flex gap-2.5">
@@ -303,7 +441,16 @@ export function NewMailButton({ signature = "" }: { signature?: string }) {
                   onChange={onPickFiles}
                   className="hidden"
                 />
-                <div ref={addRef} className="relative inline-block">
+                <div ref={addRef} className="relative inline-flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={runAide}
+                    disabled={pending}
+                    title="AIDE writes the email for you from the Knowledge tab's verified answers, keyed off the subject. You edit it before sending; nothing goes out automatically."
+                    className="rounded-md border border-teal/50 px-3 py-1.5 text-xs font-semibold text-teal hover:bg-teal/5 disabled:opacity-50"
+                  >
+                    {busy === "aide" ? "Writing..." : "AIDE"}
+                  </button>
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
@@ -318,8 +465,18 @@ export function NewMailButton({ signature = "" }: { signature?: string }) {
             </div>
 
             {error && <p className="mt-2 text-xs text-red">{error}</p>}
+            {notice && <p className="mt-2 text-xs text-green">{notice}</p>}
 
             <div className="mt-4 flex items-center justify-end gap-2">
+              <button
+                type="button"
+                onClick={saveDraft}
+                disabled={pending || (!email.trim() && !subject.trim() && !body.trim())}
+                title="Save this email as a draft to finish later. It is kept under Drafts (attachments are not saved; re-attach when you send)."
+                className="rounded-md border border-line px-3 py-1.5 text-xs font-medium text-navy hover:bg-canvas disabled:opacity-50"
+              >
+                {busy === "save" ? "Saving..." : "Save draft"}
+              </button>
               <button
                 type="button"
                 onClick={close}

@@ -8,11 +8,11 @@ import { otherThreadRecipients, splitAddresses, isOwnInbox } from "@/app/admin/e
 import { createUploadUrl, readBytes, BUCKET } from "@/app/admin/email/_lib/storage/attachments";
 import { getCurrentUserContext, requireStaff } from "@/app/admin/email/_lib/auth";
 import { retrieveRelevantArticles } from "@/app/admin/email/_lib/ai/kb";
-import { templateDraft, type DraftTurn } from "@/app/admin/email/_lib/ai/template";
+import { templateDraft, templateComposeDraft, type DraftTurn } from "@/app/admin/email/_lib/ai/template";
 import { runQc, type QcResult } from "@/app/admin/email/_lib/ai/qc";
 import type { SupportRepo } from "@/app/admin/email/_lib/data/repo";
 import { isThreadStatus } from "@/app/admin/email/_lib/types";
-import type { PendingAttachment, ThreadDetail, ThreadStatus } from "@/app/admin/email/_lib/types";
+import type { ComposeDraft, PendingAttachment, ThreadDetail, ThreadStatus } from "@/app/admin/email/_lib/types";
 
 // Every inbox server action is staff-only. Next.js Server Actions are public
 // HTTP endpoints: an action id can be POSTed from any route, so authorization
@@ -377,6 +377,90 @@ export async function generateDraftAction(threadId: string): Promise<GenerateDra
   }
 }
 
+// AIDE inside Compose (New Mail): scaffolds a brand-new outbound email from
+// the verified Knowledge base. FREE, no AI call: it greets the recipient (in
+// Thai when the subject/message is typed in Thai, English otherwise), pastes
+// the best-matching verified article for the subject, and closes with the
+// staffer's own signature. A human always edits and approves before sending.
+export async function generateComposeDraftAction(input: {
+  name: string;
+  subject: string;
+  body: string;
+}): Promise<GenerateDraftResult> {
+  const repo = await getStaffRepo();
+  try {
+    const articles = await repo.listKbArticles();
+    const query = `${input.subject} ${input.body}`.trim();
+    const relevant = query ? retrieveRelevantArticles(query, articles) : [];
+    // No inbound mail to read the language from, so key off what the staffer
+    // has typed: any Thai character in the subject or message means Thai.
+    const locale = /[฀-๿]/.test(query) ? "th" : "en";
+
+    const style = await repo.getDraftStyle();
+    const actorId = (await getCurrentUserContext()).teamMember?.id ?? null;
+    const signature = actorId ? (await repo.getStaffPrefs(actorId)).signature : "";
+    const draft = templateComposeDraft(
+      { recipientName: input.name, locale, articles: relevant, signature },
+      style,
+    );
+    const qc = runQc(draft.bodyText);
+    return { ok: true, bodyText: draft.bodyText, citations: relevant.map((a) => a.title), qc };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "Could not write a draft." };
+  }
+}
+
+// Compose (New Mail) drafts: each staff member's own drawer of unsent Compose
+// emails, persisted server-side so a draft survives closing the modal, the
+// tab, or moving to another computer. The author is always the signed-in
+// staffer; the repo pins every read/write to that id.
+export interface ComposeDraftSaveResult {
+  ok: boolean;
+  id?: string;
+  error?: string;
+}
+
+export async function saveComposeDraftAction(input: {
+  id?: string | null;
+  name: string;
+  email: string;
+  cc: string;
+  bcc: string;
+  subject: string;
+  body: string;
+}): Promise<ComposeDraftSaveResult> {
+  const repo = await getStaffRepo();
+  const me = (await getCurrentUserContext()).teamMember;
+  if (!me) return { ok: false, error: "No staff profile." };
+  if (!input.email.trim() && !input.subject.trim() && !input.body.trim()) {
+    return { ok: false, error: "Nothing to save yet." };
+  }
+  return repo.saveComposeDraft(me.id, {
+    id: input.id ?? null,
+    toText: input.email,
+    nameText: input.name,
+    ccText: input.cc,
+    bccText: input.bcc,
+    subject: input.subject,
+    bodyText: input.body,
+  });
+}
+
+export async function listComposeDraftsAction(): Promise<ComposeDraft[]> {
+  const repo = await getStaffRepo();
+  const me = (await getCurrentUserContext()).teamMember;
+  if (!me) return [];
+  return repo.listComposeDrafts(me.id);
+}
+
+export async function deleteComposeDraftAction(id: string): Promise<{ ok: boolean }> {
+  const repo = await getStaffRepo();
+  const me = (await getCurrentUserContext()).teamMember;
+  if (!me) return { ok: false };
+  await repo.deleteComposeDraft(me.id, id);
+  return { ok: true };
+}
+
 export interface SendReplyResult {
   ok: boolean;
   via?: "resend" | "mock";
@@ -505,6 +589,9 @@ export async function composeNewMailAction(input: {
   subject: string;
   body: string;
   attachments?: PendingAttachment[];
+  // When this send resumes a saved Compose draft, its id: the draft is deleted
+  // once the mail has actually gone out (never on a failed send).
+  draftId?: string | null;
 }): Promise<ComposeMailResult> {
   const toList = parseEmails(input.email);
   if (toList.length === 0) return { ok: false, error: "Enter at least one valid email address." };
@@ -575,6 +662,8 @@ export async function composeNewMailAction(input: {
       bcc: bccList,
       from,
     });
+    // The mail is out: a resumed Compose draft has served its purpose.
+    if (input.draftId && actor) await repo.deleteComposeDraft(actor.id, input.draftId);
     revalidatePath("/admin/email/inbox");
     return { ok: true, threadId: created.threadId, via: sent.via };
   } catch (e) {

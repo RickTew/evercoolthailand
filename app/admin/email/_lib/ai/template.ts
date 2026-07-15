@@ -140,6 +140,47 @@ function ackKeyFor(conversation: DraftTurn[]): AckKey {
   return "generic";
 }
 
+// AIDE for Compose (New Mail): a fresh OUTBOUND email, so there is no customer
+// message to acknowledge and no holding line ("we received your message" would
+// be nonsense). It scaffolds greeting + best-matching verified Knowledge
+// article(s) + closing + the staffer's own sign-off; with no matching article
+// it still sets up the greeting and closing so the person only writes the
+// middle. Same free template engine, no model call.
+export function templateComposeDraft(
+  input: {
+    recipientName: string;
+    locale: string;
+    articles: KbArticle[]; // retrieved, most relevant first
+    signature?: string;
+  },
+  style: DraftStyle = defaultDraftStyle(),
+): DraftResult {
+  const pack = packFor(input.locale);
+  const warm = style.warmth === "warm";
+  const greeting = greetingLine(input.recipientName, input.locale, style.greeting);
+
+  const sig = input.signature?.trim();
+  const closing = sig ? [sig] : [pack.signLead, style.signOff];
+  if (style.footer) closing.push("", style.footer);
+
+  const articles = input.articles.slice(0, 2);
+  const lines: string[] = [`${greeting},`];
+
+  if (articles.length === 0) {
+    // No knowledge matched the subject: greeting + closing only, with an empty
+    // middle for the person to fill in.
+    lines.push("", "", "", ...closing);
+    return { bodyText: lines.join("\n"), source: "template" };
+  }
+
+  const [first, second] = articles;
+  if (warm) lines.push("", pack.bridge);
+  lines.push("", first.body.trim());
+  if (second && warm) lines.push("", pack.more(second.title));
+  lines.push("", warm ? pack.closeWarm : pack.closeConcise, "", ...closing);
+  return { bodyText: lines.join("\n"), source: "template" };
+}
+
 // Deterministic, non-AI draft. No model call. `style` shapes it (the team's
 // saved Draft settings); omitted, it uses warm formal defaults.
 export function templateDraft(input: DraftInput, style: DraftStyle = defaultDraftStyle()): DraftResult {

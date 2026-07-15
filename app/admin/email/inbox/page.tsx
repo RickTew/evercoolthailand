@@ -234,13 +234,17 @@ export default async function InboxPage({
       : null;
 
   // A scoped person can't open an out-of-scope thread by URL id either: confirm the
-  // opened thread actually received mail at one of their inboxes (mirrors the list
-  // scoping). Auto-selected threads come from the already-scoped list, so this only
-  // ever blocks an explicit ?thread=<id> for mail they shouldn't see.
+  // opened thread actually received mail at one of their inboxes OR was sent from
+  // one of them (a Compose conversation has no inbound mail yet; without the
+  // outbound match its own sender couldn't open it). Mirrors the list scoping.
+  // Auto-selected threads come from the already-scoped list, so this only ever
+  // blocks an explicit ?thread=<id> for mail they shouldn't see.
   if (myAddresses && detail) {
     const allow = myAddresses.map((a) => a.toLowerCase());
-    const inScope = detail.messages.some(
-      (m) => m.direction === "inbound" && allow.some((a) => (m.toAddress ?? "").toLowerCase().includes(a)),
+    const inScope = detail.messages.some((m) =>
+      m.direction === "inbound"
+        ? allow.some((a) => `${m.toAddress ?? ""},${m.ccAddress ?? ""}`.toLowerCase().includes(a))
+        : allow.some((a) => (m.fromAddress ?? "").toLowerCase().includes(a)),
     );
     if (!inScope) {
       detail = null;

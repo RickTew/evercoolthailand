@@ -2,6 +2,7 @@ import type {
   AnswerReview,
   BlockedSender,
   CannedResponse,
+  ComposeDraft,
   ContactProfile,
   ContactSearchResult,
   DraftStyle,
@@ -147,6 +148,24 @@ export interface SupportRepo {
   // Saves the composer text as an outbound agent draft (state = "draft"): the
   // human's own manually-saved draft (prefills the box on return).
   saveDraft(threadId: string, bodyText: string): Promise<void>;
+  // Compose (New Mail) drafts: a personal drawer of unsent Compose emails
+  // (support_compose_drafts). Saving with an id updates that draft; without,
+  // it creates one. Each staff member only ever sees their own; the draft is
+  // deleted when the mail is finally sent (or discarded by hand).
+  listComposeDrafts(authorId: string): Promise<ComposeDraft[]>;
+  saveComposeDraft(
+    authorId: string,
+    draft: {
+      id?: string | null;
+      toText: string;
+      nameText: string;
+      ccText: string;
+      bccText: string;
+      subject: string;
+      bodyText: string;
+    },
+  ): Promise<{ ok: boolean; id?: string; error?: string }>;
+  deleteComposeDraft(authorId: string, id: string): Promise<void>;
   // Inbox structure: archive/unarchive and set/clear a follow-up date.
   setArchived(threadId: string, archived: boolean): Promise<void>;
   setFollowUp(threadId: string, followUpAtIso: string | null): Promise<void>;

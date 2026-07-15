@@ -3,6 +3,7 @@ import type {
   Attachment,
   BlockedSender,
   CannedResponse,
+  ComposeDraft,
   Contact,
   ContactProfile,
   ContactSearchResult,
@@ -77,6 +78,18 @@ const DEFAULT_FROM = "Evercool <hi@evercoolthailand.com>";
 const OWN_INBOX_RE = /@(?:[a-z0-9-]+\.)*evercoolthailand\.com$/i;
 
 // Row shapes (snake_case) as stored in Postgres.
+type ComposeDraftRow = {
+  id: string;
+  author_id: string;
+  to_text: string;
+  name_text: string;
+  cc_text: string;
+  bcc_text: string;
+  subject: string;
+  body_text: string;
+  updated_at: string;
+};
+
 type ContactRow = {
   id: string;
   email: string;
@@ -302,27 +315,32 @@ export class SupabaseRepo implements SupportRepo {
     return (data ?? []).map((r) => r.id);
   }
 
-  // The set of thread ids that received inbound mail at one of these Evercool
-  // addresses (all addresses share one queue, so visibility is matched on the
-  // inbound messages' recipient). This is the single enforcement point for the
-  // per-staff inbox scope: the inbox list, the overview tiles and any directory
-  // views all resolve their allowed slice through here, so they agree. An
-  // empty/blank address set yields an empty set (the caller treats it as "sees
-  // nothing"); the inbound `thread_id` column is the only thing read.
+  // The set of thread ids that belong to one of these Evercool addresses:
+  // threads that RECEIVED inbound mail at the address (all addresses share one
+  // queue, so visibility is matched on the inbound messages' recipient) PLUS
+  // threads we SENT from the address (a Compose conversation has no inbound
+  // mail yet; without the outbound match it would be invisible everywhere,
+  // including the sender's own Sent folder). This is the single enforcement
+  // point for the per-staff inbox scope: the inbox list, the overview tiles
+  // and any directory views all resolve their allowed slice through here, so
+  // they agree. An empty/blank address set yields an empty set (the caller
+  // treats it as "sees nothing"); only the `thread_id` column is read.
   private async threadIdsForInboxes(addresses: string[]): Promise<Set<string>> {
     const clean = cleanInboxAddresses(addresses);
     if (clean.length === 0) return new Set();
     const db = await this.db();
-    // Match the inbox address whether it was a To OR a Cc recipient, so a mail
-    // sent to one address and cc'd another surfaces under BOTH filters (all
-    // Evercool addresses share the queue).
-    const orFilter = clean.flatMap((a) => [`to_address.ilike.%${a}%`, `cc_address.ilike.%${a}%`]).join(",");
-    const { data } = await db
-      .from("support_messages")
-      .select("thread_id")
-      .eq("direction", "inbound")
-      .or(orFilter);
-    return new Set((data ?? []).map((r) => r.thread_id));
+    // Inbound: match the inbox address whether it was a To OR a Cc recipient,
+    // so a mail sent to one address and cc'd another surfaces under BOTH
+    // filters (all Evercool addresses share the queue). Outbound: match the
+    // From that went on the wire (stored as "Name, EVERCOOL <address>", so a
+    // contains-match on the bare address works).
+    const inboundOr = clean.flatMap((a) => [`to_address.ilike.%${a}%`, `cc_address.ilike.%${a}%`]).join(",");
+    const outboundOr = clean.map((a) => `from_address.ilike.%${a}%`).join(",");
+    const [inb, outb] = await Promise.all([
+      db.from("support_messages").select("thread_id").eq("direction", "inbound").or(inboundOr),
+      db.from("support_messages").select("thread_id").eq("direction", "outbound").or(outboundOr),
+    ]);
+    return new Set([...(inb.data ?? []), ...(outb.data ?? [])].map((r) => r.thread_id));
   }
 
   // The inverse of threadIdsForInboxes, for the manager's "shared" scope:
@@ -1038,6 +1056,77 @@ export class SupabaseRepo implements SupportRepo {
       body_text: bodyText,
       state: "draft",
     });
+  }
+
+  // Compose (New Mail) drafts: the personal drawer of unsent Compose emails.
+  // author_id is always the signed-in staffer's profile id and every query is
+  // pinned to it, so nobody can list, overwrite or delete someone else's draft.
+  async listComposeDrafts(authorId: string): Promise<ComposeDraft[]> {
+    if (!authorId) return [];
+    const db = await this.db();
+    const { data } = await db
+      .from("support_compose_drafts")
+      .select("*")
+      .eq("author_id", authorId)
+      .order("updated_at", { ascending: false });
+    return ((data ?? []) as ComposeDraftRow[]).map((r) => ({
+      id: r.id,
+      toText: r.to_text,
+      nameText: r.name_text,
+      ccText: r.cc_text,
+      bccText: r.bcc_text,
+      subject: r.subject,
+      bodyText: r.body_text,
+      updatedAt: r.updated_at,
+    }));
+  }
+
+  async saveComposeDraft(
+    authorId: string,
+    draft: {
+      id?: string | null;
+      toText: string;
+      nameText: string;
+      ccText: string;
+      bccText: string;
+      subject: string;
+      bodyText: string;
+    },
+  ): Promise<{ ok: boolean; id?: string; error?: string }> {
+    if (!authorId) return { ok: false, error: "No staff profile." };
+    const db = await this.db();
+    const row = {
+      author_id: authorId,
+      to_text: draft.toText.slice(0, 2000),
+      name_text: draft.nameText.slice(0, 500),
+      cc_text: draft.ccText.slice(0, 2000),
+      bcc_text: draft.bccText.slice(0, 2000),
+      subject: draft.subject.slice(0, 1000),
+      body_text: draft.bodyText,
+      updated_at: new Date().toISOString(),
+    };
+    if (draft.id) {
+      const { error } = await db
+        .from("support_compose_drafts")
+        .update(row)
+        .eq("id", draft.id)
+        .eq("author_id", authorId);
+      if (error) return { ok: false, error: error.message };
+      return { ok: true, id: draft.id };
+    }
+    const { data, error } = await db
+      .from("support_compose_drafts")
+      .insert(row)
+      .select("id")
+      .maybeSingle();
+    if (error || !data) return { ok: false, error: error?.message ?? "Could not save the draft." };
+    return { ok: true, id: data.id };
+  }
+
+  async deleteComposeDraft(authorId: string, id: string): Promise<void> {
+    if (!authorId || !id) return;
+    const db = await this.db();
+    await db.from("support_compose_drafts").delete().eq("id", id).eq("author_id", authorId);
   }
 
   async recordSentReply(

@@ -233,6 +233,20 @@ export interface CannedResponse {
   language: string;
 }
 
+// An unsent Compose (New Mail) email, saved with "Save draft" so it survives
+// closing the modal or the browser. Personal: each staff member sees only
+// their own. No thread or contact exists until the mail is actually sent.
+export interface ComposeDraft {
+  id: string;
+  toText: string;
+  nameText: string;
+  ccText: string;
+  bccText: string;
+  subject: string;
+  bodyText: string;
+  updatedAt: string;
+}
+
 // A team-only note on a ticket, never sent to the customer.
 export interface ThreadNote {
   id: string;

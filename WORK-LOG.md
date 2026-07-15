@@ -14,6 +14,48 @@ feeds the staff-facing Build page at /admin/build (Rick's Proof in the Pudding).
 
 ---
 
+## 2026-07-15 (evening) - Compose gets AIDE + Save draft; Sent folder fixed for scoped staff
+
+Session window: evening (Asia/Bangkok). Trigger: staff feedback from testing
+(screenshots via Rick): (1) no AIDE button in the Compose window, (2) no way
+to save an unsent Compose email as a draft "like normal email", (3) sent mail
+still not showing in the Sent folder.
+
+Work:
+- Sent folder fix (the bug): per-staff inbox scoping matched only INBOUND
+  recipients (threadIdsForInboxes), so a conversation started with Compose
+  (outbound only, no inbound mail yet) was invisible everywhere for scoped
+  staff, including their own Sent folder and overview tiles. Now a thread also
+  counts as "in an inbox" when an outbound message was SENT FROM that address.
+  Same fix mirrored in the ?thread= open-by-URL scope guard (page.tsx), which
+  also now matches Cc recipients like the list does.
+- AIDE in Compose: new AIDE button in the Compose window (and the reply box's
+  button RENAMED from "Draft" to "AIDE" everywhere, including the guide,
+  Knowledge tab and Test Lab copy, so "draft" now only ever means an unsent
+  saved email). Compose AIDE writes from the verified Knowledge answers keyed
+  off the Subject, greets in Thai when the subject is Thai, ends with the
+  staffer's signature; new templateComposeDraft (no ack/holding lines, which
+  only make sense when replying). Free, no AI call, human always edits.
+- Save draft for Compose: new support_compose_drafts table (migration 0008,
+  personal per-staffer drawer). "Save draft" button in Compose persists
+  To/Name/Cc/Bcc/Subject/Message server-side; a "Drafts (n)" toggle at the top
+  of the Compose window lists them (open to resume, x to delete); sending a
+  resumed draft deletes it. Attachments are not saved with a draft (hint text
+  says so). Guide's Compose section documents both new buttons.
+- NOTE: migration 0008 is written but NOT applied to prod (standing rule:
+  Rick's explicit go-ahead required). Until applied, Save draft shows an error
+  and everything else works.
+
+Duration: estimate ~1.5h wall clock (investigation ~30m, build ~45m, verify +
+log ~15m; no timer instrumentation yet).
+Tokens: not instrumented; estimate ~90k for this session (marked estimate).
+Verification state: tsc clean, eslint clean (one pre-existing warning), next
+build green. NOT yet verified live: Sent folder showing composed mail for
+Wanrawee's account, AIDE output quality against the real Knowledge base, and
+Save draft end-to-end (blocked on migration 0008).
+
+---
+
 ## 2026-07-15 - Build page + Rick's Proof ported from newnei, full history researched
 
 Session window: afternoon session (Asia/Bangkok). Trigger: Rick's request to

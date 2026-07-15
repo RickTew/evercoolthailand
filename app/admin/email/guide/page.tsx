@@ -98,8 +98,8 @@ const SECTIONS: GuideSection[] = [
         th: "เปิดบทสนทนาแล้วพิมพ์ในช่องตอบกลับ ลายเซ็นของคุณถูกใส่ไว้ท้ายข้อความแล้ว ให้พิมพ์ข้อความเหนือลายเซ็น",
       },
       {
-        en: "Or press Draft and the reply is written for you from the Knowledge tab's verified answers: a greeting in the customer's language, the best-matching answer, and your signature. Always read and edit it before pressing Send; nothing is ever sent automatically.",
-        th: "หรือกดปุ่ม Draft ระบบจะเขียนคำตอบให้จากคำตอบที่ยืนยันแล้วในแท็บ Knowledge: คำทักทายตามภาษาของลูกค้า คำตอบที่ตรงที่สุด และลายเซ็นของคุณ อ่านและแก้ไขก่อนกด Send เสมอ ระบบไม่ส่งอะไรอัตโนมัติ",
+        en: "Or press AIDE and the reply is written for you from the Knowledge tab's verified answers: a greeting in the customer's language, the best-matching answer, and your signature. Always read and edit it before pressing Send; nothing is ever sent automatically.",
+        th: "หรือกดปุ่ม AIDE ระบบจะเขียนคำตอบให้จากคำตอบที่ยืนยันแล้วในแท็บ Knowledge: คำทักทายตามภาษาของลูกค้า คำตอบที่ตรงที่สุด และลายเซ็นของคุณ อ่านและแก้ไขก่อนกด Send เสมอ ระบบไม่ส่งอะไรอัตโนมัติ",
       },
       {
         en: "Press Attach, or drag a file or photo onto the reply box, to send it with your reply.",
@@ -124,20 +124,20 @@ const SECTIONS: GuideSection[] = [
     ],
   },
   {
-    title: "The Knowledge tab (what the Draft button knows)",
-    titleTh: "แท็บ Knowledge (สิ่งที่ปุ่ม Draft รู้)",
+    title: "The Knowledge tab (what the AIDE button knows)",
+    titleTh: "แท็บ Knowledge (สิ่งที่ปุ่ม AIDE รู้)",
     steps: [
       {
-        en: "The Knowledge tab holds the team's verified answers: the questions customers ask most, each with the answer we want everyone to give. The Draft button writes only from these answers, so the more you add, the more useful it becomes.",
-        th: "แท็บ Knowledge เก็บคำตอบที่ทีมยืนยันแล้ว: คำถามที่ลูกค้าถามบ่อย พร้อมคำตอบที่เราอยากให้ทุกคนตอบเหมือนกัน ปุ่ม Draft เขียนจากคำตอบเหล่านี้เท่านั้น ยิ่งเพิ่มมาก ปุ่มยิ่งฉลาดขึ้น",
+        en: "The Knowledge tab holds the team's verified answers: the questions customers ask most, each with the answer we want everyone to give. The AIDE button writes only from these answers, so the more you add, the more useful it becomes.",
+        th: "แท็บ Knowledge เก็บคำตอบที่ทีมยืนยันแล้ว: คำถามที่ลูกค้าถามบ่อย พร้อมคำตอบที่เราอยากให้ทุกคนตอบเหมือนกัน ปุ่ม AIDE เขียนจากคำตอบเหล่านี้เท่านั้น ยิ่งเพิ่มมาก ปุ่มยิ่งฉลาดขึ้น",
       },
       {
-        en: "Every reply the team sends also appears there in an 'Answers to review' list. Press Add to Knowledge on the good ones and the Draft button learns them; press Reject on one-off answers.",
-        th: "ทุกคำตอบที่ทีมส่งจะไปรออยู่ในรายการ 'Answers to review' ด้วย กด Add to Knowledge กับคำตอบที่ดี ปุ่ม Draft จะเรียนรู้ไว้ หรือกด Reject กับคำตอบเฉพาะกรณี",
+        en: "Every reply the team sends also appears there in an 'Answers to review' list. Press Add to Knowledge on the good ones and the AIDE button learns them; press Reject on one-off answers.",
+        th: "ทุกคำตอบที่ทีมส่งจะไปรออยู่ในรายการ 'Answers to review' ด้วย กด Add to Knowledge กับคำตอบที่ดี ปุ่ม AIDE จะเรียนรู้ไว้ หรือกด Reject กับคำตอบเฉพาะกรณี",
       },
       {
-        en: "If Draft says no matching answer was found, it writes a polite holding reply instead. That is the signal to add that question's answer to Knowledge so next time it is ready.",
-        th: "ถ้า Draft บอกว่าไม่พบคำตอบที่ตรง ระบบจะเขียนข้อความตอบรับแบบสุภาพให้แทน นั่นคือสัญญาณว่าควรเพิ่มคำตอบของคำถามนั้นในแท็บ Knowledge เพื่อให้พร้อมในครั้งหน้า",
+        en: "If AIDE says no matching answer was found, it writes a polite holding reply instead. That is the signal to add that question's answer to Knowledge so next time it is ready.",
+        th: "ถ้า AIDE บอกว่าไม่พบคำตอบที่ตรง ระบบจะเขียนข้อความตอบรับแบบสุภาพให้แทน นั่นคือสัญญาณว่าควรเพิ่มคำตอบของคำถามนั้นในแท็บ Knowledge เพื่อให้พร้อมในครั้งหน้า",
       },
     ],
   },
@@ -158,8 +158,16 @@ const SECTIONS: GuideSection[] = [
         th: "ใส่หัวข้อ (Subject) พิมพ์ข้อความ (ลายเซ็นใส่ให้แล้ว) แนบไฟล์หากต้องการ แล้วกด Send",
       },
       {
-        en: "Sending opens a new conversation. When the customer replies, their answer threads back into this inbox.",
-        th: "เมื่อส่งแล้วระบบจะเปิดบทสนทนาใหม่ เมื่อลูกค้าตอบกลับ อีเมลจะเข้ามาต่อในบทสนทนาเดิมในกล่องนี้",
+        en: "Not ready to send? Press Save draft and the email is kept under the Drafts button at the top of the Compose window. Open it later from any computer to finish and send. (Attachments are not saved with a draft; re-attach them when you send.)",
+        th: "ยังไม่พร้อมส่ง? กด Save draft ระบบจะเก็บอีเมลไว้ใต้ปุ่ม Drafts ด้านบนของหน้าต่าง Compose เปิดกลับมาเขียนต่อและส่งได้จากเครื่องไหนก็ได้ (ไฟล์แนบจะไม่ถูกเก็บกับฉบับร่าง ให้แนบใหม่ตอนส่ง)",
+      },
+      {
+        en: "Press AIDE and the message is written for you from the Knowledge tab's verified answers, keyed off your Subject: a greeting, the best-matching answer, and your signature. Always read and edit it before pressing Send.",
+        th: "กดปุ่ม AIDE ระบบจะเขียนข้อความให้จากคำตอบที่ยืนยันแล้วในแท็บ Knowledge โดยอิงจากหัวข้อ (Subject): คำทักทาย คำตอบที่ตรงที่สุด และลายเซ็นของคุณ อ่านและแก้ไขก่อนกด Send เสมอ",
+      },
+      {
+        en: "Sending opens a new conversation. When the customer replies, their answer threads back into this inbox, and the conversation appears in the Sent folder.",
+        th: "เมื่อส่งแล้วระบบจะเปิดบทสนทนาใหม่ เมื่อลูกค้าตอบกลับ อีเมลจะเข้ามาต่อในบทสนทนาเดิมในกล่องนี้ และบทสนทนาจะแสดงในโฟลเดอร์ Sent",
       },
     ],
   },
