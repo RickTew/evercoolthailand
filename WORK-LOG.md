@@ -14,18 +14,20 @@ feeds the staff-facing Build page at /admin/build (Rick's Proof in the Pudding).
 
 ---
 
-## 2026-07-15 (evening, part 6) - Cross-app inbound mail leak found and fixed (fix lives in the tewbedo repo)
+## 2026-07-15 (evening wrap) - Session totals + spam defense proven on a live attack
 
-Rick spotted Evercool staff emails appearing as tickets in another of his
-apps. Investigated: the email provider fires its inbound event account-wide
-with no per-domain scoping, so every inbound app on the shared account gets
-every domain's mail and must filter its own. Verified: THIS app filters
-correctly and its database holds zero foreign-domain mail (nobody's mail
-leaked INTO the CRM, ever); one sibling app had no filter and was filing
-Evercool's mail as its own tickets. Fixed there with Rick's explicit
-approval (sibling-domain drop guard; that repo's commit f98dbbf), deployed.
-Still open in the sibling app: purging its already-ingested Evercool
-tickets (Rick to decide). No Evercool code changed for this.
+Spam defense verified with real samples: two phishing emails forging our own
+domain in the From line arrived during the day (EC-10101, EC-10109); the
+filter auto-flagged both as suspected on the failed DMARC check and filed
+them in the Spam folder, so the team never saw them in the working queue.
+Queued hardening ideas (not built): auto-escalate own-domain forgery with a
+failed DMARC to confirmed, and review the domain's DMARC policy.
+
+Evening totals: estimate ~3h wall clock across parts 1-5 plus verification
+work (no timer instrumentation yet). Tokens: not instrumented; rough
+estimate ~250k for the whole evening (marked estimate). All evening work is
+committed, pushed, deployed and live, including both database migrations
+(0008, 0009), applied with explicit approval and verified.
 
 ---
 
@@ -57,10 +59,10 @@ tonight is now fully live.
 
 ---
 
-## 2026-07-15 (evening, part 4) - Wanrawee can hire: Users console opened to managers
+## 2026-07-15 (evening, part 4) - The manager can hire: Users console opened to managers
 
-Rick: Wanrawee is hiring and needs to create users, their email accounts and
-CRM access herself. Built: the Users console (nav tab, layout gate, API
+Rick: the manager is hiring and needs to create users, their email accounts
+and CRM access herself. Built: the Users console (nav tab, layout gate, API
 route, CRM-access server actions) now allows role manager, with hard server
 limits: a manager can never create an admin, grant the admin role, or
 edit/deactivate/touch the access of an admin account (UI hides those
@@ -141,8 +143,8 @@ log ~15m; no timer instrumentation yet).
 Tokens: not instrumented; estimate ~90k for this session (marked estimate).
 Verification state: tsc clean, eslint clean (one pre-existing warning), next
 build green. NOT yet verified live: Sent folder showing composed mail for
-Wanrawee's account, AIDE output quality against the real Knowledge base, and
-Save draft end-to-end (blocked on migration 0008).
+the manager's account, AIDE output quality against the real Knowledge base,
+and Save draft end-to-end (blocked on migration 0008).
 
 ---
 

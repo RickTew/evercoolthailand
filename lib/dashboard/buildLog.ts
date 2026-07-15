@@ -31,6 +31,28 @@ export type BuildLogEntry = {
 export const BUILD_LOG: BuildLogEntry[] = [
   {
     "date": "2026-07-15",
+    "title": "Evening sprint on staff feedback: AIDE in Compose, Save draft, the Sent folder fixed, hiring from the portal, and per-person tab control",
+    "type": "feature",
+    "summary": "A full evening driven by the team's live testing. Compose gained the AIDE writing assistant and a real Save draft drawer, and the bug hiding sent mail from the Sent folder was found in the visibility rules and fixed. The admin queue can now hide colleagues' personal mail. Hiring moved fully into the portal: the manager role can create accounts (the new person's company address becomes their login and their CRM mailbox automatically), assign roles and set access, guided by a new bilingual New staff setup checklist, while admin accounts stay untouchable. Every person can now also be limited to just the portal tabs they need. Two security holes were closed along the way, and the spam defense proved itself the same day by auto-flagging two real phishing emails that forged our own domain.",
+    "hours": 3,
+    "changes": [
+      "AIDE button added to the Compose window: writes the email from verified Knowledge answers keyed off the Subject, in Thai when the subject is Thai, ending with the sender's own signature; free, no AI call, a human always edits",
+      "The reply box's writing button renamed from Draft to AIDE everywhere (composer, guide, Knowledge tab, Test Lab) so draft only ever means an unsent saved email",
+      "Save draft in Compose: a personal drafts drawer that survives closing the window or switching computers; open to resume, sending cleans the draft up (new table, migration applied and verified)",
+      "Sent folder fixed: a conversation started with Compose had no incoming mail yet, so the visibility rules hid it from its own sender; mail sent FROM an address now counts as belonging to that inbox, in the list, the tiles and direct links",
+      "Admins can opt into the shared mail scope, so the admin queue no longer drowns in colleagues' personal mail; reversible in two clicks in Users",
+      "Users console stops offering anyone another person's personal mailbox (interface and server both); admin rows became editable for the scope choice",
+      "Managers can hire: create accounts, set roles and CRM access from the Users tab, with hard server limits so a manager can never create, change or deactivate an admin",
+      "New-hire shortcut: creating a user with their company address auto-sets their mailbox, scope and starting sections; no separate email setup exists at all",
+      "New bilingual New staff setup checklist page: eight steps from choosing the address to offboarding, linked from the dashboard map and the Users header",
+      "Per-person portal tabs: checkboxes decide which portal areas each person can open (for example no CRM, or no Build page); enforced at the door on every request, mirrored in the nav and the dashboard map, and only ever narrowing below the role",
+      "Security: closed a hole that let any signed-in staffer edit their own profile row, including promoting their own role; profile writes now go through the server only",
+      "Security: role values are validated on the server when creating or editing users (previously any text could become a role)",
+      "Spam defense verified against a live attack: two phishing emails forging our own domain were auto-flagged on their failed authenticity check and filed into the Spam folder; the team never saw them in the working queue"
+    ]
+  },
+  {
+    "date": "2026-07-15",
     "title": "EQ Tracker's separate deployment paused: the portal is now the only door",
     "type": "infra",
     "summary": "The old standalone EQ Tracker app was retired from service. Before pausing, a full check confirmed nothing lives only there: the code is identical in the private repo and the local folder, all data sits in the shared database the portal already reads, the only settings are the same shared credentials the portal uses, and no schedules or domains hang off it. The deployment is paused, not deleted: it costs nothing, staff can no longer enter data in the old app by accident, and it can be switched back on in one step if anything turns out to be missing. The code stays kept for a possible future EQ tracker for another company.",
