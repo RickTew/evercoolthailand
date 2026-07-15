@@ -41,13 +41,13 @@ export function BuildUpdate({
       <p className="mt-3 text-sm leading-relaxed text-ec-text-muted">
         This did not start with an app. It started with building and hosting the Evercool
         websites the old way, then managing the hosting and the mailboxes for years. Then
-        the whole stack was rebuilt from zero: a new backend (Supabase + Vercel + Resend),
-        a new public website with the quote builder in Thai and English, the EQ Tracker
-        app, then the Service &amp; Maintenance app, and then both of those built AGAIN so
-        they live inside this one portal with one login. Email was cut over from the old
-        A2 Hosting mailboxes to Resend with spam defense, and a full CRM now sits on top:
-        shared inbox, one contact record, labels, saved replies, AI drafts. Every piece of
-        that is in the log below, with every individual change inside it.
+        everything was rebuilt from zero: a new backend, a new public website with the
+        quote builder in Thai and English, the EQ Tracker app, then the Service &amp;
+        Maintenance app, and then both of those built AGAIN so they live inside this one
+        portal with one login. Email was cut over from the old mailboxes to the new
+        system with spam defense, and a full CRM now sits on top: shared inbox, one
+        contact record, labels, saved replies, drafts. Every piece of that is in the log
+        below, with every individual change inside it.
       </p>
     </div>
   );

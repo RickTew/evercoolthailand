@@ -15,7 +15,7 @@ export interface LiveSection {
 // website is listed once as its own live piece.
 export const LIVE_SECTIONS: LiveSection[] = [
   { name: "Public website", what: "The Evercool site: services, products, gallery, articles, quote builder, TH/EN, PWA.", href: "/" },
-  { name: "CRM", what: "Shared inbox on one contact record: labels, saved replies, AI drafts, Knowledge tab.", href: "/admin/email/inbox" },
+  { name: "CRM", what: "Shared inbox on one contact record: labels, saved replies, drafts, Knowledge tab.", href: "/admin/email/inbox" },
   { name: "Quotes", what: "Quote requests from the website, tracked to accepted.", href: "/admin/quotes" },
   { name: "Bookings", what: "Job bookings and scheduling.", href: "/admin/bookings" },
   { name: "Customers", what: "The customer record behind quotes, bookings and the CRM.", href: "/admin/customers" },
@@ -42,12 +42,11 @@ export const BUILDING: BuildItem[] = [
 ];
 
 // On the radar, that we know of. Not a committed plan; meant to stay loose.
+// (Old-host cancellation, EQ Tracker retirement and consolidation phase 2 are
+// tracked internally, not shown here: Rick, 15 Jul.)
 export const PLANNED: BuildItem[] = [
-  { name: "A2 Hosting cancellation", gloss: "Export the old mailboxes (the largest is 4.2 GB), keep a short webmail archive window, then cancel entirely; all-in on Resend." },
-  { name: "EQ Tracker app retirement", gloss: "After a week of clean parallel running, retire the separate EQ Tracker deployment; its sections already live here." },
-  { name: "Consolidation phase 2", gloss: "Finish the three-apps merge: unify users_profile into profiles, link customers to contacts, one migrations home." },
-  { name: "Aide draft templates port", gloss: "Deterministic draft templates plus style settings from newnei Care, no API cost." },
-  { name: "AI drafts and after-hours agent", gloss: "The paid AI layer: needs an API key, usage logging, and a budget decision." },
+  { name: "Aide draft templates port", gloss: "Deterministic draft templates plus style settings, ported from the sister CRM." },
+  { name: "Smarter drafts and after-hours replies", gloss: "The assisted-reply layer: needs setup, usage logging, and a budget decision." },
   { name: "Booking and quote forms into the CRM", gloss: "Both public forms still send notification email only; fold them into the CRM ticket channel like the contact form." },
   { name: "Full Thai translation of the CRM", gloss: "The CRM UI is English with Thai only in the guide; Projects, Service and Reports are already bilingual." },
   { name: "RLS hardening on EQ Tracker tables", gloss: "Bring the ported tables up to the portal's stricter access model." },
@@ -59,10 +58,10 @@ export const PLANNED: BuildItem[] = [
 
 /** Cross-cutting cards that apply to every build, not their own section. */
 export const STANDING_CARDS: { name: string; gloss: string }[] = [
-  { name: "One shared backend", gloss: "Three apps (website + portal, EQ Tracker, Service & Maintenance) consolidated onto ONE Supabase, one login, one deploy." },
-  { name: "Email done right", gloss: "The cutover from A2 Hosting mailboxes to Resend: sending, receiving, spam defense, signatures, the EVERCOOL logo on outgoing mail." },
+  { name: "One shared backend", gloss: "Three apps (website + portal, EQ Tracker, Service & Maintenance) consolidated onto ONE shared backend, one login, one deploy." },
+  { name: "Email done right", gloss: "The cutover from the old hosting mailboxes to the new system: sending, receiving, spam defense, signatures, the EVERCOOL logo on outgoing mail." },
   { name: "Bilingual by default", gloss: "Thai and English across the public site and the ported staff sections; staff are Thai, TH is the default." },
-  { name: "Data, privacy & security", gloss: "Roles, RLS on the shared Supabase, spam defense, backups; hardening continues every build." },
+  { name: "Data, privacy & security", gloss: "Roles, RLS on the shared database, spam defense, backups; hardening continues every build." },
 ];
 
 // --- The layered picture ------------------------------------------------------
@@ -74,7 +73,7 @@ export const STANDING_CARDS: { name: string; gloss: string }[] = [
 /** Bump these when you add a migration or a screen; everything else updates
  * itself. Screens = app route page.tsx files a person can open. */
 export const FOUNDATION = {
-  migrations: 9, // in-repo: 7 (portal) + 2 (EQ Tracker); the earlier schema was built directly in the shared Supabase
+  migrations: 9, // in-repo: 7 (portal) + 2 (EQ Tracker); the earlier schema was built directly in the shared database
   screens: 44, // 37 portal + public site, 7 EQ Tracker
   apps: 4, // public website, staff portal + CRM, EQ Tracker, Service & Maintenance
   zones: 2, // public site + staff portal
@@ -109,7 +108,7 @@ export function buildLayers(): BuildLayer[] {
       depth: 0,
       count: FOUNDATION.screens,
       unit: "screens",
-      detail: `One shared Supabase backend, ${FOUNDATION.zones} security zones, one login for staff.`,
+      detail: `One shared backend, ${FOUNDATION.zones} security zones, one login for staff.`,
     },
     {
       key: "tools",
@@ -146,25 +145,8 @@ export function buildCounts(): { live: number; building: number; planned: number
   };
 }
 
-// Readiness: how much of a section's REAL work is finished. Live tools run
-// every day but still gather polish; building is early; planned has not
-// started. Estimates, deliberately honest.
-export const READINESS = {
-  liveSection: 0.8,
-  building: 0.25,
-  planned: 0,
-} as const;
-
-/** The honest "until truly done" figure: live things counted at real readiness,
- * not as finished just because they exist. */
-export function buildCompletion(): { pct: number } {
-  const done =
-    LIVE_SECTIONS.length * READINESS.liveSection +
-    BUILDING.length * READINESS.building +
-    PLANNED.length * READINESS.planned;
-  const total = LIVE_SECTIONS.length + BUILDING.length + PLANNED.length;
-  return { pct: total ? done / total : 0 };
-}
+// (The "until truly done" completion meter was removed 15 Jul on Rick's call:
+// we do not know the true total, so no percentage is shown.)
 
 /** The four status counts for the chip row. */
 export function buildStatus(): { live: number; building: number; todo: number; ideas: number } {

@@ -8,11 +8,10 @@ import {
   PLANNED,
   STANDING_CARDS,
   buildCounts,
-  buildCompletion,
   buildLayers,
   buildStatus,
 } from "@/lib/dashboard/buildPlan";
-import { BUILD_LOG, BUILD_TODO } from "@/lib/dashboard/buildLog";
+import { BUILD_LOG } from "@/lib/dashboard/buildLog";
 import { BuildLogList } from "./BuildLogList";
 import { BuildUpdate } from "./BuildUpdate";
 import { Collapsible } from "./Collapsible";
@@ -45,7 +44,6 @@ export default async function BuildPage() {
   if (!user) redirect("/login");
 
   const counts = buildCounts();
-  const completion = buildCompletion();
   const layers = buildLayers();
   const status = buildStatus();
   const totalHours = BUILD_LOG.reduce((s, e) => s + e.hours, 0);
@@ -140,23 +138,6 @@ export default async function BuildPage() {
             </div>
           ))}
         </div>
-
-        {/* One honest meter: scale built is not the same as fully finished. */}
-        <div className="mt-5">
-          <div className="flex items-baseline justify-between gap-3 text-xs">
-            <span className="font-semibold uppercase tracking-wide text-white/70">
-              Until truly done
-            </span>
-            <span className="font-semibold text-white/80">{Math.round(completion.pct * 100)}%</span>
-          </div>
-          <div className="mt-1.5 h-3 overflow-hidden rounded-full bg-white/15">
-            <div className="h-full rounded-full bg-ec-teal" style={{ width: `${completion.pct * 100}%` }} />
-          </div>
-          <p className="mt-1 text-xs text-white/60">
-            Scale built is not the same as finished. This counts the polish, content and
-            hardening still missing inside each live section. Lower on purpose, and honest.
-          </p>
-        </div>
       </div>
 
       {/* Where the build is: Live / Building / Planned, colour-blocked. */}
@@ -234,13 +215,13 @@ export default async function BuildPage() {
       {/* Rick's Proof in the Pudding: collapsed by default so the long log does
           not take up page space; opens with a click. */}
       <Collapsible title="Rick's Proof in the Pudding 🍮" right={`${BUILD_LOG.length} shipped`}>
-        <p className="mb-3 max-w-2xl text-sm text-ec-text-muted">
+        <p className="mb-3 text-sm text-ec-text-muted">
           The receipts. Every late night, every fix that finally made things work, in
-          one place. Built with AI, driven by a human. The team does not see the hours
-          behind a thing that &ldquo;just works&rdquo;, so here they are: from the
-          original websites and years of hosting management, through the new stack, the
-          new website, EQ Tracker, Service &amp; Maintenance, the consolidation into one
-          portal, the email cutover, and the CRM.
+          one place. The team does not see the hours behind a thing that &ldquo;just
+          works&rdquo;, so here they are: from the original websites and years of
+          hosting management, through the new foundations, the new website, EQ Tracker,
+          Service &amp; Maintenance, the consolidation into one portal, the email
+          cutover, and the CRM.
         </p>
         <div className="mb-4 grid grid-cols-3 gap-3">
           <div className="rounded-2xl border border-ec-border bg-ec-card p-4">
@@ -261,9 +242,9 @@ export default async function BuildPage() {
 
         <p className="mb-4 text-xs text-ec-text-muted">
           Estimated, and honest: per-session logging started 2026-07-15 (WORK-LOG.md).
-          Everything earlier is reconstructed from the git histories of this portal and
-          the EQ Tracker app, plus dated backfill for the pre-app era (the original
-          websites and the A2 Hosting years). Hours are estimates; token counts appear
+          Everything earlier is reconstructed from the change histories of this portal
+          and the EQ Tracker app, plus dated backfill for the pre-app era (the original
+          websites and the old hosting years). Hours are estimates; token counts appear
           only where they were actually logged, never invented.
         </p>
 
@@ -273,45 +254,6 @@ export default async function BuildPage() {
           planned={counts.planned}
           asOf={BUILD_LOG[0]?.date ?? ""}
         />
-
-        {/* Still to be done, ABOVE the list (the list gets long). */}
-        <div className="mb-6">
-          <div className="mb-2 text-sm font-bold text-ec-text">Still to be done</div>
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-            <div>
-              <div className="mb-2 text-xs font-bold uppercase tracking-wide text-ec-text-muted">
-                Accounting for the work
-              </div>
-              <div className="space-y-2">
-                {BUILD_TODO.filter((t) => t.group === "accounting").map((t) => (
-                  <div key={t.title} className="flex gap-3 rounded-2xl border border-dashed border-amber-500/40 bg-amber-500/[0.04] p-3">
-                    <span className="mt-0.5 flex h-4 w-4 shrink-0 rounded border-2 border-amber-500/50" />
-                    <div>
-                      <div className="text-sm font-bold text-ec-text">{t.title}</div>
-                      <div className="text-xs leading-relaxed text-ec-text-muted">{t.detail}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div>
-              <div className="mb-2 text-xs font-bold uppercase tracking-wide text-ec-text-muted">
-                The standing queue
-              </div>
-              <div className="space-y-2">
-                {BUILD_TODO.filter((t) => t.group === "queue").map((t) => (
-                  <div key={t.title} className="flex gap-3 rounded-2xl border border-dashed border-ec-teal/30 bg-ec-teal/[0.04] p-3">
-                    <span className="mt-0.5 flex h-4 w-4 shrink-0 rounded border-2 border-ec-teal/40" />
-                    <div>
-                      <div className="text-sm font-bold text-ec-text">{t.title}</div>
-                      <div className="text-xs leading-relaxed text-ec-text-muted">{t.detail}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
 
         <p className="mb-3 text-xs text-ec-text-muted">
           What got built and fixed, newest first. Open any item to see every individual
