@@ -44,6 +44,15 @@ Verification state: tsc + eslint clean, next build green, /admin/build present
 in the route list, anonymous request 307s to /login, public home 200s. NOT yet
 verified: the page rendered in a signed-in staff session on the deployed site.
 
+Feedback round 1 (Rick, same day, from live screenshots; commit a976ccf):
+removed the "Until truly done" meter (we do not know the true total), removed
+the "Still to be done" board from Rick's Proof, removed the old-host
+cancellation / EQ Tracker retirement / consolidation phase 2 tiles from
+Planned, Rick's Proof intro made full width with the AI mention dropped, and
+ALL stack/vendor names scrubbed from everything the page renders (hosting,
+mail, database, framework providers described generically). STANDING RULE for
+future log entries: no vendor or stack names in build-log text.
+
 ## 2026-07-15 - Staff launch-day feedback + Draft/Knowledge port
 
 Session window: approx 11:05 - 12:30 (Asia/Bangkok). Trigger: Wanrawee's LINE
