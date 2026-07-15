@@ -33,6 +33,9 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/admin/team",       label: "Team",       roles: ["admin", "manager", "owner"] },
   { href: "/admin/reports",    label: "Reports",    roles: ["admin", "manager", "owner"] },
   { href: "/admin/users",      label: "Users",      roles: ["admin"] },
+  // The Build page (Rick's Proof): the record of what got built and what it
+  // took. Staff-facing on purpose; never linked from the public site.
+  { href: "/admin/build",      label: "Build",      roles: ["admin", "sales", "manager", "owner", "technician", "staff"] },
 ];
 
 // Website content management, grouped under one dropdown (admin-only, as the

@@ -9,7 +9,40 @@ fields are marked as estimates.
 Format per entry: date, session summary, table of changes (commit, time,
 files/lines, what), duration, tokens, notes.
 
+Each entry is also mirrored into lib/dashboard/buildLog.ts (newest first), which
+feeds the staff-facing Build page at /admin/build (Rick's Proof in the Pudding).
+
 ---
+
+## 2026-07-15 - Build page + Rick's Proof ported from newnei, full history researched
+
+Session window: afternoon session (Asia/Bangkok). Trigger: Rick's request to
+port the newnei Build page and Rick's Proof to the Evercool portal, populated
+with ALL the old work (pre-app websites, hosting, both apps, consolidation).
+
+Work:
+- Researched the complete work history with three parallel agents: the 122
+  commits of this repo, the 36 commits of eq-tracker, and the non-git record
+  (WORK-LOG.md, plan docs, evercoolthailandbuild.rtf, reference/, memory,
+  Resend/A2 Hosting facts). Merged, deduplicated and dated: 41 build entries,
+  331 individual changes, ~185 estimated hours, from the 2023 WordPress site
+  on A2 Hosting to today.
+- lib/dashboard/buildLog.ts: the log data + BUILD_TODO (types ported from
+  newnei; tokensK optional and only shown where actually logged, never
+  invented).
+- lib/dashboard/buildPlan.ts: Live board (12 sections mirroring the admin
+  nav), Building (4), Planned (12), standing cards, layered stack, honest
+  completion meter.
+- app/admin/build/: page.tsx + Collapsible + BuildLogList + BuildUpdate,
+  restyled to the ec-* palette. Nav gains a "Build" tab for all staff roles.
+  Not reachable or linked from the public site (auth wall bounces to /login,
+  verified).
+
+Duration: estimate ~1h wall clock (no timer instrumentation yet).
+Tokens: not fully recorded; the three research agents alone logged ~175k.
+Verification state: tsc + eslint clean, next build green, /admin/build present
+in the route list, anonymous request 307s to /login, public home 200s. NOT yet
+verified: the page rendered in a signed-in staff session on the deployed site.
 
 ## 2026-07-15 - Staff launch-day feedback + Draft/Knowledge port
 
