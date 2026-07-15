@@ -14,6 +14,28 @@ feeds the staff-facing Build page at /admin/build (Rick's Proof in the Pudding).
 
 ---
 
+## 2026-07-15 (evening, part 5) - Per-user portal tabs + profiles security fix
+
+Rick: some workers must not use the CRM at all, others should not see the
+Build page, so the whole nav (not just CRM sections) needs per-person
+checkboxes. Built: new shared registry lib/portalTabs.ts (10 restrictable
+tabs; Dashboard always available); "Portal tabs they can open" checkbox
+group in the Users console's CRM access panel (restriction below the role,
+can never grant beyond it; admins exempt); enforced in the proxy on every
+/admin request (direct URLs bounce to the dashboard), mirrored in the nav
+and the dashboard map. Stored in profiles.portal_tabs (migration 0009,
+NOT applied yet; until then everything behaves as unrestricted and saving
+the tab list reports the pending migration). SECURITY FIX in the same
+migration: the profiles_update_own RLS policy allowed any signed-in staffer
+to update their own profiles row with no column limits (including role =
+self-promotion to admin); all legitimate profile writes go through the
+service role, so session write access to profiles is revoked entirely.
+Also answered: roles stay the fixed baselines; the checkboxes personalize
+below them. One eslint cascading-render error left at repo parity
+(pre-existing pattern, also tolerated in ProjectsClient).
+
+---
+
 ## 2026-07-15 (evening, part 4) - Wanrawee can hire: Users console opened to managers
 
 Rick: Wanrawee is hiring and needs to create users, their email accounts and

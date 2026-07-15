@@ -26,6 +26,19 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     redirect("/login");
   }
 
+  // Per-user portal-tab restriction for the nav. Queried separately and
+  // best-effort so the portal keeps working before migration 0009 adds the
+  // column: an error just means "no restriction".
+  let portalTabs: string[] | null = null;
+  if (profile.role !== "admin") {
+    const { data: tabsRow, error: tabsError } = await supabase
+      .from("profiles")
+      .select("portal_tabs")
+      .eq("id", user.id)
+      .maybeSingle();
+    if (!tabsError) portalTabs = (tabsRow?.portal_tabs as string[] | null) ?? null;
+  }
+
   return (
     // The TH/EN provider wraps the whole admin area so the nav toggle and the
     // ported eq-tracker sections (Projects/Service/Reports) share ONE locale
@@ -36,6 +49,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         userEmail={user.email ?? ""}
         userName={profile.name ?? ""}
         role={profile.role}
+        portalTabs={portalTabs}
       />
       <div className="max-w-[1100px] mx-auto px-4 py-6">
         {children}

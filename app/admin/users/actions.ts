@@ -1,10 +1,11 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseServerClient, createAdminClient } from "@/lib/supabase/server";
 import { getRepo } from "@/app/admin/email/_lib/data/repo";
 import { EVERCOOL_INBOXES } from "@/app/admin/email/_lib/inboxes";
 import { CARE_SECTION_KEYS, type CareSectionKey } from "@/app/admin/email/_lib/sections";
+import { tabsForRole } from "@/lib/portalTabs";
 import type { StaffPrefs } from "@/app/admin/email/_lib/types";
 
 // Server actions for the Users console's "CRM access" panel (ported from
@@ -45,6 +46,10 @@ export interface CareAccess {
   personalAddress: string | null;
   requestedAddress: string | null;
   careSections: string[];
+  // The target's role + their portal-tab restriction (profiles.portal_tabs):
+  // empty = every tab their role allows; non-empty = only the ticked tabs.
+  role: string;
+  portalTabs: string[];
 }
 
 // The current access for one staffer (loaded when the admin expands the panel).
@@ -54,6 +59,15 @@ export async function loadCareAccessAction(
   if (!(await requireUserManagerId(userId))) return { ok: false, error: "Not allowed." };
   const repo = await getRepo();
   const prefs = await repo.getStaffPrefs(userId);
+  // Role + portal tabs live on profiles. portal_tabs is best-effort until
+  // migration 0009 lands: a missing column reads as "no restriction".
+  const admin = createAdminClient();
+  const { data: roleRow } = await admin.from("profiles").select("role").eq("id", userId).maybeSingle();
+  const { data: tabsRow, error: tabsError } = await admin
+    .from("profiles")
+    .select("portal_tabs")
+    .eq("id", userId)
+    .maybeSingle();
   return {
     ok: true,
     access: {
@@ -62,6 +76,8 @@ export async function loadCareAccessAction(
       personalAddress: prefs.personalAddress,
       requestedAddress: prefs.requestedAddress,
       careSections: prefs.careSections,
+      role: roleRow?.role ?? "staff",
+      portalTabs: tabsError ? [] : ((tabsRow?.portal_tabs as string[] | null) ?? []),
     },
   };
 }
@@ -72,6 +88,8 @@ export async function setUserCareAccessAction(
     inboxScope: StaffPrefs["inboxScope"];
     assignedInboxes: string[];
     careSections: string[];
+    // Portal-tab restriction; empty array = everything the role allows.
+    portalTabs?: string[];
   },
 ): Promise<{ ok: boolean; error?: string }> {
   if (!(await requireUserManagerId(userId))) return { ok: false, error: "Not allowed." };
@@ -100,8 +118,28 @@ export async function setUserCareAccessAction(
   );
 
   await repo.setStaffPrefs(userId, { inboxScope: scope, assignedInboxes, careSections });
+
+  // Portal tabs (profiles.portal_tabs): restriction-only, so only keys the
+  // target's role could see are kept; ticking everything is stored as [] =
+  // "no restriction". Saved best-effort until migration 0009 adds the column.
+  if (patch.portalTabs !== undefined) {
+    const admin = createAdminClient();
+    const { data: roleRow } = await admin.from("profiles").select("role").eq("id", userId).maybeSingle();
+    const roleTabs = tabsForRole(roleRow?.role ?? "staff").map((t) => t.key);
+    const cleaned = patch.portalTabs.filter((k) => roleTabs.includes(k));
+    const value = cleaned.length >= roleTabs.length ? [] : cleaned;
+    const { error: tabsError } = await admin
+      .from("profiles")
+      .update({ portal_tabs: value, updated_at: new Date().toISOString() })
+      .eq("id", userId);
+    if (tabsError) {
+      return { ok: false, error: "Mailboxes and sections saved, but portal tabs could not be saved yet (database migration 0009 pending)." };
+    }
+  }
+
   revalidatePath("/admin/users");
   revalidatePath("/admin/email/inbox");
+  revalidatePath("/admin/dashboard");
   return { ok: true };
 }
 

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { portalPathAllowed } from "@/lib/portalTabs";
 
 // "Where everything is": the orientation block on the dashboard (Rick, 13 Jul).
 // New staff get told "check the dashboard", land here, and see a map of the
@@ -103,8 +104,18 @@ const GUIDE: {
   },
 ];
 
-export function PortalGuide({ role }: { role: Role }) {
-  const items = GUIDE.filter((g) => g.roles.includes(role));
+export function PortalGuide({
+  role,
+  portalTabs = null,
+}: {
+  role: Role;
+  // Per-user tab restriction (profiles.portal_tabs): the map hides cards for
+  // tabs this person cannot open. null/empty = role defaults.
+  portalTabs?: string[] | null;
+}) {
+  const items = GUIDE.filter(
+    (g) => g.roles.includes(role) && portalPathAllowed(g.href, role, portalTabs),
+  );
   return (
     <div className="mb-8">
       <div className="mb-3">

@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { portalPathAllowed } from "@/lib/portalTabs";
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -53,6 +54,25 @@ export async function proxy(request: NextRequest) {
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = "/login";
     return NextResponse.redirect(loginUrl);
+  }
+
+  // Per-user portal-tab restriction (profiles.portal_tabs): a person whose
+  // list is set can only open the ticked tabs; everything else bounces to the
+  // dashboard. Queried separately and best-effort so the portal keeps working
+  // if the column does not exist yet (migration 0009 pending): an error here
+  // simply means "no restriction".
+  if (profile.role !== "admin") {
+    const { data: tabsRow, error: tabsError } = await supabase
+      .from("profiles")
+      .select("portal_tabs")
+      .eq("id", user.id)
+      .maybeSingle();
+    const portalTabs = tabsError ? null : (tabsRow?.portal_tabs as string[] | null);
+    if (!portalPathAllowed(pathname, profile.role, portalTabs)) {
+      const dashUrl = request.nextUrl.clone();
+      dashUrl.pathname = "/admin/dashboard";
+      return NextResponse.redirect(dashUrl);
+    }
   }
 
   return supabaseResponse;

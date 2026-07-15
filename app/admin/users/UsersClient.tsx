@@ -54,8 +54,10 @@ export function UsersClient({ callerRole }: { callerRole: "admin" | "manager" })
   // Create form state
   const [form, setForm] = useState({ name: "", email: "", password: "", role: "sales" as Role, department: "" });
 
+  // `loading` starts true, so the initial fetch needs no synchronous
+  // setLoading(true) inside the effect (it triggered cascading-render lint);
+  // later refreshes just swap the list in place without a spinner.
   const loadUsers = useCallback(async () => {
-    setLoading(true);
     try {
       const res = await fetch("/api/admin/users");
       const data = res.ok ? await res.json() : null;

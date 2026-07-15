@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { useI18n } from "@/lib/eqt/i18n";
+import { portalPathAllowed } from "@/lib/portalTabs";
 
 export type UserRole = "admin" | "sales" | "manager" | "owner" | "technician" | "staff";
 
@@ -67,10 +68,15 @@ export default function AdminNav({
   userEmail,
   userName,
   role,
+  portalTabs = null,
 }: {
   userEmail: string;
   userName: string;
   role: UserRole;
+  // Per-user tab restriction (profiles.portal_tabs): non-empty hides the
+  // unticked tabs below the role's set. null/empty = role defaults. The proxy
+  // enforces the same list on direct URLs; this only keeps the nav honest.
+  portalTabs?: string[] | null;
 }) {
   const pathname = usePathname();
   const { locale, setLocale } = useI18n();
@@ -78,7 +84,9 @@ export default function AdminNav({
   const [menuOpen, setMenuOpen] = useState(false);
   const [websiteOpen, setWebsiteOpen] = useState(false);
 
-  const visibleLinks = NAV_ITEMS.filter((item) => item.roles.includes(role));
+  const visibleLinks = NAV_ITEMS.filter(
+    (item) => item.roles.includes(role) && portalPathAllowed(item.href, role, portalTabs),
+  );
   const websiteActive = WEBSITE_ITEMS.some((w) => pathname.startsWith(w.href));
 
   async function handleSignOut() {

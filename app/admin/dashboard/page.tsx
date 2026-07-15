@@ -51,6 +51,18 @@ export default async function DashboardPage({
   const isPreviewing = actualRole === "admin" && previewParam && ALL_ROLES.includes(previewParam);
   const role: Role = isPreviewing ? previewParam! : actualRole;
 
+  // Per-user portal-tab restriction, so the map only shows doors this person
+  // can actually open. Best-effort until migration 0009 adds the column.
+  let portalTabs: string[] | null = null;
+  if (actualRole !== "admin") {
+    const { data: tabsRow, error: tabsError } = await supabase
+      .from("profiles")
+      .select("portal_tabs")
+      .eq("id", user.id)
+      .maybeSingle();
+    if (!tabsError) portalTabs = (tabsRow?.portal_tabs as string[] | null) ?? null;
+  }
+
   const admin = createAdminClient();
 
   // "Messages" on this dashboard = the CRM queue (contact-form submissions and
@@ -206,7 +218,7 @@ export default async function DashboardPage({
       {/* The orientation map: every role sees THEIR portal, so "check the
           dashboard" is the one instruction a new person needs. For technicians
           and staff this IS the main dashboard content. */}
-      <PortalGuide role={role} />
+      <PortalGuide role={role} portalTabs={isPreviewing ? null : portalTabs} />
 
       {/* Staff inbox: admin only */}
       {actualRole === "admin" && !isPreviewing && staffMessages && staffMessages.length > 0 && (

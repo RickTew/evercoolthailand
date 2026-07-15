@@ -9,6 +9,7 @@ import {
 } from "@/app/admin/users/actions";
 import { EVERCOOL_INBOXES, inboxLabel } from "@/app/admin/email/_lib/inboxes";
 import { CARE_SECTIONS } from "@/app/admin/email/_lib/sections";
+import { tabsForRole } from "@/lib/portalTabs";
 
 // "CRM access" panel under each user row (ported from newnei's
 // CareAccessEditor): the checkbox options that decide which mailboxes and
@@ -81,6 +82,19 @@ export function CareAccessEditor({
             assignedInboxes: a.assignedInboxes.includes(address)
               ? a.assignedInboxes.filter((x) => x !== address)
               : [...a.assignedInboxes, address],
+          }
+        : a,
+    );
+  }
+
+  function togglePortalTab(key: string) {
+    setAccess((a) =>
+      a
+        ? {
+            ...a,
+            portalTabs: a.portalTabs.includes(key)
+              ? a.portalTabs.filter((x) => x !== key)
+              : [...a.portalTabs, key],
           }
         : a,
     );
@@ -179,6 +193,53 @@ export function CareAccessEditor({
             </div>
           )}
 
+          {/* Portal tabs: which top-level portal areas this person can open at
+              all (Rick, 15 Jul: some people must not use the CRM; some should
+              not see Build). Restriction below the role: unticking hides the
+              tab AND blocks its pages. Dashboard is always available. */}
+          <div className={isAdminRole ? "hidden" : ""}>
+            <p className="text-xs font-bold text-ec-text">Portal tabs they can open</p>
+            <p className="text-[11px] text-ec-text-muted">
+              Which portal areas this person can use at all. The Dashboard is always available.
+            </p>
+            <Select
+              value={access.portalTabs.length === 0 ? "all" : "some"}
+              onChange={(v) =>
+                setAccess((a) =>
+                  a
+                    ? {
+                        ...a,
+                        portalTabs:
+                          v === "all"
+                            ? []
+                            : a.portalTabs.length
+                              ? a.portalTabs
+                              : tabsForRole(a.role).map((t) => t.key),
+                      }
+                    : a,
+                )
+              }
+            >
+              <option value="all">Everything their role allows</option>
+              <option value="some">Only selected</option>
+            </Select>
+            {access.portalTabs.length > 0 && (
+              <div className="mt-2 flex flex-wrap gap-3">
+                {tabsForRole(access.role).map((t) => (
+                  <label key={t.key} className="flex cursor-pointer items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={access.portalTabs.includes(t.key)}
+                      onChange={() => togglePortalTab(t.key)}
+                      className="h-3.5 w-3.5 accent-ec-teal"
+                    />
+                    <span className="text-xs text-ec-text">{t.label}</span>
+                  </label>
+                ))}
+              </div>
+            )}
+          </div>
+
           <div>
             <p className="text-xs font-bold text-ec-text">Inbox visibility</p>
             <p className="text-[11px] text-ec-text-muted">
@@ -268,6 +329,7 @@ export function CareAccessEditor({
                     inboxScope: access.inboxScope,
                     assignedInboxes: access.assignedInboxes,
                     careSections: access.careSections,
+                    portalTabs: access.portalTabs,
                   });
                   setNotice(res.ok ? "Access saved." : null);
                   if (!res.ok) setError(res.error ?? "Could not save.");
