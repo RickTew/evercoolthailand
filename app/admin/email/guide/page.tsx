@@ -98,6 +98,10 @@ const SECTIONS: GuideSection[] = [
         th: "เปิดบทสนทนาแล้วพิมพ์ในช่องตอบกลับ ลายเซ็นของคุณถูกใส่ไว้ท้ายข้อความแล้ว ให้พิมพ์ข้อความเหนือลายเซ็น",
       },
       {
+        en: "Or press Draft and the reply is written for you from the Knowledge tab's verified answers: a greeting in the customer's language, the best-matching answer, and your signature. Always read and edit it before pressing Send; nothing is ever sent automatically.",
+        th: "หรือกดปุ่ม Draft ระบบจะเขียนคำตอบให้จากคำตอบที่ยืนยันแล้วในแท็บ Knowledge: คำทักทายตามภาษาของลูกค้า คำตอบที่ตรงที่สุด และลายเซ็นของคุณ อ่านและแก้ไขก่อนกด Send เสมอ ระบบไม่ส่งอะไรอัตโนมัติ",
+      },
+      {
         en: "Press Attach, or drag a file or photo onto the reply box, to send it with your reply.",
         th: "กด Attach หรือลากไฟล์/รูปมาวางบนช่องตอบกลับ เพื่อแนบไปกับอีเมล",
       },
@@ -116,6 +120,24 @@ const SECTIONS: GuideSection[] = [
       {
         en: "Whoever replies first becomes the owner of that conversation automatically, so the team always knows who is handling it.",
         th: "คนที่ตอบเป็นคนแรกจะเป็นผู้รับผิดชอบบทสนทนานั้นโดยอัตโนมัติ ทีมจึงรู้เสมอว่าใครกำลังดูแลเรื่องไหน",
+      },
+    ],
+  },
+  {
+    title: "The Knowledge tab (what the Draft button knows)",
+    titleTh: "แท็บ Knowledge (สิ่งที่ปุ่ม Draft รู้)",
+    steps: [
+      {
+        en: "The Knowledge tab holds the team's verified answers: the questions customers ask most, each with the answer we want everyone to give. The Draft button writes only from these answers, so the more you add, the more useful it becomes.",
+        th: "แท็บ Knowledge เก็บคำตอบที่ทีมยืนยันแล้ว: คำถามที่ลูกค้าถามบ่อย พร้อมคำตอบที่เราอยากให้ทุกคนตอบเหมือนกัน ปุ่ม Draft เขียนจากคำตอบเหล่านี้เท่านั้น ยิ่งเพิ่มมาก ปุ่มยิ่งฉลาดขึ้น",
+      },
+      {
+        en: "Every reply the team sends also appears there in an 'Answers to review' list. Press Add to Knowledge on the good ones and the Draft button learns them; press Reject on one-off answers.",
+        th: "ทุกคำตอบที่ทีมส่งจะไปรออยู่ในรายการ 'Answers to review' ด้วย กด Add to Knowledge กับคำตอบที่ดี ปุ่ม Draft จะเรียนรู้ไว้ หรือกด Reject กับคำตอบเฉพาะกรณี",
+      },
+      {
+        en: "If Draft says no matching answer was found, it writes a polite holding reply instead. That is the signal to add that question's answer to Knowledge so next time it is ready.",
+        th: "ถ้า Draft บอกว่าไม่พบคำตอบที่ตรง ระบบจะเขียนข้อความตอบรับแบบสุภาพให้แทน นั่นคือสัญญาณว่าควรเพิ่มคำตอบของคำถามนั้นในแท็บ Knowledge เพื่อให้พร้อมในครั้งหน้า",
       },
     ],
   },

@@ -179,6 +179,30 @@ export interface KbArticle {
   updatedAt: string;
 }
 
+// How the free Draft button writes (stored in support_settings under
+// 'draft_style'). The deterministic template's tone knobs; no AI involved.
+export interface DraftStyle {
+  signOff: string; // team sign-off used when the staffer has no personal signature
+  greeting: "formal" | "casual";
+  acknowledge: boolean; // open with a warm, situation-aware line
+  warmth: "warm" | "concise";
+  emoji: boolean;
+  footer: string | null; // optional footer (hours, phone) under the sign-off
+}
+
+// One sent reply captured for the Knowledge review queue: promote it to a
+// verified article (the Draft button then reuses it) or reject it.
+export interface AnswerReview {
+  id: string;
+  threadId: string;
+  question: string;
+  answer: string;
+  score: number | null;
+  notes: string | null;
+  status: string; // pending | promoted | rejected
+  createdAt: string;
+}
+
 // Per-staff inbox access + personalization (support_staff_prefs, one row per
 // profile). Access model v1: admin manages everything; scope stays "all" until
 // a per-staff privacy wall is decided.

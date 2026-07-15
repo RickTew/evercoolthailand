@@ -1,9 +1,12 @@
 import type {
+  AnswerReview,
   BlockedSender,
   CannedResponse,
   ContactProfile,
   ContactSearchResult,
+  DraftStyle,
   Folder,
+  KbArticle,
   MessageAuthResults,
   PendingAttachment,
   StaffPrefs,
@@ -257,6 +260,23 @@ export interface SupportRepo {
   setStaffSignature(profileId: string, signature: string): Promise<void>;
   getStaffPrefs(profileId: string): Promise<StaffPrefs>;
   setStaffPrefs(profileId: string, patch: Partial<Omit<StaffPrefs, "profileId">>): Promise<void>;
+  // Knowledge base (support_kb_articles): the verified answers the Draft
+  // button writes from. listKbArticles = verified only (what drafts use);
+  // listAllKbArticles = everything, for the Knowledge admin page.
+  listKbArticles(): Promise<KbArticle[]>;
+  listAllKbArticles(): Promise<KbArticle[]>;
+  addKbArticle(title: string, body: string, language: string): Promise<void>;
+  updateKbArticle(id: string, fields: { title: string; body: string; isVerified: boolean }): Promise<void>;
+  deleteKbArticle(id: string): Promise<void>;
+  // Learning loop (support_answer_reviews): every human-sent reply is logged
+  // for review; promoting one inserts it as a new verified knowledge article.
+  logAnswerReview(threadId: string, question: string, answer: string): Promise<string | null>;
+  listPendingReviews(): Promise<AnswerReview[]>;
+  promoteReview(id: string, title: string, score: number | null, notes: string): Promise<void>;
+  rejectReview(id: string, score: number | null, notes: string): Promise<void>;
+  // How the free Draft button writes (support_settings 'draft_style').
+  getDraftStyle(): Promise<DraftStyle>;
+  setDraftStyle(patch: Partial<DraftStyle>): Promise<void>;
 }
 
 // The only backend is Supabase (the Evercool project). All reads and writes run

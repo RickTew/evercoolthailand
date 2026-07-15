@@ -12,6 +12,7 @@ const ITEMS = [
   { href: "/admin/email/inbox", label: "Inbox", section: "inbox" },
   { href: "/admin/email/customers", label: "Customers", section: "contacts" },
   { href: "/admin/email/labels", label: "Labels", section: "labels" },
+  { href: "/admin/email/knowledge", label: "Knowledge", section: "knowledge" },
   { href: "/admin/email/settings", label: "Settings", section: "settings" },
   { href: "/admin/email/test", label: "Test Lab", section: "test" },
   // The help page is never scoped away: everyone can always read the manual.

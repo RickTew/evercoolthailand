@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import {
   listCannedResponsesAction,
   addCannedResponseAction,
+  generateDraftAction,
   saveDraftAction,
   sendReplyAction,
   createAttachmentUploadAction,
@@ -58,7 +59,7 @@ export function Composer({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [pending, startTransition] = useTransition();
-  const [busy, setBusy] = useState<null | "send" | "save" | "upload">(null);
+  const [busy, setBusy] = useState<null | "send" | "save" | "upload" | "generate">(null);
   // Saved replies (canned responses).
   const [canned, setCanned] = useState<CannedResponse[] | null>(null);
   const [showCanned, setShowCanned] = useState(false);
@@ -160,6 +161,37 @@ export function Composer({
     setText((prev) => (prev.trim() === "" ? c.body : `${prev.trim()}\n\n${c.body}`));
     setShowCanned(false);
     setBanner({ kind: "ok", text: `Inserted "${c.title}".` });
+  }
+
+  // The Draft button: fills the reply box with an answer written from the
+  // Knowledge tab's verified articles (free, no AI call; a human always edits
+  // and sends). Anything already typed beyond the signature prefill is guarded
+  // by a confirm so a half-written reply is never wiped by a stray click.
+  function generateDraft() {
+    if (!signatureOnly && text.trim() !== "" &&
+        !window.confirm("Replace what you have written with a fresh draft?")) {
+      return;
+    }
+    setBusy("generate");
+    setBanner(null);
+    startTransition(async () => {
+      const res = await generateDraftAction(threadId);
+      setBusy(null);
+      if (!res.ok || !res.bodyText) {
+        setBanner({ kind: "err", text: res.error ?? "Could not write a draft." });
+        return;
+      }
+      setText(res.bodyText);
+      const qcNote = res.qc && !res.qc.pass ? ` Check: ${res.qc.issues.join(" ")}` : "";
+      setBanner({
+        kind: "ok",
+        text:
+          (res.citations && res.citations.length > 0
+            ? `Draft written from: ${res.citations.join(", ")}. Edit it, then press Send.`
+            : "No matching answer in Knowledge yet, so this is a holding reply. Edit it, then press Send.") +
+          qcNote,
+      });
+    });
   }
 
   // Append the staff member's personal signature (if it is not already there).
@@ -284,6 +316,15 @@ export function Composer({
 
       <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
         <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={generateDraft}
+            disabled={pending}
+            title="Write a reply for you from the Knowledge tab's verified answers. You edit it before sending; nothing goes out automatically."
+            className="rounded-md border border-teal/50 px-3 py-1.5 text-xs font-semibold text-teal hover:bg-teal/5 disabled:opacity-50"
+          >
+            {busy === "generate" ? "Writing..." : "Draft"}
+          </button>
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}

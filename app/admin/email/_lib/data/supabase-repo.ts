@@ -1,10 +1,13 @@
 import type {
+  AnswerReview,
   Attachment,
   BlockedSender,
   CannedResponse,
   Contact,
   ContactProfile,
   ContactSearchResult,
+  DraftStyle,
+  KbArticle,
   Message,
   MessageAuthResults,
   PendingAttachment,
@@ -26,6 +29,29 @@ import { isArchived } from "@/app/admin/email/_lib/ui";
 import { classifyTopics } from "@/app/admin/email/_lib/support/classify";
 import { normalizeBlockPattern, senderMatchesPattern } from "@/app/admin/email/_lib/mail/spam";
 import { signedUrl } from "@/app/admin/email/_lib/storage/attachments";
+import { normalizeDraftStyle } from "@/app/admin/email/_lib/ai/draftStyle";
+
+type KbArticleRow = {
+  id: string;
+  title: string;
+  body: string;
+  language: string;
+  is_verified: boolean;
+  show_in_help: boolean;
+  updated_at: string;
+};
+
+function mapKbArticle(r: KbArticleRow): KbArticle {
+  return {
+    id: r.id,
+    title: r.title,
+    body: r.body,
+    language: r.language,
+    isVerified: !!r.is_verified,
+    showInHelp: !!r.show_in_help,
+    updatedAt: r.updated_at,
+  };
+}
 
 // Trash retention default (days) when no support_settings row exists, plus the
 // allowed range. Shared shape for getTrashRetentionDays / setTrashRetentionDays.
@@ -1532,6 +1558,142 @@ export class SupabaseRepo implements SupportRepo {
   async deleteCannedResponse(id: string): Promise<void> {
     const db = await this.db();
     await db.from("support_canned_responses").delete().eq("id", id);
+  }
+
+  // ---- Knowledge base + learning loop (the Draft button's memory) ----
+
+  async listKbArticles(): Promise<KbArticle[]> {
+    const db = await this.db();
+    const { data } = await db
+      .from("support_kb_articles")
+      .select("id, title, body, language, is_verified, show_in_help, updated_at")
+      .eq("is_verified", true);
+    return (data ?? []).map(mapKbArticle);
+  }
+
+  async listAllKbArticles(): Promise<KbArticle[]> {
+    const db = await this.db();
+    const { data } = await db
+      .from("support_kb_articles")
+      .select("id, title, body, language, is_verified, show_in_help, updated_at")
+      .order("updated_at", { ascending: false });
+    return (data ?? []).map(mapKbArticle);
+  }
+
+  async addKbArticle(title: string, body: string, language: string): Promise<void> {
+    const db = await this.db();
+    await db
+      .from("support_kb_articles")
+      .insert({ title, body, language, is_verified: true });
+  }
+
+  async updateKbArticle(
+    id: string,
+    fields: { title: string; body: string; isVerified: boolean },
+  ): Promise<void> {
+    const db = await this.db();
+    await db
+      .from("support_kb_articles")
+      .update({
+        title: fields.title,
+        body: fields.body,
+        is_verified: fields.isVerified,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", id);
+  }
+
+  async deleteKbArticle(id: string): Promise<void> {
+    const db = await this.db();
+    await db.from("support_kb_articles").delete().eq("id", id);
+  }
+
+  async logAnswerReview(threadId: string, question: string, answer: string): Promise<string | null> {
+    const db = await this.db();
+    const { data } = await db
+      .from("support_answer_reviews")
+      .insert({ thread_id: threadId, question, answer, status: "pending" })
+      .select("id")
+      .maybeSingle();
+    return data?.id ?? null;
+  }
+
+  async listPendingReviews(): Promise<AnswerReview[]> {
+    const db = await this.db();
+    const { data } = await db
+      .from("support_answer_reviews")
+      .select("id, thread_id, question, answer, score, notes, status, created_at")
+      .eq("status", "pending")
+      .order("created_at", { ascending: false });
+    return (data ?? []).map((r) => ({
+      id: r.id as string,
+      threadId: r.thread_id as string,
+      question: r.question as string,
+      answer: r.answer as string,
+      score: r.score as number | null,
+      notes: r.notes as string | null,
+      status: r.status as string,
+      createdAt: r.created_at as string,
+    }));
+  }
+
+  async promoteReview(id: string, title: string, score: number | null, notes: string): Promise<void> {
+    const db = await this.db();
+    const { data: review } = await db
+      .from("support_answer_reviews")
+      .select("answer")
+      .eq("id", id)
+      .maybeSingle();
+    if (!review) return;
+    // Store the article under the language it is written in, so Thai answers
+    // rank for Thai customers (a rough but reliable check: any Thai character).
+    const language = /[฀-๿]/.test(review.answer as string) ? "th" : "en";
+    const { data: article } = await db
+      .from("support_kb_articles")
+      .insert({ title, body: review.answer, language, is_verified: true })
+      .select("id")
+      .maybeSingle();
+    await db
+      .from("support_answer_reviews")
+      .update({
+        status: "promoted",
+        score,
+        notes,
+        kb_article_id: article?.id ?? null,
+        reviewed_at: new Date().toISOString(),
+      })
+      .eq("id", id);
+  }
+
+  async rejectReview(id: string, score: number | null, notes: string): Promise<void> {
+    const db = await this.db();
+    await db
+      .from("support_answer_reviews")
+      .update({ status: "rejected", score, notes, reviewed_at: new Date().toISOString() })
+      .eq("id", id);
+  }
+
+  // How the free Draft button writes (one support_settings row, 'draft_style').
+  // Warm formal defaults when no row exists.
+  async getDraftStyle(): Promise<DraftStyle> {
+    const db = await this.db();
+    const { data } = await db
+      .from("support_settings")
+      .select("value")
+      .eq("key", "draft_style")
+      .maybeSingle();
+    return normalizeDraftStyle((data?.value ?? {}) as Partial<DraftStyle>);
+  }
+
+  async setDraftStyle(patch: Partial<DraftStyle>): Promise<void> {
+    const current = await this.getDraftStyle();
+    const next = normalizeDraftStyle({ ...current, ...patch });
+    const db = await this.db();
+    await db.from("support_settings").upsert({
+      key: "draft_style",
+      value: next,
+      updated_at: new Date().toISOString(),
+    });
   }
 
   async addThreadNote(threadId: string, authorName: string, body: string): Promise<ThreadNote> {

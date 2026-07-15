@@ -12,6 +12,9 @@ export const CARE_SECTIONS = [
   { key: "inbox", label: "Inbox", href: "/admin/email/inbox" },
   { key: "contacts", label: "Customers", href: "/admin/email/customers" },
   { key: "labels", label: "Labels", href: "/admin/email/labels" },
+  // The verified answers behind the composer's Draft button + the review queue
+  // that grows them (newnei's "Wisdom", renamed so the team knows what it is).
+  { key: "knowledge", label: "Knowledge", href: "/admin/email/knowledge" },
   { key: "settings", label: "Settings", href: "/admin/email/settings" },
   { key: "test", label: "Test Lab", href: "/admin/email/test" },
 ] as const;

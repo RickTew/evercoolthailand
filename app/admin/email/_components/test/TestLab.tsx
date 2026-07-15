@@ -35,6 +35,12 @@ function Explainer() {
         [EC-10001] in the subject to test that a reply lands on the existing
         conversation instead of opening a new one.
       </p>
+      <p className="mt-1.5">
+        Good exercise: open your practice conversation and press <strong>Draft</strong> in
+        the reply box. It writes an answer from the verified answers on the
+        <strong> Knowledge</strong> tab; if nothing matches yet, add an answer there first
+        and press Draft again to watch it get used.
+      </p>
     </section>
   );
 }

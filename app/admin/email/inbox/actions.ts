@@ -7,6 +7,9 @@ import { isEmailOptedOut } from "@/app/admin/email/_lib/mail/consent";
 import { otherThreadRecipients, splitAddresses, isOwnInbox } from "@/app/admin/email/_lib/mail/recipients";
 import { createUploadUrl, readBytes, BUCKET } from "@/app/admin/email/_lib/storage/attachments";
 import { getCurrentUserContext, requireStaff } from "@/app/admin/email/_lib/auth";
+import { retrieveRelevantArticles } from "@/app/admin/email/_lib/ai/kb";
+import { templateDraft, type DraftTurn } from "@/app/admin/email/_lib/ai/template";
+import { runQc, type QcResult } from "@/app/admin/email/_lib/ai/qc";
 import type { SupportRepo } from "@/app/admin/email/_lib/data/repo";
 import { isThreadStatus } from "@/app/admin/email/_lib/types";
 import type { PendingAttachment, ThreadDetail, ThreadStatus } from "@/app/admin/email/_lib/types";
@@ -321,6 +324,59 @@ function buildQuotedHistory(detail: ThreadDetail): string {
   return `\n\n----- Previous messages -----\n\n${blocks.join("\n\n")}`;
 }
 
+export interface GenerateDraftResult {
+  ok: boolean;
+  bodyText?: string;
+  citations?: string[]; // titles of the knowledge articles the draft drew on
+  qc?: QcResult;
+  error?: string;
+}
+
+// The Draft button: writes a reply from the verified Knowledge base. FREE, no
+// AI call: it opens in the customer's language, pastes the best-matching
+// verified article (or an honest holding line when nothing matches), and
+// closes with the staffer's own signature. A human always edits and approves.
+export async function generateDraftAction(threadId: string): Promise<GenerateDraftResult> {
+  const repo = await getStaffRepo();
+  const detail = await repo.getThread(threadId);
+  if (!detail) return { ok: false, error: "Conversation not found." };
+
+  try {
+    const articles = await repo.listKbArticles();
+    // Exclude unsent drafts; the reply is written from the real exchange.
+    const turns: DraftTurn[] = detail.messages
+      .filter((m) => m.state !== "draft")
+      .map((m) => ({
+        author: m.authorType === "customer" ? "customer" : "agent",
+        text: m.bodyText,
+      }));
+    const lastCustomer = [...detail.messages].reverse().find((m) => m.authorType === "customer");
+    const query = `${detail.thread.subject} ${lastCustomer?.bodyText ?? ""}`;
+    const relevant = retrieveRelevantArticles(query, articles);
+
+    const style = await repo.getDraftStyle();
+    // The drafting staffer's personal signature (when set) becomes the
+    // draft's closing.
+    const actorId = (await getCurrentUserContext()).teamMember?.id ?? null;
+    const signature = actorId ? (await repo.getStaffPrefs(actorId)).signature : "";
+    const draft = templateDraft(
+      {
+        customerName: detail.contact.fullName,
+        customerLocale: detail.contact.locale,
+        conversation: turns,
+        articles: relevant,
+        signature,
+      },
+      style,
+    );
+    // QC is free (keyword heuristic) and advisory: it flags, never blocks.
+    const qc = runQc(draft.bodyText);
+    return { ok: true, bodyText: draft.bodyText, citations: relevant.map((a) => a.title), qc };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "Could not write a draft." };
+  }
+}
+
 export interface SendReplyResult {
   ok: boolean;
   via?: "resend" | "mock";
@@ -397,6 +453,18 @@ export async function sendReplyAction(
     // one a colleague already owns).
     if (!detail.thread.assigneeId && actorId) {
       await repo.setAssignee(threadId, actorId);
+    }
+    // Learning loop: log the question + the sent answer to the Knowledge review
+    // queue, where a reviewer can promote it into a verified article the Draft
+    // button reuses. Only when a customer actually asked something (never on
+    // outbound-only threads), and never blocking the send result.
+    const asked = [...detail.messages].reverse().find((m) => m.authorType === "customer");
+    if (asked && bodyText.trim()) {
+      try {
+        await repo.logAnswerReview(threadId, `${detail.thread.subject}\n\n${asked.bodyText}`, bodyText);
+      } catch {
+        // The review queue is best-effort; a failure must never fail the send.
+      }
     }
     revalidatePath("/admin/email/inbox");
     return { ok: true, via: sent.via };
