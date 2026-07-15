@@ -21,8 +21,8 @@ const SECTIONS: GuideSection[] = [
     titleTh: "ระบบนี้คืออะไร",
     steps: [
       {
-        en: "Every email sent to the company (hi@, sales@, info@ and everyone's own @evercoolthailand.com address) arrives here, in one shared inbox. The whole team works from the same list, so nothing gets lost and anyone can help.",
-        th: "อีเมลทุกฉบับที่ส่งถึงบริษัท (hi@, sales@, info@ และที่อยู่ @evercoolthailand.com ของแต่ละคน) จะเข้ามารวมกันที่นี่ในกล่องเดียว ทั้งทีมเห็นรายการเดียวกัน งานจึงไม่ตกหล่นและทุกคนช่วยกันตอบได้",
+        en: "Every email sent to the company (hi@, sales@, info@ and everyone's own @evercoolthailand.com address) arrives here, in one shared inbox, so nothing gets lost. What each person sees depends on their access; the next section explains who sees what.",
+        th: "อีเมลทุกฉบับที่ส่งถึงบริษัท (hi@, sales@, info@ และที่อยู่ @evercoolthailand.com ของแต่ละคน) จะเข้ามารวมกันที่นี่ในกล่องเดียว งานจึงไม่ตกหล่น แต่ละคนจะเห็นอีเมลไม่เท่ากันตามสิทธิ์ที่ได้รับ อ่านหัวข้อถัดไปว่าใครเห็นอะไรบ้าง",
       },
       {
         en: "Each conversation has a status: New (the customer is waiting for us), Waiting for customer (we replied; the email was sent and we are waiting for their answer), Resolved (finished).",
@@ -35,6 +35,35 @@ const SECTIONS: GuideSection[] = [
       {
         en: "When a conversation mentions an EQ project number, a small project chip appears under the subject showing the number and the project name. Click it to jump straight to that project in the Projects section (for the roles that can open Projects).",
         th: "เมื่อบทสนทนามีเลขโครงการ EQ จะมีปุ่มเล็ก ๆ ใต้หัวข้อ แสดงเลขและชื่อโครงการ กดเพื่อไปที่โครงการนั้นในหน้า Projects ได้ทันที (เฉพาะผู้ที่มีสิทธิ์เข้าหน้า Projects)",
+      },
+    ],
+  },
+  {
+    // Rick, 15 Jul: the team is not confident with computers and was unsure who
+    // can see the shared mailboxes (info@, sales@, ...), so spell it out. Keep
+    // this in sync with the real enforcement (inbox scope in inbox/page.tsx).
+    title: "Who can see which email?",
+    titleTh: "ใครเห็นอีเมลฉบับไหนบ้าง",
+    steps: [
+      {
+        en: "Each person sees a different list, set by their access level. You can check your own anytime: open Settings and look at the Your access box. It says exactly which addresses you can see.",
+        th: "แต่ละคนเห็นรายการอีเมลไม่เหมือนกัน ขึ้นอยู่กับสิทธิ์ที่ได้รับ ตรวจสอบสิทธิ์ของตัวเองได้เสมอที่แท็บ Settings ในกล่อง Your access ซึ่งบอกชัดเจนว่าคุณเห็นที่อยู่อีเมลไหนบ้าง",
+      },
+      {
+        en: "The admin sees every email. The manager sees every company email too (info@, sales@, support@, hi@, office@ and all the rest); the only mail hidden from the manager is mail sent only to another person's personal address.",
+        th: "แอดมินเห็นอีเมลทุกฉบับ ผู้จัดการก็เห็นอีเมลของบริษัททั้งหมดเช่นกัน (info@, sales@, support@, hi@, office@ และอื่น ๆ) สิ่งเดียวที่ผู้จัดการไม่เห็นคืออีเมลที่ส่งถึงที่อยู่ส่วนตัวของคนอื่นเท่านั้น",
+      },
+      {
+        en: "Everyone else sees only mail sent to their own address (for example tassanee@evercoolthailand.com). Mail to the shared addresses like info@ or sales@ does not appear in your list; the manager and admin take care of it.",
+        th: "พนักงานคนอื่น ๆ เห็นเฉพาะอีเมลที่ส่งถึงที่อยู่ของตัวเอง (เช่น tassanee@evercoolthailand.com) อีเมลที่ส่งถึงกล่องกลางอย่าง info@ หรือ sales@ จะไม่ปรากฏในรายการของคุณ ผู้จัดการและแอดมินเป็นคนดูแล",
+      },
+      {
+        en: "If your work needs a shared mailbox (for example you answer info@), ask the admin to add it to your access. Until then you cannot see those emails, even if a conversation is assigned to you.",
+        th: "หากงานของคุณต้องดูแลกล่องกลาง (เช่น ตอบอีเมล info@) ให้แจ้งแอดมินเพื่อเพิ่มสิทธิ์ให้ ก่อนหน้านั้นคุณจะยังไม่เห็นอีเมลเหล่านั้น แม้ว่างานจะถูกมอบหมายให้คุณก็ตาม",
+      },
+      {
+        en: "The All inboxes dropdown above the list only offers the addresses you are allowed to see, so you can never be looking at someone else's private mail by accident.",
+        th: "เมนู All inboxes เหนือรายการจะแสดงเฉพาะที่อยู่ที่คุณมีสิทธิ์เห็นเท่านั้น จึงไม่มีทางเปิดดูอีเมลส่วนตัวของคนอื่นโดยไม่ตั้งใจ",
       },
     ],
   },
