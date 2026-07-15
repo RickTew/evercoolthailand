@@ -153,8 +153,11 @@ export default async function InboxPage({
   // The manager's 'shared' scope is the INVERSE: see everything (including mail
   // to addresses nobody has listed, so company mail can never hide) EXCEPT
   // threads that went only to another staffer's personal address. The excluded
-  // set is every OTHER person's confirmed personal address.
-  const sharedScope = prefs.inboxScope === "shared" && !userCtx.isAdmin;
+  // set is every OTHER person's confirmed personal address. An admin may OPT
+  // INTO this scope too (Rick, 15 Jul: staff-personal mail was drowning his
+  // queue); 'assigned' stays admin-exempt so an admin can never be locked down
+  // to a fixed list by accident.
+  const sharedScope = prefs.inboxScope === "shared";
   const excludeInboxes = sharedScope
     ? (await repo.listPersonalAddresses())
         .filter((p) => p.profileId !== (me?.id ?? ""))

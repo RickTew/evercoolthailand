@@ -14,6 +14,20 @@ feeds the staff-facing Build page at /admin/build (Rick's Proof in the Pudding).
 
 ---
 
+## 2026-07-15 (evening, part 2) - Admin can opt into the shared inbox scope
+
+Rick's report: his admin queue showed everyone's mail (41 unassigned threads,
+15 of them to one staffer's personal mailbox). Verified in data: not spam, and
+My desk works as designed (mine + unclaimed; all 41 were unclaimed). The real
+cause: admin bypassed inbox scoping entirely. Change: the 'shared' scope
+(all company mail, other people's personal mailboxes hidden) is now honored
+for admins who choose it in Users or have it set; 'assigned' stays
+admin-exempt so an admin can never be locked to a fixed list by accident.
+Settings scope summary describes the new case. Rick's prefs switched to
+'shared' in prod data.
+
+---
+
 ## 2026-07-15 (evening) - Compose gets AIDE + Save draft; Sent folder fixed for scoped staff
 
 Session window: evening (Asia/Bangkok). Trigger: staff feedback from testing

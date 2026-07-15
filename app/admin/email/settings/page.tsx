@@ -31,8 +31,12 @@ export default async function EmailSettingsPage() {
   // Saved replies are the team's shared voice: admin and manager curate them.
   const canManageReplies = profile?.role === "admin" || profile?.role === "manager";
 
-  // Plain-language description of this person's real inbox visibility.
-  const scopeSummary = userCtx.isAdmin
+  // Plain-language description of this person's real inbox visibility. An
+  // admin can opt into the 'shared' scope (hide other people's personal
+  // mailboxes), so that case is described before the admin catch-all.
+  const scopeSummary = userCtx.isAdmin && prefs.inboxScope === "shared"
+    ? "You are an admin on the shared scope: you see all company mail; only other people's personal mailboxes are hidden from the inbox."
+    : userCtx.isAdmin
     ? "You are an admin: you see every mailbox and every section."
     : prefs.inboxScope === "shared"
       ? "You see all company mail; only other people's personal mailboxes are hidden."
