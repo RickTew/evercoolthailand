@@ -30,6 +30,23 @@ export type BuildLogEntry = {
 // old CMS site and the old hosting years). Newest first.
 export const BUILD_LOG: BuildLogEntry[] = [
   {
+    "date": "2026-07-16",
+    "title": "Security cleanup day: safer keys, a rate limit on the public forms, and bot defense on the customer login",
+    "type": "infra",
+    "summary": "A sweep through the open security flags. The app's database access keys were migrated to the new, safer key format across all hosting environments and verified on the live site, with the old keys kept temporarily as an instant rollback. The public forms (contact, quote, booking) got a platform-level rate limit, running in watch-only mode first so no real customer can be blocked by mistake. The customer login form gained three invisible bot defenses. And a month-old pile of unfinished work was reviewed line by line: the two still-valuable pieces were shipped fresh, the rest confirmed superseded and discarded.",
+    "hours": 2,
+    "changes": [
+      "Database access keys migrated to the new publishable + secret key format in all three hosting environments, plus the local development setup; nothing sensitive ever printed or stored along the way",
+      "Live verification after redeploy: every public page loads and the gallery and learning pages render database content through the server-side client, proving both new keys end to end",
+      "Old-format keys left active on the database as a one-click rollback; deactivating them is the final step once the new keys have run quietly for a few days",
+      "Platform rate limit on the public form endpoints (contact, quote, booking, notifications): 20 submissions per minute per visitor, in log-only mode first; flipped to blocking after a false-positive review",
+      "Customer login form bot defense: a hidden trap field, a too-fast-to-be-human submit check, and a filter for machine-generated email patterns that shows bots a fake success so they never learn they were caught",
+      "Admin Quotes page can now delete a quote (confirm-first button, new server endpoint)",
+      "June's stashed work reviewed and settled: framework bump, old nav link and a hand-rolled email reply all confirmed superseded; one piece deliberately NOT revived because it would have locked first-time customers out of the portal",
+      "Two stale flags closed after checking the live database: the duplicate role table is referenced by nothing (it goes away with the old tracker app), and the shared-key concern ends with that app's planned deletion"
+    ]
+  },
+  {
     "date": "2026-07-15",
     "title": "Evening sprint on staff feedback: AIDE in Compose, Save draft, the Sent folder fixed, hiring from the portal, and per-person tab control",
     "type": "feature",
