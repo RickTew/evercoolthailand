@@ -36,6 +36,14 @@ now auto-opens the Drafts drawer and says where the draft went (the board's
 "Drafts waiting" tile counts reply drafts, not Compose drafts, which had made
 saves look lost).
 
+Follow-up same session: the four duplicate tickets from the test moved to
+Trash (soft delete, restorable until the retention purge), and the How to use
+guide's Compose section gained three bilingual notes: the ticket number in the
+subject is what threads replies (leave it alone), Compose drafts live under
+the Compose window's Drafts button (the board tile counts reply drafts only),
+and emailing a colleague's company address stays on the same conversation
+(use Assign to for handoffs).
+
 Duration: ~50m wall clock (estimate from message timestamps).
 Tokens: not recorded (instrumentation still queued).
 Verification state: tsc + eslint clean, next build green (--webpack); helpers

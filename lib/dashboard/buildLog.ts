@@ -40,7 +40,8 @@ export const BUILD_LOG: BuildLogEntry[] = [
       "Reply threading now tries every ticket reference in the subject, newest first, instead of only the first (oldest) one, so replies land on the right conversation",
       "Outbound subjects now carry exactly one ticket reference (the conversation's own), stripping older ones, so subjects stop growing reference chains",
       "The Test Lab simulator threads the same way as live mail, keeping practice faithful",
-      "Save draft in Compose now opens the Drafts drawer and says where the draft is kept, so a saved draft never looks lost"
+      "Save draft in Compose now opens the Drafts drawer and says where the draft is kept, so a saved draft never looks lost",
+      "The duplicate tickets from the test moved to Trash, and the How to use guide now explains the ticket number in the subject, where Compose drafts live, and that colleague-to-colleague mail stays on one conversation (use Assign to for handoffs)"
     ]
   },
   {

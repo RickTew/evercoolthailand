@@ -166,8 +166,16 @@ const SECTIONS: GuideSection[] = [
         th: "กดปุ่ม AIDE ระบบจะเขียนข้อความให้จากคำตอบที่ยืนยันแล้วในแท็บ Knowledge โดยอิงจากหัวข้อ (Subject): คำทักทาย คำตอบที่ตรงที่สุด และลายเซ็นของคุณ อ่านและแก้ไขก่อนกด Send เสมอ",
       },
       {
-        en: "Sending opens a new conversation. When the customer replies, their answer threads back into this inbox, and the conversation appears in the Sent folder.",
-        th: "เมื่อส่งแล้วระบบจะเปิดบทสนทนาใหม่ เมื่อลูกค้าตอบกลับ อีเมลจะเข้ามาต่อในบทสนทนาเดิมในกล่องนี้ และบทสนทนาจะแสดงในโฟลเดอร์ Sent",
+        en: "Sending opens a new conversation. When the customer replies, their answer threads back into this inbox, and the conversation appears in the Sent folder. Every outgoing email carries the conversation's ticket number like [EC-10123] at the end of the subject; that number is how replies find their way back to the same conversation, so leave it alone.",
+        th: "เมื่อส่งแล้วระบบจะเปิดบทสนทนาใหม่ เมื่อลูกค้าตอบกลับ อีเมลจะเข้ามาต่อในบทสนทนาเดิมในกล่องนี้ และบทสนทนาจะแสดงในโฟลเดอร์ Sent อีเมลขาออกทุกฉบับจะมีหมายเลขตั๋วของบทสนทนา เช่น [EC-10123] ต่อท้ายหัวข้อ หมายเลขนี้คือสิ่งที่ทำให้คำตอบกลับมาต่อในบทสนทนาเดิม อย่าลบหรือแก้ไข",
+      },
+      {
+        en: "Note the Drafts waiting tile on the board counts unsent reply drafts on conversations, not Compose drafts. Your saved Compose emails live only under the Drafts button inside the Compose window.",
+        th: "หมายเหตุ: ช่อง Drafts waiting บนบอร์ดนับเฉพาะฉบับร่างของการตอบกลับในบทสนทนา ไม่นับฉบับร่างของ Compose อีเมลที่คุณ Save draft ไว้จะอยู่ใต้ปุ่ม Drafts ในหน้าต่าง Compose เท่านั้น",
+      },
+      {
+        en: "Emailing a colleague's @evercoolthailand.com address does NOT create a new incoming conversation for them: the whole exchange stays on this one conversation, which you can both open in the CRM. To pass work to a colleague, use Assign to on the conversation instead of emailing them.",
+        th: "การส่งอีเมลถึงที่อยู่ @evercoolthailand.com ของเพื่อนร่วมงาน จะไม่สร้างบทสนทนาขาเข้าใหม่ให้เขา ทุกอย่างจะอยู่ในบทสนทนาเดียวกันนี้ ซึ่งเปิดดูได้ทั้งคู่ใน CRM หากต้องการส่งต่องานให้เพื่อนร่วมงาน ให้ใช้ Assign to ที่บทสนทนาแทนการส่งอีเมลหา",
       },
     ],
   },
