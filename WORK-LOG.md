@@ -14,6 +14,36 @@ feeds the staff-facing Build page at /admin/build (Rick's Proof in the Pudding).
 
 ---
 
+## 2026-07-16 (afternoon) - CRM ticket-explosion fix (internal loopback + threading)
+
+Rick's screenshots showed one CC test becoming five separate tickets, replies
+filing as new conversations with subjects like "Re: Re: CC [EC-10103]
+[EC-10104] [EC-10107]". Root causes verified in the live data: (1) email
+between two of our own domain addresses loops back through the domain-wide
+inbound catch-all and was ingested as a customer ticket (the self-mail filter
+only covered the two system senders); (2) every outbound send appended its own
+ticket reference to the subject instead of replacing older ones, so refs piled
+up; (3) inbound threading only tried the FIRST reference in the subject (the
+oldest, wrong one) and gave up after the ownership check failed.
+
+Fixes: inbound mail FROM any own-domain address with clean authentication is
+now dropped as an internal loopback (spoofed own-domain mail still falls
+through to the spam folder); inbound threading tries every reference in the
+subject, newest first, until one passes the ownership check; outbound subjects
+are stamped with exactly ONE reference (this thread's), stripping any older
+bracketed refs; Test Lab simulator kept in parity. Also: Compose "Save draft"
+now auto-opens the Drafts drawer and says where the draft went (the board's
+"Drafts waiting" tile counts reply drafts, not Compose drafts, which had made
+saves look lost).
+
+Duration: ~50m wall clock (estimate from message timestamps).
+Tokens: not recorded (instrumentation still queued).
+Verification state: tsc + eslint clean, next build green (--webpack); helpers
+exercised via tsx against the real subject lines from the incident. NOT yet
+verified with a live email round-trip post-deploy.
+
+---
+
 ## 2026-07-15 (evening wrap) - Session totals + spam defense proven on a live attack
 
 Spam defense verified with real samples: two phishing emails forging our own

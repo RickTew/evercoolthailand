@@ -8,7 +8,7 @@ import {
   isStaffRole,
   staffActionAal2Ok,
 } from "@/app/admin/email/_lib/auth";
-import { extractReference } from "@/app/admin/email/_lib/mail/inbound";
+import { extractReferences } from "@/app/admin/email/_lib/mail/inbound";
 import type { PendingAttachment } from "@/app/admin/email/_lib/types";
 
 export interface TestActionResult {
@@ -45,8 +45,7 @@ export async function simulateInboundAction(input: {
   // threads onto that ticket; anything else opens a new conversation. This
   // keeps the Test Lab a faithful stand-in for real inbound mail, threading
   // included.
-  const reference = extractReference(input.subject);
-  if (reference) {
+  for (const reference of extractReferences(input.subject)) {
     const appended = await repo.appendInboundToThreadByReference(reference, {
       name: input.name,
       email: input.email,

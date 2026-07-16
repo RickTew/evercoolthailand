@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { getRepo } from "@/app/admin/email/_lib/data/repo";
 import { getMailSender, buildFrom } from "@/app/admin/email/_lib/mail/send";
 import { isEmailOptedOut } from "@/app/admin/email/_lib/mail/consent";
+import { stampReference } from "@/app/admin/email/_lib/mail/inbound";
 import { otherThreadRecipients, splitAddresses, isOwnInbox } from "@/app/admin/email/_lib/mail/recipients";
 import { createUploadUrl, readBytes, BUCKET } from "@/app/admin/email/_lib/storage/attachments";
 import { getCurrentUserContext, requireStaff } from "@/app/admin/email/_lib/auth";
@@ -502,7 +503,9 @@ export async function sendReplyAction(
 
     const sender = getMailSender();
     // Keep the ticket reference in the subject so replies thread back reliably.
-    const ref = detail.thread.reference ? ` [${detail.thread.reference}]` : "";
+    // stampReference also strips any OTHER tickets' refs the stored subject may
+    // carry (an inbound-created thread keeps the sender's subject verbatim), so
+    // outbound mail always leaves with exactly one ref: this thread's.
     // When asked, quote the whole conversation under the reply in the email the
     // customer receives. The in-app record keeps the clean new reply (the thread
     // shows the history right above it), so the staff view never double-quotes.
@@ -519,7 +522,7 @@ export async function sendReplyAction(
     const sent = await sender.send({
       to: detail.contact.email,
       cc: cc.length ? cc : undefined,
-      subject: `Re: ${detail.thread.subject}${ref}`,
+      subject: stampReference(`Re: ${detail.thread.subject}`, detail.thread.reference),
       text: bodyText,
       quotedText,
       from,
@@ -645,13 +648,13 @@ export async function composeNewMailAction(input: {
       if (blob) sendAttachments.push({ filename: a.fileName, content: blob.bytes });
     }
     const sender = getMailSender();
-    // Carry the new ticket reference in the subject so the reply threads back.
-    const ref = created.reference ? ` [${created.reference}]` : "";
+    // Carry the new ticket reference in the subject so the reply threads back
+    // (and only this one: stampReference drops any refs pasted into the field).
     const sent = await sender.send({
       to: allowedTo,
       cc: ccList.length ? ccList : undefined,
       bcc: bccList.length ? bccList : undefined,
-      subject: `${input.subject.trim()}${ref}`,
+      subject: stampReference(input.subject.trim(), created.reference),
       text: input.body,
       from,
       attachments: sendAttachments.length ? sendAttachments : undefined,
@@ -716,10 +719,9 @@ export async function bulkReplyAction(
         skipped += 1;
         continue;
       }
-      const ref = detail.thread.reference ? ` [${detail.thread.reference}]` : "";
       const res = await sender.send({
         to: detail.contact.email,
-        subject: `Re: ${detail.thread.subject}${ref}`,
+        subject: stampReference(`Re: ${detail.thread.subject}`, detail.thread.reference),
         text: bodyText,
         from,
       });

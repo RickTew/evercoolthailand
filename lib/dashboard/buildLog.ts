@@ -31,6 +31,20 @@ export type BuildLogEntry = {
 export const BUILD_LOG: BuildLogEntry[] = [
   {
     "date": "2026-07-16",
+    "title": "CRM ticket-explosion fix: internal mail no longer spawns duplicate conversations",
+    "type": "fix",
+    "summary": "A CC test showed one conversation multiplying into five separate tickets: email between two of our own addresses looped back in through the inbound catch-all and was filed as a new customer ticket, and every reply after that minted another. Three fixes in the inbound and outbound mail path stop the multiplication, and Save draft in Compose now shows exactly where the draft went.",
+    "hours": 1,
+    "changes": [
+      "Inbound mail sent FROM one of our own addresses with clean authentication is now recognized as our own outbound looping back and dropped instead of filed as a customer ticket; forged mail pretending to be us still lands in the Spam folder",
+      "Reply threading now tries every ticket reference in the subject, newest first, instead of only the first (oldest) one, so replies land on the right conversation",
+      "Outbound subjects now carry exactly one ticket reference (the conversation's own), stripping older ones, so subjects stop growing reference chains",
+      "The Test Lab simulator threads the same way as live mail, keeping practice faithful",
+      "Save draft in Compose now opens the Drafts drawer and says where the draft is kept, so a saved draft never looks lost"
+    ]
+  },
+  {
+    "date": "2026-07-16",
     "title": "Security cleanup day: safer keys, a rate limit on the public forms, and bot defense on the customer login",
     "type": "infra",
     "summary": "A sweep through the open security flags. The app's database access keys were migrated to the new, safer key format across all hosting environments and verified on the live site, with the old keys kept temporarily as an instant rollback. The public forms (contact, quote, booking) got a platform-level rate limit, running in watch-only mode first so no real customer can be blocked by mistake. The customer login form gained three invisible bot defenses. And a month-old pile of unfinished work was reviewed line by line: the two still-valuable pieces were shipped fresh, the rest confirmed superseded and discarded.",

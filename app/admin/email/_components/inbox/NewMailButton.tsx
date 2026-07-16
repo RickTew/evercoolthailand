@@ -194,7 +194,11 @@ export function NewMailButton({ signature = "" }: { signature?: string }) {
       }
       setDraftId(res.id ?? null);
       setDrafts(await listComposeDraftsAction());
-      setNotice("Draft saved. You can close this window; it is under Drafts when you come back.");
+      // Open the Drafts drawer so it is visible WHERE the draft went; the
+      // "Drafts waiting" board tile counts reply drafts on threads, not these,
+      // so this drawer is the only place Compose drafts live.
+      setShowDrafts(true);
+      setNotice('Draft saved under "Drafts" at the top of this window. You can close this window and come back to it any time.');
     });
   }
 

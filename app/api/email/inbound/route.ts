@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 import { getRepo } from "@/app/admin/email/_lib/data/repo";
-import { extractReference } from "@/app/admin/email/_lib/mail/inbound";
+import { extractReferences } from "@/app/admin/email/_lib/mail/inbound";
 import { assessInboundSpam, type SpamVerdict } from "@/app/admin/email/_lib/mail/spam";
 import { putAttachment } from "@/app/admin/email/_lib/storage/attachments";
 import type { PendingAttachment } from "@/app/admin/email/_lib/types";
@@ -233,6 +233,20 @@ export async function POST(request: NextRequest) {
   let spamStatus: SpamVerdict = assessment.verdict;
   const authResults = { ...assessment.auth };
 
+  // Mail FROM one of our own domain addresses is our own outbound looping back
+  // through the domain-wide catch-all (e.g. a Compose or reply that put a
+  // colleague's @evercoolthailand.com address in To/Cc: that colleague's copy
+  // arrives right back here). The send is already recorded on its thread, so
+  // ingesting the copy just mints a duplicate "customer" ticket authored by a
+  // staff member, and every internal reply mints another (the EC-10104 ->
+  // 10107 -> 10116 -> 10117 explosion). Drop it, but ONLY when authentication
+  // is clean: a spoofed From claiming our domain fails DMARC and must still
+  // fall through to be filed as spam, never silently vanish.
+  if (OWN_DOMAIN_RE.test(email.trim()) && !spamStatus) {
+    console.log(`[inbound] ignoring internal loopback from ${email} (own-domain sender)`);
+    return NextResponse.json({ ok: true, ignored: "internal-loopback" });
+  }
+
   try {
     const repo = await getRepo();
 
@@ -252,21 +266,27 @@ export async function POST(request: NextRequest) {
     // threads: a forged From (DMARC fail) could otherwise pass the ownership
     // check and inject into a real conversation, and a blocked sender's mail
     // belongs in Spam, not appended to an open ticket.
-    const reference = extractReference(subject);
-    if (reference && !spamStatus) {
-      const appended = await repo.appendInboundToThreadByReference(reference, {
-        name,
-        email,
-        body,
-        bodyHtml,
-        toAddress,
-        ccAddress,
-        attachments,
-        authResults,
-      });
-      if (appended) {
-        console.log(`[inbound] ${email} -> appended to ${reference} (thread ${appended})`);
-        return NextResponse.json({ ok: true, threadId: appended, threaded: true });
+    // A subject can carry several refs (older mail stamped a new one per hop);
+    // extractReferences returns newest first, and each candidate still has to
+    // pass the sender-ownership check inside appendInboundToThreadByReference,
+    // so the reply lands on the newest thread that actually belongs to this
+    // sender instead of always hitting (and failing on) the oldest ref.
+    if (!spamStatus) {
+      for (const reference of extractReferences(subject)) {
+        const appended = await repo.appendInboundToThreadByReference(reference, {
+          name,
+          email,
+          body,
+          bodyHtml,
+          toAddress,
+          ccAddress,
+          attachments,
+          authResults,
+        });
+        if (appended) {
+          console.log(`[inbound] ${email} -> appended to ${reference} (thread ${appended})`);
+          return NextResponse.json({ ok: true, threadId: appended, threaded: true });
+        }
       }
     }
 
