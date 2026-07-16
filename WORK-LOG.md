@@ -257,6 +257,16 @@ Deliberately NOT ported from the stash: blocking sign-in link creation for
 new accounts, since first-time customers signing in to track a quote is a
 legitimate flow it would break.
 
+Also this session, outside the repo (approx 12:20, Rick's go-ahead):
+- Platform firewall rate limiting turned ON for this project: one rule,
+  "Form endpoint rate limit", POSTs to /api/contact, /api/quotes,
+  /api/bookings, /api/push at 20 requests per minute per IP, LOG mode
+  (records only, blocks nothing). Published to production and verified
+  active. FOLLOW-UP: after a few days, review the logs for false positives
+  and flip the exceeded action from log to deny. This closes the June 21
+  blocked item (the old machine had no platform token; this session's CLI
+  is authenticated, so the blocker was stale).
+
 Duration: ~55m wall clock (estimate from message timestamps).
 Tokens: not recorded (instrumentation still queued).
 Verification state: next build green (--webpack). NOT yet verified on the
