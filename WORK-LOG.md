@@ -251,7 +251,7 @@ Flags resolved:
 
 | Commit | Pushed | Size | What |
 | --- | --- | --- | --- |
-| (below) | | 3 files, +54/-4 | Customer login form bot defense (honeypot field, 2-second speed check, dot-spam email filter with fake success) + admin Quotes: delete endpoint and confirm-to-delete button per quote card. |
+| 7e3c048 | 12:10 | 3 files, +54/-4 | Customer login form bot defense (honeypot field, 2-second speed check, dot-spam email filter with fake success) + admin Quotes: delete endpoint and confirm-to-delete button per quote card. |
 
 Deliberately NOT ported from the stash: blocking sign-in link creation for
 new accounts, since first-time customers signing in to track a quote is a
