@@ -271,3 +271,32 @@ Duration: ~55m wall clock (estimate from message timestamps).
 Tokens: not recorded (instrumentation still queued).
 Verification state: next build green (--webpack). NOT yet verified on the
 deployed site: delete button click-through, bot filter on live login form.
+
+## 2026-07-16 (afternoon) - Database API key migration to new-format keys
+
+Session window: approx 13:30 - 14:15 (Asia/Bangkok). Trigger: Rick clearing
+the flags queue; asked for the key swap to be done here directly instead of
+spawning another queued card.
+
+Outside the repo (Rick's explicit named go-ahead in chat):
+- Both env values swapped on the production hosting project in all three
+  environments (public browser key -> new publishable format, server admin
+  key -> new secret format). New-format keys already existed on the shared
+  database project; nothing was created or rotated there. Values piped CLI
+  to CLI; no key material printed or stored in the transcript.
+- Local .env.local and .env.production.local updated to match.
+- Production rebuilt and verified live: public pages 200, and /gallery +
+  /learn render database content through the server admin client, proving
+  the secret key end to end. Browser pages prove the publishable key.
+- Old legacy JWT keys remain ACTIVE on the database project (drop-in
+  rollback). FOLLOW-UP for Rick: deactivate the legacy anon + service_role
+  keys in the database dashboard once comfortable; the paused tracker app
+  still holds the old service key locally but is deletion-bound.
+- The separate tracker app's key-swap card: answered NOPE (app paused,
+  deletion planned, sections already live inside the main admin).
+
+Duration: ~45m wall clock (estimate; much of it permission-system wrangling
+around credential handling, which is working as intended).
+Tokens: not recorded (instrumentation still queued).
+Verification state: live production verified as above. Local dev not
+re-run with new keys yet (next `npm run dev` will prove it).
