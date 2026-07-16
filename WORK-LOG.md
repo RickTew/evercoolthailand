@@ -230,3 +230,34 @@ Verification state: tsc + eslint clean, next build green (--webpack), draft
 engine exercised with EN/TH/holding/QC test cases via tsx. NOT yet verified on
 the deployed site: From name on a real send, Draft button click-through,
 Knowledge promote flow.
+
+## 2026-07-16 - FLAGS triage + stash salvage (login bot defense, quote delete)
+
+Session window: approx 11:15 - 12:10 (Asia/Bangkok). Trigger: Rick's FLAGS
+review; three items checked against the live database and code instead of
+memory.
+
+Flags resolved:
+- profiles vs users_profile role mismatch: real but harmless (no RLS policy
+  references users_profile; main app code never touches it). Dismissed; with
+  the tracker app now headed for deletion it becomes a drop-the-table cleanup.
+- Shared service-role secret across the two apps: confirmed identical key in
+  both repos' env files, but only one app is live and the other will be
+  deleted, so the split is moot. Dismissed.
+- Stashed June 21 admin work: reviewed file by file. Mostly superseded
+  (framework bump, old nav link, hand-rolled quote reply now covered by the
+  CRM). Two still-valuable pieces salvaged fresh instead of restoring the
+  stale stash; stash then dropped.
+
+| Commit | Pushed | Size | What |
+| --- | --- | --- | --- |
+| (below) | | 3 files, +54/-4 | Customer login form bot defense (honeypot field, 2-second speed check, dot-spam email filter with fake success) + admin Quotes: delete endpoint and confirm-to-delete button per quote card. |
+
+Deliberately NOT ported from the stash: blocking sign-in link creation for
+new accounts, since first-time customers signing in to track a quote is a
+legitimate flow it would break.
+
+Duration: ~55m wall clock (estimate from message timestamps).
+Tokens: not recorded (instrumentation still queued).
+Verification state: next build green (--webpack). NOT yet verified on the
+deployed site: delete button click-through, bot filter on live login form.

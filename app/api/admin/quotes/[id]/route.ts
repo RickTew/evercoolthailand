@@ -22,3 +22,14 @@ export async function PATCH(request: Request, { params }: Params) {
   if (error) return NextResponse.json({ error: "Update failed" }, { status: 500 });
   return NextResponse.json({ success: true });
 }
+
+export async function DELETE(_request: Request, { params }: Params) {
+  if (!await verifyAdmin()) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  const { id } = await params;
+  const admin = createAdminClient();
+  const { error } = await admin.from("quotes").delete().eq("id", id);
+  if (error) return NextResponse.json({ error: "Delete failed" }, { status: 500 });
+  return NextResponse.json({ success: true });
+}

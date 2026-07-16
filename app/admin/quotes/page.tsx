@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { createAdminClient } from "@/lib/supabase/server";
 import StatusSelect from "@/components/admin/StatusSelect";
+import DeleteButton from "@/components/admin/DeleteButton";
 
 export const metadata: Metadata = { title: "Quotes | Admin" };
 export const dynamic = "force-dynamic";
@@ -66,9 +67,12 @@ export default async function AdminQuotesPage() {
                 {q.notes}
               </p>
             )}
-            <p className="text-[10px] text-ec-text-muted/50 mt-2">
-              {new Date(q.created_at).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Bangkok" })}
-            </p>
+            <div className="flex items-center justify-between mt-2">
+              <p className="text-[10px] text-ec-text-muted/50">
+                {new Date(q.created_at).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Bangkok" })}
+              </p>
+              <DeleteButton table="quotes" id={q.id} />
+            </div>
           </div>
         ))}
         {all.length === 0 && (

@@ -1,8 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { createBrowserClient } from "@supabase/ssr";
 import { useLanguage } from "@/lib/i18n/useLanguage";
+
+// Reject obviously fake dot-spam emails (e.g. a.f.i.z.9.6@gmail.com)
+function looksLikeBotEmail(email: string): boolean {
+  const local = email.split("@")[0];
+  const dots = (local.match(/\./g) || []).length;
+  const segments = local.split(".");
+  const avgLen = segments.reduce((s, p) => s + p.length, 0) / segments.length;
+  // More than 4 dots AND average segment length under 3 chars = bot pattern
+  return dots > 4 && avgLen < 3;
+}
 
 export default function AccountAuth() {
   const { t } = useLanguage();
@@ -10,6 +20,8 @@ export default function AccountAuth() {
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [honeypot, setHoneypot] = useState(""); // bots fill this, humans don't
+  const loadedAt = useRef(Date.now());
 
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -18,6 +30,19 @@ export default function AccountAuth() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+
+    // Honeypot check: bots fill hidden fields
+    if (honeypot) return;
+
+    // Speed check: real humans take more than 2 seconds
+    if (Date.now() - loadedAt.current < 2000) return;
+
+    // Email pattern check: silently swallow dot-spam bot emails
+    if (looksLikeBotEmail(email)) {
+      setSent(true); // show success so bots don't know they're blocked
+      return;
+    }
+
     setLoading(true);
     setError("");
 
@@ -59,6 +84,16 @@ export default function AccountAuth() {
       <p className="text-xs text-ec-text-muted mb-4">{t.accountAuthDesc}</p>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+        {/* Honeypot: hidden from real users, bots fill it and get silently blocked */}
+        <input
+          type="text"
+          value={honeypot}
+          onChange={(e) => setHoneypot(e.target.value)}
+          aria-hidden="true"
+          tabIndex={-1}
+          autoComplete="off"
+          style={{ display: "none" }}
+        />
         <div>
           <label className="text-xs font-semibold text-ec-text-muted block mb-1">{t.accountEmailLabel}</label>
           <input
