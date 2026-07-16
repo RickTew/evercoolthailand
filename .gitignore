@@ -48,3 +48,6 @@ next-env.d.ts
 /reference/
 .claude/
 .env*.local
+
+# Supabase CLI local state
+supabase/.temp/
