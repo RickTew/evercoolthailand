@@ -1,10 +1,14 @@
 # Work Log
 
 Every working session on this project gets one entry: what was done, the
-commits, the time spent, and the tokens used. Token and precise-time capture is
-not instrumented yet (that recording system is the next session's build); until
-then entries carry what git and the conversation can prove, and estimated
-fields are marked as estimates.
+commits, the time spent, and the tokens used. Since 2026-07-20 token and time
+capture is instrumented: a per-turn hook tallies each session's real wall
+clock and token usage into .worklog/sessions.jsonl, and
+`node scripts/worklog/worklog.mjs report` prints the measured numbers for the
+day, ready for the session's entry. Entries before 2026-07-20 predate the
+instrumentation; their duration and token fields are estimates and are marked
+as such. Measured numbers are labeled measured; anything else stays labeled
+estimate, and token counts are never invented.
 
 Format per entry: date, session summary, table of changes (commit, time,
 files/lines, what), duration, tokens, notes.

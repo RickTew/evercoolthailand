@@ -46,7 +46,8 @@ next-env.d.ts
 # Reference files (not part of the web app)
 /EverCool Thailand Files/
 /reference/
-.claude/
+.claude/*
+!.claude/settings.json
 .env*.local
 
 # Supabase CLI local state
