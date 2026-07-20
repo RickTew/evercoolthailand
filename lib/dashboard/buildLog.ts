@@ -45,6 +45,20 @@ export const BUILD_LOG: BuildLogEntry[] = [
     ]
   },
   {
+    "date": "2026-07-20",
+    "title": "Health alarm: the system now emails the admin within 10 minutes when something core breaks",
+    "type": "infra",
+    "summary": "The outage ran silent for four days because failing systems looked fine: pages served from cache, and the inbox showed 'Nothing here' instead of an error. Three guards now make silent failure impossible: a health check that exercises the real keys every 10 minutes and emails the admin when one fails, an honest in-app banner telling staff when email cannot load (instead of an empty inbox), and error logs that carry the real cause.",
+    "hours": 0.5,
+    "changes": [
+      "New health endpoint tests the server database key, the public database key, and the email provider key with real uncached calls, the exact three paths that can break mail and the site",
+      "A scheduled job calls it every 10 minutes; any failure emails the admin with exactly which check failed, throttled to one alert per 3 hours",
+      "The alert cooldown is built on the email provider, not the database, so the alarm still fires when the database is the thing that is down",
+      "The CRM inbox now checks database connectivity explicitly and shows staff a bilingual warning banner (email cannot load, your mail is safe, tell the admin) instead of rendering an empty inbox during an outage",
+      "Contact-creation failures in the mail pipeline now log the underlying database error, so the first log line of any future incident states the actual cause"
+    ]
+  },
+  {
     "date": "2026-07-16",
     "title": "CRM ticket-explosion fix: internal mail no longer spawns duplicate conversations",
     "type": "fix",

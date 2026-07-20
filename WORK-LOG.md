@@ -47,6 +47,19 @@ hold the broken value until the next env pull.
 Duration: ~1h (estimate). Tokens: not instrumented; rough estimate 150k
 (marked estimate per the honesty rule).
 
+Same session, follow-up build (commit b1db51a): so this class of failure can
+never again run silent for four days, three guards shipped. (1) /api/health
+exercises the live server database key, the publishable key, and the email
+provider key, uncached, on a 10-minute Vercel Cron; on failure it emails an
+alert with the failing checks, throttled to one email per 3 hours via
+idempotency keys so the cooldown needs no database (the alarm must work when
+the database is what broke). Verified live: endpoint returns all-green on
+production, cron registered. (2) The CRM inbox now probes the database with an
+explicit error check and shows a bilingual "Email cannot load right now, your
+email is safe, tell the admin" banner instead of rendering a convincing empty
+inbox. (3) Contact-creation failures now log the real database error instead
+of a bare "Could not create the contact". Additional ~30min (estimate).
+
 ## 2026-07-16 (afternoon) - CRM ticket-explosion fix (internal loopback + threading)
 
 Rick's screenshots showed one CC test becoming five separate tickets, replies
