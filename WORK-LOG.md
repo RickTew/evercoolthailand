@@ -18,6 +18,38 @@ feeds the staff-facing Build page at /admin/build (Rick's Proof in the Pudding).
 
 ---
 
+## NEXT SESSION START HERE - clean these up first
+
+The standing queue was fully cleared on 2026-07-20. These are the carried
+items to work in this order before taking on anything new.
+
+1. **Mint and swap the new-format database secret key.** Production still runs
+   on the old-format key. Mint a real `sb_secret_`, swap it into the Production
+   and Preview environments, redeploy, and verify the new deployment is Ready
+   AND holding the production alias before trusting it. The old-format keys stay
+   active until that verification passes; deactivating them first is exactly
+   what caused the four-day outage. This is the last loose thread from that
+   incident.
+2. **Retire eq-tracker.** Rick decided on 2026-07-16 that it gets deleted, not
+   unpaused. Deleting it also disposes of its legacy `users_profile` table,
+   which still grants any signed-in user direct insert/update/delete. No
+   Evercool code touches that table, so it is not a live hole today, but it
+   should not outlive the app it belongs to. Teardown checklist is in the
+   evercool-three-apps note.
+3. **Link customers to contacts.** The long-standing open item from the
+   eq-tracker consolidation.
+4. **Lower-severity items from the 2026-07-20 permissions audit**, deliberately
+   left out of that day's fixes so the real holes shipped on their own: page
+   level role gates as defence in depth behind the tab gate, and folding the
+   duplicate profile lookups into one query.
+5. **Tell the staff about one visible change** from 2026-07-20: people on the
+   staff role can no longer reach Quotes, Bookings or Team by typing the
+   address directly. The menu already hid those pages from them, so this
+   matches the intended design, but an old bookmark now bounces to the
+   dashboard. Worth a line in the How to use guide (EN and TH).
+
+---
+
 ## 2026-07-20 (late afternoon) - Work recording built; queue cleared; privilege gaps closed
 
 The standing work-recording directive finally built, then the whole queue
@@ -67,9 +99,10 @@ that the database itself allows staff no direct writes to their own profile
 row, so there is no path around these checks. Also swept every em dash out
 of the app, components, shared code and both language files (27 files).
 
-Duration: 2h58m (measured wall clock, all sessions this day). Tokens: 51.9M
-total (191k output, 1k fresh input, 51.7M cache), measured by the new
-instrumentation.
+Duration: 1h08m for this session; 3h38m measured across all three sessions
+this day. Tokens: 14.9M for this session; 56.4M for the day (204k output, 1k
+fresh input, 56.2M cache). All measured by the new instrumentation, and the
+first entry in this log that is measured rather than estimated.
 
 ## 2026-07-20 (afternoon) - "Still no emails" report investigated; outage tail replayed
 

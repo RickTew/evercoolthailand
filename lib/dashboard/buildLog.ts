@@ -34,8 +34,8 @@ export const BUILD_LOG: BuildLogEntry[] = [
     "title": "Effort recording built; email round trip proven live; staff permissions tightened",
     "type": "infra",
     "summary": "Time and effort on this project are now recorded automatically instead of reconstructed afterwards, and every session back to 12 July was filled in from the real record. The email system was then proven end to end on live mail: a message sent in from outside, answered from the portal, and answered again from outside all stayed on one conversation with one reference number, and no duplicate was created. Checking the staff management screens turned up several ways a manager-level account could have reached further than intended, and all of them were closed.",
-    "hours": 0.5,
-    "tokensK": 10400,
+    "hours": 1.1,
+    "tokensK": 14900,
     "changes": [
       "Every working session now records its real duration and effort automatically, so this page's numbers are measured rather than estimated",
       "All sessions back to 12 July backfilled from the real record; older entries stay marked as estimates",
