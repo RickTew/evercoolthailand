@@ -18,6 +18,59 @@ feeds the staff-facing Build page at /admin/build (Rick's Proof in the Pudding).
 
 ---
 
+## 2026-07-20 (late afternoon) - Work recording built; queue cleared; privilege gaps closed
+
+The standing work-recording directive finally built, then the whole queue
+worked through, which turned up a set of real privilege holes in the staff
+management console.
+
+Work recording (1a0aa45). A per-turn hook now tallies each session's real
+wall clock and token usage from the session transcript into
+.worklog/sessions.jsonl, deduplicating repeated usage blocks so the counts
+are true rather than inflated. `node scripts/worklog/worklog.mjs report`
+prints the day's measured numbers in the exact shape this log wants. Every
+retrievable session back to 2026-07-12 was backfilled from its transcript,
+so the historical record is now measured rather than guessed from commit
+timestamps. Estimates stay labeled as estimates; nothing is invented.
+
+Staff access confirmed. The staff member who reported an empty inbox has
+been in and active since the fix (live session refreshed, admin pages
+served, no errors), which closes the outage follow-up.
+
+Round-trip email test, live and end to end. An external mail was sent in,
+answered from the CRM, and replied to again from outside. All three messages
+landed on one ticket, the outgoing subject carried exactly one reference
+number, and no duplicate ticket appeared. Save draft and the AIDE draft
+button were exercised in the same pass: the draft saved and reloaded
+correctly, and AIDE produced a holding reply while honestly flagging that
+its knowledge base had no matching answer. Test ticket trashed afterward.
+
+Form rate limiting flipped from watching to enforcing. Four days of logs
+showed the rule never triggered (two legitimate form posts in total, against
+a limit of twenty per minute), so the exceeded action moved from log to deny
+and is now live.
+
+Privilege gaps closed (b019390). Verifying the manager console properly
+surfaced several holes, all now fixed. The "owner" tier had no protection at
+all: every rule tested for the word "admin" only, so a manager could create
+an owner account with a password of their choosing and log in as it, or
+demote, deactivate and rewrite the access of a real owner. Nobody can change
+their own role any more, closing self-promotion. A manager can no longer
+widen their own access or lift an access restriction an admin placed on
+them. Account-active status is now re-checked inside the management API
+rather than only at the page layer, so a deactivated account with a live
+session cannot still drive it. The portal tab gate now enforces the role
+half of its own rules, so a typed URL cannot reach a section the menu does
+not offer, and it reads its data in a way that fails closed on a database
+error instead of silently dropping the restriction. Confirmed separately
+that the database itself allows staff no direct writes to their own profile
+row, so there is no path around these checks. Also swept every em dash out
+of the app, components, shared code and both language files (27 files).
+
+Duration: 2h58m (measured wall clock, all sessions this day). Tokens: 51.9M
+total (191k output, 1k fresh input, 51.7M cache), measured by the new
+instrumentation.
+
 ## 2026-07-20 (afternoon) - "Still no emails" report investigated; outage tail replayed
 
 A staff member reported the inbox still empty hours after the morning fix.

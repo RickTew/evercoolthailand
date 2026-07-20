@@ -31,6 +31,28 @@ export type BuildLogEntry = {
 export const BUILD_LOG: BuildLogEntry[] = [
   {
     "date": "2026-07-20",
+    "title": "Effort recording built; email round trip proven live; staff permissions tightened",
+    "type": "infra",
+    "summary": "Time and effort on this project are now recorded automatically instead of reconstructed afterwards, and every session back to 12 July was filled in from the real record. The email system was then proven end to end on live mail: a message sent in from outside, answered from the portal, and answered again from outside all stayed on one conversation with one reference number, and no duplicate was created. Checking the staff management screens turned up several ways a manager-level account could have reached further than intended, and all of them were closed.",
+    "hours": 0.5,
+    "tokensK": 10400,
+    "changes": [
+      "Every working session now records its real duration and effort automatically, so this page's numbers are measured rather than estimated",
+      "All sessions back to 12 July backfilled from the real record; older entries stay marked as estimates",
+      "Live round-trip test on real mail: sent in, answered from the portal, answered again from outside, all on one conversation with one reference number and no duplicate",
+      "Save draft and the draft-writing button checked in the same pass: the draft saved and came back correctly, and the draft button was honest when it had no matching answer on file",
+      "Confirmed the staff member who reported an empty inbox is now in and working normally",
+      "Public form rate limiting switched from watching to enforcing after four days of clean logs (the limit was never once reached by real visitors)",
+      "The senior account tier is now properly protected: a manager could previously create or alter accounts above their own level",
+      "Nobody can change their own permission level any more, and a manager can no longer widen the access an admin set for them",
+      "Deactivating an account now takes effect immediately everywhere, including for someone already signed in",
+      "Portal sections a person's role does not include can no longer be reached by typing the address directly, and the check now fails safe rather than opening up if the database hiccups",
+      "Confirmed at the database level that staff cannot edit their own permission record directly, so there is no way around these checks",
+      "Punctuation style swept across the app and both languages (27 files)"
+    ]
+  },
+  {
+    "date": "2026-07-20",
     "title": "Every mailbox verified after the outage; duplicate tickets made impossible",
     "type": "fix",
     "summary": "A staff report of a still-empty inbox hours after the morning fix was traced to the fix itself only taking effect with the morning redeploys, plus the inbox never being reopened after that. The whole received-mail store was reconciled against the database: every email to every staff address is accounted for, and the last four stragglers from the outage tail were replayed in. The inbound webhook now records each mail's Message-ID and refuses to ingest the same message twice, so provider retries, replays, and mail sent to two of our addresses at once can no longer create duplicate tickets.",
