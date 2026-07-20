@@ -14,6 +14,39 @@ feeds the staff-facing Build page at /admin/build (Rick's Proof in the Pudding).
 
 ---
 
+## 2026-07-20 - Inbound email outage found and fixed; 4 days of mail recovered
+
+Staff reported the CRM inbox showing zero conversations and no new email.
+Diagnosis from the live logs: since 2026-07-16 07:03 UTC every server-side
+database call had been failing with 401 Unauthorized. The database key saved
+during the 2026-07-16 key migration was malformed: the new-format secret
+prefix had been glued onto the front of the old-format key, producing a string
+that matched neither format. Three symptoms, one cause: (1) every real inbound
+email hit "Could not create the contact" and returned 500 (174 failed webhook
+deliveries), (2) the staff inbox rendered empty because its queries silently
+returned nothing, (3) the public site's database-driven pages (services,
+articles, gallery) were failing server-side. Foreign-domain spam kept
+processing normally (it exits before any database write), which masked the
+break.
+
+Fix: the correct key verified against the live API first, then saved to
+Production and Preview and redeployed; server-side queries confirmed back to
+200 in the database logs. Recovery: no mail was lost because the email
+provider stores every inbound message regardless. The 18 missed emails older
+than the provider's 24-hour retry window were replayed through the live
+webhook with properly signed events, oldest first, through the full normal
+pipeline: all 18 accepted, 4 auto-flagged as spam, 10 attachments stored.
+Mail from the last 24 hours redelivers automatically via the provider's
+retries.
+
+Follow-ups: the deployed key is currently the old-format key (proven
+working); do NOT deactivate old-format keys in the database dashboard until a
+true new-format secret key is minted and swapped in. Local env files still
+hold the broken value until the next env pull.
+
+Duration: ~1h (estimate). Tokens: not instrumented; rough estimate 150k
+(marked estimate per the honesty rule).
+
 ## 2026-07-16 (afternoon) - CRM ticket-explosion fix (internal loopback + threading)
 
 Rick's screenshots showed one CC test becoming five separate tickets, replies

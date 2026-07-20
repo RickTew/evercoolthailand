@@ -30,6 +30,21 @@ export type BuildLogEntry = {
 // old CMS site and the old hosting years). Newest first.
 export const BUILD_LOG: BuildLogEntry[] = [
   {
+    "date": "2026-07-20",
+    "title": "Inbound email outage found and fixed; four days of mail recovered",
+    "type": "fix",
+    "summary": "Staff reported an empty inbox and no new email. The cause was a malformed database access key saved during the July 16 key migration: the new-format prefix had been glued onto the old-format key, so every server-side database call had been rejected for four days. New tickets failed to file, the inbox rendered empty, and the public site's database-driven pages were failing quietly. The key was corrected and verified live, and every missed email was recovered because the email provider stores all inbound mail regardless.",
+    "hours": 1,
+    "changes": [
+      "Traced the empty inbox to 401 Unauthorized on every server-side database call since July 16, from the live database and hosting logs",
+      "Identified the malformed key (new-format prefix glued onto the old-format key, matching neither format) and verified the correct key against the live API before saving anything",
+      "Corrected the key in the Production and Preview hosting environments and redeployed; server-side queries confirmed healthy in the live logs",
+      "Replayed the 18 missed emails through the live inbound pipeline with properly signed webhook events, oldest first: all 18 filed as tickets, 4 auto-flagged as spam, 10 attachments stored",
+      "Mail from the final 24 hours excluded from the replay on purpose: the provider's automatic retries redeliver it, and replaying it too would have created duplicate tickets",
+      "Old-format keys stay active until a proper new-format secret key is minted and swapped in; deactivating them now would repeat the outage"
+    ]
+  },
+  {
     "date": "2026-07-16",
     "title": "CRM ticket-explosion fix: internal mail no longer spawns duplicate conversations",
     "type": "fix",
