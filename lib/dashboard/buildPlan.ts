@@ -35,7 +35,8 @@ export interface BuildItem {
 
 // Actively being built right now. Loose by design; edit freely.
 export const BUILDING: BuildItem[] = [
-  { name: "Work / time / token recording", gloss: "The instrumentation behind this page: every session logged with work, time and tokens, measured instead of estimated." },
+  // Work / time / token recording shipped 2026-07-20; it now lives in the build
+  // log itself, which is where its result shows.
   { name: "Post-deploy verification pass", gloss: "Confirm on the live site: the EVERCOOL logo on a real send, the Draft button, Waiting for customer chips, EQ project chips, saved replies." },
   { name: "CRM staff launch", gloss: "Each staff member sets their signature, walks the How to use guide, and feeds back; fix whatever they hit." },
   { name: "Supplier-thread triage", gloss: "Work the restored supplier threads with the manager; spam-flag on authentication evidence only, never origin." },
