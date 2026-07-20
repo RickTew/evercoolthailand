@@ -975,16 +975,18 @@ export class SupabaseRepo implements SupportRepo {
 
     // Find or create the contact (email is a unique citext), mirroring the
     // inbound path so a New Mail to a known address lands on their record.
+    // Real database error carried in the message (July 2026 outage lesson).
     let contactId: string | undefined;
-    const { data: existing } = await db
+    const { data: existing, error: lookupError } = await db
       .from("contacts")
       .select("id")
       .eq("email", email)
       .maybeSingle();
+    let insertError: string | undefined;
     if (existing) {
       contactId = existing.id;
     } else {
-      const { data: created } = await db
+      const { data: created, error: createError } = await db
         .from("contacts")
         .insert({
           email,
@@ -995,8 +997,12 @@ export class SupabaseRepo implements SupportRepo {
         .select("id")
         .maybeSingle();
       contactId = created?.id;
+      insertError = createError?.message;
     }
-    if (!contactId) throw new Error("Could not create the contact.");
+    if (!contactId) {
+      const cause = insertError ?? lookupError?.message;
+      throw new Error(`Could not create the contact.${cause ? ` (${cause})` : ""}`);
+    }
 
     const now = new Date().toISOString();
     const { data: thread } = await db
@@ -1387,17 +1393,20 @@ export class SupabaseRepo implements SupportRepo {
     const db = await this.db();
     const email = input.email.trim().toLowerCase();
 
-    // Find or create the contact (email is unique citext).
+    // Find or create the contact (email is unique citext). Carry the REAL
+    // database error into the thrown message: during the July 2026 key outage
+    // the bare "Could not create the contact." hid a plain 401 for four days.
     let contactId: string | undefined;
-    const { data: existing } = await db
+    const { data: existing, error: lookupError } = await db
       .from("contacts")
       .select("id")
       .eq("email", email)
       .maybeSingle();
+    let insertError: string | undefined;
     if (existing) {
       contactId = existing.id;
     } else {
-      const { data: created } = await db
+      const { data: created, error: createError } = await db
         .from("contacts")
         .insert({
           email,
@@ -1408,8 +1417,12 @@ export class SupabaseRepo implements SupportRepo {
         .select("id")
         .maybeSingle();
       contactId = created?.id;
+      insertError = createError?.message;
     }
-    if (!contactId) throw new Error("Could not create the contact.");
+    if (!contactId) {
+      const cause = insertError ?? lookupError?.message;
+      throw new Error(`Could not create the contact.${cause ? ` (${cause})` : ""}`);
+    }
 
     const now = new Date().toISOString();
     const { data: thread } = await db

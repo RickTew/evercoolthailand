@@ -1,6 +1,7 @@
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { getRepo } from "@/app/admin/email/_lib/data/repo";
+import { createAdminClient } from "@/lib/supabase/server";
 import { getCurrentUserContext } from "@/app/admin/email/_lib/auth";
 import type { ThreadStatus } from "@/app/admin/email/_lib/types";
 import { buildInboxHref, parseView, parseSearchMode, type InboxParams } from "@/app/admin/email/_lib/inbox-url";
@@ -47,6 +48,21 @@ export default async function InboxPage({
   // Care section gate: bounce anyone whose access doesn't include the Inbox to
   // their first allowed section (a hidden tab can't be reached by URL).
   await requireCareSection("inbox");
+
+  // Infra health probe (July 2026 outage lesson): when the database rejects the
+  // server key, every query below silently returns empty and the inbox renders
+  // as "Nothing here", which staff read as "no email". Probe once with an
+  // explicit error check and tell them the truth instead.
+  let dbUnreachable = false;
+  try {
+    const { error: probeError } = await createAdminClient()
+      .from("support_threads")
+      .select("id", { count: "exact", head: true })
+      .limit(1);
+    dbUnreachable = !!probeError;
+  } catch {
+    dbUnreachable = true;
+  }
 
   // Session restore: a FRESH landing (no view/filters in the URL) reopens where this
   // person left off, when they have "Pick up where you left off" on. The redirect
@@ -310,6 +326,17 @@ export default async function InboxPage({
     // tells the inbox dropdown which addresses this person may filter by.
     <InboxScopeProvider options={inboxOptions}>
     <div className="flex h-full min-h-0 flex-col overflow-hidden">
+      {dbUnreachable && (
+        <div className="border-b border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800">
+          <strong>Email cannot load right now.</strong> The system cannot reach the
+          database, so the lists below may look empty even though your email is safe.
+          Please tell the admin.
+          <span className="block text-red-700">
+            อีเมลโหลดไม่ได้ในขณะนี้ ระบบเชื่อมต่อฐานข้อมูลไม่ได้ รายการด้านล่างอาจดูว่างเปล่า
+            แต่อีเมลของคุณไม่หายไป กรุณาแจ้งผู้ดูแลระบบ
+          </span>
+        </div>
+      )}
       {prefs.restoreSession && <RememberInboxState view={view} filters={rememberFilters} />}
       <SupportSubBar
         right={
