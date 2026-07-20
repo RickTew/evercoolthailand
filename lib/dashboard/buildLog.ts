@@ -31,6 +31,22 @@ export type BuildLogEntry = {
 export const BUILD_LOG: BuildLogEntry[] = [
   {
     "date": "2026-07-20",
+    "title": "Every mailbox verified after the outage; duplicate tickets made impossible",
+    "type": "fix",
+    "summary": "A staff report of a still-empty inbox hours after the morning fix was traced to the fix itself only taking effect with the morning redeploys, plus the inbox never being reopened after that. The whole received-mail store was reconciled against the database: every email to every staff address is accounted for, and the last four stragglers from the outage tail were replayed in. The inbound webhook now records each mail's Message-ID and refuses to ingest the same message twice, so provider retries, replays, and mail sent to two of our addresses at once can no longer create duplicate tickets.",
+    "hours": 1.5,
+    "changes": [
+      "Confirmed from the deployment timeline that the morning key fix only went live with the morning redeploys; the prior night had still served the broken deployment",
+      "Confirmed from the request logs that the reported empty inbox was a stale view: no admin page had been opened since the fix went live",
+      "Reconciled the email provider's received-mail store against the database across the outage window and the days before it: no staff mailbox is missing any email",
+      "Replayed the 4 outage-tail emails whose automatic retries had run out against the broken deployment (1 real with attachments, 3 spam, all filed correctly)",
+      "Trashed the one duplicate spam ticket created by a replay overlapping a late provider retry",
+      "Inbound webhook now stores each mail's Message-ID and skips ingestion when that Message-ID was already filed, returning the existing ticket instead",
+      "Duplicate check runs before the attachment fetch so a duplicate delivery never uploads orphan files, and a failed check falls back to normal ingestion so mail is never lost"
+    ]
+  },
+  {
+    "date": "2026-07-20",
     "title": "Inbound email outage found and fixed; four days of mail recovered",
     "type": "fix",
     "summary": "Staff reported an empty inbox and no new email. The cause was a malformed database access key saved during the July 16 key migration: the new-format prefix had been glued onto the old-format key, so every server-side database call had been rejected for four days. New tickets failed to file, the inbox rendered empty, and the public site's database-driven pages were failing quietly. The key was corrected and verified live, and every missed email was recovered because the email provider stores all inbound mail regardless.",

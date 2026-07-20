@@ -218,6 +218,32 @@ export async function POST(request: NextRequest) {
   // faithfully later (sanitized at render time). body_text above stays the
   // plain fallback.
   const bodyHtml = full.html?.trim() ? full.html : null;
+
+  // Idempotency gate: the same mail can reach this endpoint more than once.
+  // Resend retries a delivery whose earlier attempt ingested but failed to
+  // respond, an outage replay can overlap a late provider retry (this minted
+  // the duplicate "Notice: Invioce" tickets on 2026-07-20), and a mail sent to
+  // two of our addresses fans out as two stored emails carrying the same RFC
+  // Message-ID. If a message with this Message-ID was already ingested,
+  // acknowledge without writing anything. Runs BEFORE the attachment fetch so
+  // a duplicate never uploads orphan files to storage. Best-effort: a lookup
+  // failure falls through to normal ingestion (worst case a duplicate ticket,
+  // never a lost mail).
+  const rfcMessageId = (full as { message_id?: string }).message_id?.trim() || null;
+  if (rfcMessageId) {
+    try {
+      const existingThreadId = await (await getRepo()).findInboundThreadByMessageId(rfcMessageId);
+      if (existingThreadId) {
+        console.log(
+          `[inbound] ${email} -> already ingested as thread ${existingThreadId} (${rfcMessageId}); skipping duplicate`,
+        );
+        return NextResponse.json({ ok: true, threadId: existingThreadId, deduped: true });
+      }
+    } catch (err) {
+      console.error("[inbound] duplicate-check failed; ingesting normally", err);
+    }
+  }
+
   const attachments = await fetchInboundAttachments(apiKey, emailId);
 
   // Spam / phishing check. SES (Resend's receiving MTA) stamps every message
@@ -282,6 +308,7 @@ export async function POST(request: NextRequest) {
           ccAddress,
           attachments,
           authResults,
+          providerMessageId: rfcMessageId,
         });
         if (appended) {
           console.log(`[inbound] ${email} -> appended to ${reference} (thread ${appended})`);
@@ -301,6 +328,7 @@ export async function POST(request: NextRequest) {
       attachments,
       spamStatus,
       authResults,
+      providerMessageId: rfcMessageId,
       note: inboxAddress
         ? `Created from an inbound email to ${inboxAddress}.`
         : "Created from an inbound email to Evercool.",

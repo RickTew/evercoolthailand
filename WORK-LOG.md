@@ -16,25 +16,26 @@ feeds the staff-facing Build page at /admin/build (Rick's Proof in the Pudding).
 
 ## 2026-07-20 (afternoon) - "Still no emails" report investigated; outage tail replayed
 
-Wanrawee reported the inbox still empty hours after the morning fix. Verified
+A staff member reported the inbox still empty hours after the morning fix.
+Verified
 from live data that the system is actually healthy: /api/health all green,
 25+ tickets created since ~10:15 Thailand time (the moment the morning's
-redeploys took effect), and her own mail (newsletter, expo invitation,
-supplier quote with attachments) present in the database under her scope.
+redeploys took effect), and their own mail (newsletter, expo invitation,
+supplier quote with attachments) present in the database under their scope.
 Key finding from the deployment timeline: the morning env-var fix only
 reached production with the ~09:30-10:15 redeploys; production had been
 serving the July 16 deployment (broken key baked in) all of the prior
 evening and night, so webhook deliveries kept failing until then.
 
 Second finding from the request logs: no one loaded any /admin page in
-production for 7+ hours (and no preview traffic), so Wanrawee was not
+production for 7+ hours (and no preview traffic), so the staffer was not
 looking at the live CRM inbox at all. Either a stale tab from the outage or
 the old dead mailbox (MX cutover means the old mailbox never receives mail
 again). Action for staff: open the CRM inbox fresh and refresh the page.
 
 Recovery: cross-referenced the provider's received-mail store against the
 database and found 4 emails whose auto-retries had exhausted against the
-broken deployment overnight: 1 real (seminar reply to Wanrawee's address
+broken deployment overnight: 1 real (seminar reply to a staff address
 with 2 attachments) and 3 spam to info@. All 4 replayed through the signed
 webhook: all accepted; all 4 auto-flagged suspected spam (the seminar mail
 because the sender's own server fails SPF/DMARC, so it sits in the Spam
@@ -42,9 +43,25 @@ view; staff can mark it not-spam). Known cosmetic leftover: one duplicate
 spam ticket ("Notice: Invioce - 75BBY09") from a late provider retry, safe
 to trash.
 
-No code changes this session; operations only. Duration: ~45min (estimate).
-Tokens: not instrumented; rough estimate 100k (marked estimate per the
-honesty rule).
+Duration: ~45min (estimate). Tokens: not instrumented; rough estimate 100k
+(marked estimate per the honesty rule).
+
+Same session, follow-up: every staff mailbox verified and duplicates made
+impossible. (1) Full reconciliation of the provider's received-mail store
+against the database across the whole outage window and the healthy days
+before it: every email to every staff address (personal addresses plus
+info@, sales@, project@ and the rest) is accounted for; nothing is missing
+for anyone. (2) The duplicate spam ticket from the replay/retry overlap was
+trashed. (3) Idempotency shipped in the inbound webhook: every ingested
+message now stores its RFC Message-ID (provider_message_id column, present
+since the schema's first cut but never filled on inbound), and the webhook
+checks it before ingesting. A provider retry, a manual replay, or the
+account-wide fanout of one mail sent to two of our addresses now returns
+the existing ticket instead of minting a duplicate. The check runs before
+the attachment fetch so a duplicate never uploads orphan files, and it is
+best-effort: if the lookup itself fails the mail still ingests normally
+(worst case a duplicate ticket, never a lost email). Build green.
+Additional ~30min (estimate).
 
 ## 2026-07-20 - Inbound email outage found and fixed; 4 days of mail recovered
 

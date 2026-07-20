@@ -1389,6 +1389,7 @@ export class SupabaseRepo implements SupportRepo {
     attachments?: PendingAttachment[];
     spamStatus?: "suspected" | "confirmed" | null;
     authResults?: MessageAuthResults | null;
+    providerMessageId?: string | null;
   }): Promise<string> {
     const db = await this.db();
     const email = input.email.trim().toLowerCase();
@@ -1465,6 +1466,7 @@ export class SupabaseRepo implements SupportRepo {
         body_text: input.body,
         body_html: input.bodyHtml ?? null,
         auth_results: input.authResults ?? null,
+        provider_message_id: input.providerMessageId?.trim() || null,
       })
       .select("id")
       .maybeSingle();
@@ -1472,6 +1474,20 @@ export class SupabaseRepo implements SupportRepo {
       await this.insertAttachmentRows(inserted.id, "inbound", input.attachments);
     }
     return thread.id;
+  }
+
+  async findInboundThreadByMessageId(providerMessageId: string): Promise<string | null> {
+    const id = providerMessageId.trim();
+    if (!id) return null;
+    const db = await this.db();
+    const { data } = await db
+      .from("support_messages")
+      .select("thread_id")
+      .eq("direction", "inbound")
+      .eq("provider_message_id", id)
+      .limit(1)
+      .maybeSingle();
+    return data?.thread_id ?? null;
   }
 
   async appendInboundToThreadByReference(
@@ -1485,6 +1501,7 @@ export class SupabaseRepo implements SupportRepo {
       ccAddress?: string;
       attachments?: PendingAttachment[];
       authResults?: MessageAuthResults | null;
+      providerMessageId?: string | null;
     },
   ): Promise<string | null> {
     const ref = reference.trim().toUpperCase();
@@ -1526,6 +1543,7 @@ export class SupabaseRepo implements SupportRepo {
         body_text: msg.body,
         body_html: msg.bodyHtml ?? null,
         auth_results: msg.authResults ?? null,
+        provider_message_id: msg.providerMessageId?.trim() || null,
       })
       .select("id")
       .maybeSingle();

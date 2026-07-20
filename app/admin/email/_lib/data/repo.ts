@@ -232,7 +232,16 @@ export interface SupportRepo {
     // message either way so staff can see the evidence.
     spamStatus?: "suspected" | "confirmed" | null;
     authResults?: MessageAuthResults | null;
+    // The mail's RFC Message-ID, stored on the message row for idempotency:
+    // the webhook checks it via findInboundThreadByMessageId before ingesting,
+    // so a provider retry, a manual replay, or the account-wide fanout of a
+    // mail sent to two of our addresses cannot mint a duplicate ticket.
+    providerMessageId?: string | null;
   }): Promise<string>;
+  // Idempotency lookup: the thread that already ingested an inbound mail with
+  // this RFC Message-ID, or null if we have never seen it. Empty/missing ids
+  // are never stored, so they can't false-positive here.
+  findInboundThreadByMessageId(providerMessageId: string): Promise<string | null>;
   // Inbound threading: when a reply's subject carries the ticket's EC-#####
   // reference, append the message to that existing thread instead of opening a
   // new one, so back-and-forth stays on a single conversation. A customer reply
@@ -250,6 +259,7 @@ export interface SupportRepo {
       ccAddress?: string;
       attachments?: PendingAttachment[];
       authResults?: MessageAuthResults | null; // arrival evidence, stored on the message
+      providerMessageId?: string | null; // RFC Message-ID (see createInboundMessage)
     },
   ): Promise<string | null>;
   // Spam triage: "Mark as spam" (confirmed), "Not spam" (null; also clears a
