@@ -48,7 +48,7 @@ export default function QuoteBuilder() {
   const [error, setError] = useState("");
   const [photoPreviews, setPhotoPreviews] = useState<string[]>([]);
   const [photoError, setPhotoError] = useState("");
-  const [company, setCompany] = useState(""); // honeypot — stays empty for real users
+  const [company, setCompany] = useState(""); // honeypot - stays empty for real users
 
   const [form, setForm] = useState<QuoteForm>({
     propertyType: "",
@@ -168,7 +168,7 @@ export default function QuoteBuilder() {
 
   return (
     <main className="page-enter px-5 py-6">
-      {/* Honeypot — hidden from users, catches bots. Do not remove. */}
+      {/* Honeypot - hidden from users, catches bots. Do not remove. */}
       <input
         type="text"
         name="company"

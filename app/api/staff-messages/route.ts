@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient, createAdminClient } from "@/lib/supabase/server";
 
-// POST — staff sends a message to admin
+// POST - staff sends a message to admin
 export async function POST(request: Request) {
   const supabase = await createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -28,7 +28,7 @@ export async function POST(request: Request) {
   return NextResponse.json({ success: true });
 }
 
-// GET — admin fetches all staff messages
+// GET - admin fetches all staff messages
 export async function GET() {
   const supabase = await createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -52,7 +52,7 @@ export async function GET() {
   return NextResponse.json(data);
 }
 
-// PATCH — admin marks message as read
+// PATCH - admin marks message as read
 export async function PATCH(request: Request) {
   const supabase = await createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();

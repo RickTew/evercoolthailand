@@ -60,7 +60,7 @@ export default function TopBar() {
           ))}
         </nav>
 
-        {/* Next Event — mobile only, centre of header */}
+        {/* Next Event - mobile only, centre of header */}
         <Link
           href="/contact"
           className="md:hidden flex items-center gap-1.5 text-[11px] font-bold text-ec-teal border border-ec-teal/40 bg-ec-teal/10 hover:bg-ec-teal/20 px-3 py-1.5 rounded-full transition-colors"

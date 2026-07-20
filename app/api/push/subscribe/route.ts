@@ -14,7 +14,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid subscription" }, { status: 400 });
     }
 
-    // Get current user if signed in (optional — anonymous subscriptions allowed)
+    // Get current user if signed in (optional - anonymous subscriptions allowed)
     const supabase = await createSupabaseServerClient();
     const { data: { user } } = await supabase.auth.getUser();
 

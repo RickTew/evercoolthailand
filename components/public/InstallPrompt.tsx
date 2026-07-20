@@ -34,7 +34,7 @@ export default function InstallPrompt() {
       return () => clearTimeout(timer);
     }
 
-    // Android / desktop — listen for native prompt
+    // Android / desktop - listen for native prompt
     function onPrompt(e: Event) {
       e.preventDefault();
       setDeferredPrompt(e as BeforeInstallPromptEvent);

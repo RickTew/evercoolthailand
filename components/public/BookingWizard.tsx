@@ -51,7 +51,7 @@ const EMPTY_FORM: BookingForm = {
 // ─── Calendar ─────────────────────────────────────────────────────────────────
 
 function BookingCalendar({ selected, onSelect }: { selected: string; onSelect: (d: string) => void }) {
-  // "Today" in Bangkok, not the visitor's timezone — bangkokToday() returns "YYYY-MM-DD".
+  // "Today" in Bangkok, not the visitor's timezone - bangkokToday() returns "YYYY-MM-DD".
   const [bkkYear, bkkMonth, bkkDay] = bangkokToday().split("-").map(Number);
   const today = new Date(bkkYear, bkkMonth - 1, bkkDay);
 
@@ -175,7 +175,7 @@ export default function BookingWizard() {
   const [photoError, setPhotoError] = useState("");
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
   const [bookingId, setBookingId] = useState<string>("");
-  const [company, setCompany] = useState(""); // honeypot — stays empty for real users
+  const [company, setCompany] = useState(""); // honeypot - stays empty for real users
   const [showPayment, setShowPayment] = useState(false);
 
   // Pre-fill service from URL param
@@ -300,7 +300,7 @@ export default function BookingWizard() {
 
   return (
     <main className="page-enter px-4 pt-6 pb-8">
-      {/* Honeypot — hidden from users, catches bots. Do not remove. */}
+      {/* Honeypot - hidden from users, catches bots. Do not remove. */}
       <input
         type="text"
         name="company"

@@ -4,14 +4,14 @@ import { createAdminClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
-// VAPID keys — generate once: npx web-push generate-vapid-keys
+// VAPID keys - generate once: npx web-push generate-vapid-keys
 // Then set in .env.local / Vercel:
 //   VAPID_PUBLIC_KEY=...
 //   VAPID_PRIVATE_KEY=...
 //   VAPID_SUBJECT=mailto:info@evercoolthailand.com
 
 export async function POST(request: Request) {
-  // Verify admin — must include admin API key header
+  // Verify admin - must include admin API key header
   const authHeader = request.headers.get("x-admin-key");
   if (authHeader !== process.env.ADMIN_API_KEY) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

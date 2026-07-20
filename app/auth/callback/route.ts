@@ -5,7 +5,7 @@ export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
   const nextParam = searchParams.get("next") ?? "/account";
-  // Only allow same-origin relative paths — block open-redirect via
+  // Only allow same-origin relative paths - block open-redirect via
   // protocol-relative ("//evil.com") or userinfo ("@evil.com") payloads.
   const next =
     nextParam.startsWith("/") && !nextParam.startsWith("//")

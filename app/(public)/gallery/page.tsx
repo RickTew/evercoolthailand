@@ -27,7 +27,7 @@ export default async function GalleryPage() {
   try {
     allItems = (await fetchGalleryItems()) ?? [];
   } catch {
-    // DB unavailable — show the static page without the dynamic list.
+    // DB unavailable - show the static page without the dynamic list.
   }
 
   return (

@@ -29,7 +29,7 @@ export default async function LearnPage() {
   try {
     allArticles = (await fetchArticles()) ?? [];
   } catch {
-    // DB unavailable — show the static page without the dynamic list.
+    // DB unavailable - show the static page without the dynamic list.
   }
 
   return (

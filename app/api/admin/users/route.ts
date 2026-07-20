@@ -9,23 +9,35 @@ import { createSupabaseServerClient, createAdminClient } from "@/lib/supabase/se
 const KNOWN_ROLES = ["admin", "owner", "manager", "sales", "technician", "staff"] as const;
 type KnownRole = (typeof KNOWN_ROLES)[number];
 
+// The tier a manager may never create, grant, or touch. "owner" counts: it
+// outranks manager just as "admin" does, so every admin-tier rule below tests
+// membership of this set rather than the string "admin".
+const ADMIN_TIER = ["admin", "owner"] as const;
+function isAdminTier(role: string | null | undefined): boolean {
+  return role != null && (ADMIN_TIER as readonly string[]).includes(role);
+}
+
 async function requireUserManager(): Promise<{ id: string; role: "admin" | "manager" } | null> {
   const supabase = await createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
-  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle();
+  // is_active is re-checked here, not just in the proxy: the proxy only covers
+  // /admin/* page routes, so a deactivated account holding a live session cookie
+  // could otherwise still call this endpoint directly.
+  const { data: profile } = await supabase.from("profiles").select("role, is_active").eq("id", user.id).maybeSingle();
+  if (profile?.is_active === false) return null;
   if (profile?.role !== "admin" && profile?.role !== "manager") return null;
   return { id: user.id, role: profile.role };
 }
 
-// The target's current role, for the manager-cannot-touch-admins rule.
+// The target's current role, for the manager-cannot-touch-admin-tier rule.
 async function targetRole(id: string): Promise<string | null> {
   const admin = createAdminClient();
   const { data } = await admin.from("profiles").select("role").eq("id", id).maybeSingle();
   return data?.role ?? null;
 }
 
-// GET — list all staff profiles
+// GET - list all staff profiles
 export async function GET() {
   const caller = await requireUserManager();
   if (!caller) return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
@@ -40,7 +52,7 @@ export async function GET() {
   return NextResponse.json(data);
 }
 
-// POST — create a new user
+// POST - create a new user
 export async function POST(request: Request) {
   const caller = await requireUserManager();
   if (!caller) return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
@@ -53,8 +65,8 @@ export async function POST(request: Request) {
   if (!KNOWN_ROLES.includes(role as KnownRole)) {
     return NextResponse.json({ error: "Unknown role" }, { status: 400 });
   }
-  if (caller.role === "manager" && role === "admin") {
-    return NextResponse.json({ error: "Only an admin can create another admin." }, { status: 403 });
+  if (caller.role === "manager" && isAdminTier(role)) {
+    return NextResponse.json({ error: "Only an admin can create an admin or owner account." }, { status: 403 });
   }
 
   const admin = createAdminClient();
@@ -107,7 +119,7 @@ export async function POST(request: Request) {
   return NextResponse.json({ success: true, id: authData.user.id });
 }
 
-// PATCH — update role / active status / department
+// PATCH - update role / active status / department
 export async function PATCH(request: Request) {
   const caller = await requireUserManager();
   if (!caller) return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
@@ -117,12 +129,17 @@ export async function PATCH(request: Request) {
   if (role !== undefined && !KNOWN_ROLES.includes(role as KnownRole)) {
     return NextResponse.json({ error: "Unknown role" }, { status: 400 });
   }
+  // Nobody changes their own role, admin included: self-promotion is the one
+  // escalation no tier check can catch, since the caller already passes them all.
+  if (role !== undefined && caller.id === id) {
+    return NextResponse.json({ error: "You cannot change your own role." }, { status: 403 });
+  }
   if (caller.role === "manager") {
-    if (role === "admin") {
-      return NextResponse.json({ error: "Only an admin can grant the admin role." }, { status: 403 });
+    if (isAdminTier(role)) {
+      return NextResponse.json({ error: "Only an admin can grant the admin or owner role." }, { status: 403 });
     }
-    if ((await targetRole(id)) === "admin") {
-      return NextResponse.json({ error: "Only an admin can change an admin's account." }, { status: 403 });
+    if (isAdminTier(await targetRole(id))) {
+      return NextResponse.json({ error: "Only an admin can change an admin or owner account." }, { status: 403 });
     }
   }
 
@@ -139,7 +156,7 @@ export async function PATCH(request: Request) {
   return NextResponse.json({ success: true });
 }
 
-// DELETE — deactivate (soft delete) a user
+// DELETE - deactivate (soft delete) a user
 export async function DELETE(request: Request) {
   const caller = await requireUserManager();
   if (!caller) return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
@@ -149,8 +166,8 @@ export async function DELETE(request: Request) {
 
   // Prevent self-deletion
   if (caller.id === id) return NextResponse.json({ error: "Cannot deactivate your own account" }, { status: 400 });
-  if (caller.role === "manager" && (await targetRole(id)) === "admin") {
-    return NextResponse.json({ error: "Only an admin can deactivate an admin." }, { status: 403 });
+  if (caller.role === "manager" && isAdminTier(await targetRole(id))) {
+    return NextResponse.json({ error: "Only an admin can deactivate an admin or owner." }, { status: 403 });
   }
 
   const admin = createAdminClient();

@@ -42,19 +42,22 @@ export function portalTabForPath(pathname: string): string | null {
 }
 
 // Is this path allowed for a person with this role + portal_tabs value?
-// Restriction-only semantics: an empty/unknown list means "everything the
-// role allows"; a non-empty list hides the unticked tabs. Role gates on the
-// pages themselves still apply on top.
+// Both halves of the registry are enforced: the tab's `roles` set the widest
+// reachable set, and a non-empty portal_tabs list narrows it further (empty =
+// everything the role allows). Unmapped admin pages are never restricted here.
 export function portalPathAllowed(
   pathname: string,
   role: string,
   portalTabs: string[] | null | undefined,
 ): boolean {
   if (role === "admin") return true;
+  const tab = PORTAL_TABS.find(
+    (t) => pathname === t.pathPrefix || pathname.startsWith(`${t.pathPrefix}/`),
+  );
+  if (!tab) return true;
+  if (!tab.roles.includes(role as PortalRole)) return false;
   if (!portalTabs || portalTabs.length === 0) return true;
-  const key = portalTabForPath(pathname);
-  if (!key) return true;
-  return portalTabs.includes(key);
+  return portalTabs.includes(tab.key);
 }
 
 // The tabs this role could ever see: what the Users console offers as

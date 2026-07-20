@@ -23,7 +23,7 @@ export default function OgImage() {
           fontFamily: "sans-serif",
         }}
       >
-        {/* Logo mark — absolute top-right */}
+        {/* Logo mark - absolute top-right */}
         <div
           style={{
             position: "absolute",
@@ -75,7 +75,7 @@ export default function OgImage() {
         >
           Ever
         </div>
-        {/* Headline row 2 — teal word */}
+        {/* Headline row 2 - teal word */}
         <div
           style={{
             display: "flex",

@@ -15,27 +15,47 @@ import type { StaffPrefs } from "@/app/admin/email/_lib/types";
 // access. Server Actions are public HTTP endpoints, so the gate lives here,
 // not just in the UI.
 
-async function requireUserManagerId(targetUserId?: string): Promise<string | null> {
+// The tier a manager may never read or write: "owner" outranks manager exactly
+// as "admin" does, so both are covered.
+const ADMIN_TIER = ["admin", "owner"] as const;
+function isAdminTier(role: string | null | undefined): boolean {
+  return role != null && (ADMIN_TIER as readonly string[]).includes(role);
+}
+
+async function requireUserManagerId(
+  targetUserId?: string,
+  opts?: { write?: boolean },
+): Promise<string | null> {
   const supabase = await createSupabaseServerClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return null;
+  // is_active is re-checked here because the proxy only guards /admin/* page
+  // routes; a deactivated account with a live session could otherwise still
+  // invoke this server action directly.
   const { data: profile } = await supabase
     .from("profiles")
-    .select("role")
+    .select("role, is_active")
     .eq("id", user.id)
     .maybeSingle();
+  if (profile?.is_active === false) return null;
   if (profile?.role !== "admin" && profile?.role !== "manager") return null;
-  // The manager tier stops at admins: reading or writing an admin's access
-  // needs an admin caller.
+  // The manager tier stops at the admin tier: reading or writing an admin's or
+  // owner's access needs an admin caller.
   if (profile.role === "manager" && targetUserId) {
     const { data: target } = await supabase
       .from("profiles")
       .select("role")
       .eq("id", targetUserId)
       .maybeSingle();
-    if (target?.role === "admin") return null;
+    if (isAdminTier(target?.role)) return null;
+  }
+  // Nobody widens their own access. Without this a manager whose portal tabs an
+  // admin had narrowed could simply save their own row with every tab ticked,
+  // since their own role is not admin-tier and every check above passes.
+  if (opts?.write && targetUserId && targetUserId === user.id && profile.role !== "admin") {
+    return null;
   }
   return user.id;
 }
@@ -92,7 +112,7 @@ export async function setUserCareAccessAction(
     portalTabs?: string[];
   },
 ): Promise<{ ok: boolean; error?: string }> {
-  if (!(await requireUserManagerId(userId))) return { ok: false, error: "Not allowed." };
+  if (!(await requireUserManagerId(userId, { write: true }))) return { ok: false, error: "Not allowed." };
   if (!userId) return { ok: false, error: "No user." };
 
   const scope = (["all", "shared", "assigned"] as const).includes(patch.inboxScope)
@@ -149,7 +169,7 @@ export async function resolveAddressRequestAction(
   userId: string,
   approve: boolean,
 ): Promise<{ ok: boolean; error?: string }> {
-  if (!(await requireUserManagerId(userId))) return { ok: false, error: "Not allowed." };
+  if (!(await requireUserManagerId(userId, { write: true }))) return { ok: false, error: "Not allowed." };
   const repo = await getRepo();
   const prefs = await repo.getStaffPrefs(userId);
   const requested = (prefs.requestedAddress ?? "").trim().toLowerCase();

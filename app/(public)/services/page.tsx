@@ -30,7 +30,7 @@ export default async function ServicesPage() {
   try {
     allServices = (await fetchServices()) ?? [];
   } catch {
-    // DB unavailable — show the static page without the dynamic list.
+    // DB unavailable - show the static page without the dynamic list.
   }
 
   return (

@@ -88,7 +88,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Failed to save quote" }, { status: 500 });
     }
 
-    // Send email notification (non-blocking — don't fail if email fails)
+    // Send email notification (non-blocking - don't fail if email fails)
     try {
       const { sendEmail, escapeHtml } = await import("@/lib/email/send");
       const nameEsc = escapeHtml(name);

@@ -77,7 +77,7 @@ export default function CustomerPortal({
       setCodeCopied(true);
       setTimeout(() => setCodeCopied(false), 2000);
     } catch {
-      // Clipboard unavailable (insecure context / old browser) — silently skip.
+      // Clipboard unavailable (insecure context / old browser) - silently skip.
     }
   }
 

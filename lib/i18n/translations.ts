@@ -334,7 +334,7 @@ const en = {
   prodIndustrial: "Industrial",
   prodViewSpecs: "View Tech Specs",
 
-  // Homepage — New Hero
+  // Homepage - New Hero
   heroEyebrow: "Est. 1998 · TECH FREE Authorised Distributor",
   heroH1: "Pioneering Green Innovation in",
   heroH1Teal: "Thailand's Air Quality",
@@ -344,14 +344,14 @@ const en = {
   heroStatCerts: "Certifications",
   heroStatMarkets: "Global Markets",
 
-  // Homepage — Trust Banner
+  // Homepage - Trust Banner
   trustBannerLabel: "Trusted By",
   trustHospitals: "Hospitals",
   trustPharma: "Pharmaceutical Plants",
   trustHotels: "Hotels & Hospitality",
   trustDataCentres: "Data Centres",
 
-  // Homepage — Core Solutions section
+  // Homepage - Core Solutions section
   coreEyebrow: "Product Lines",
   coreHeading: "Core Solutions",
   ahuSubtitle: "Custom Air Handling Units",
@@ -376,7 +376,7 @@ const en = {
   purifierFeat4: "Activated carbon odour removal",
   purifierLink: "View range",
 
-  // Homepage — Why EverCool bento
+  // Homepage - Why EverCool bento
   whyEyebrow: "Why EverCool",
   whyHeading: "Built Different",
   whyECFansTitle: "Energy Saving EC Fans",
@@ -389,11 +389,11 @@ const en = {
   whyAZTitle: "A-Z Custom Installations",
   whyAZBody: "From system design and product development through control logic, software programming and on-site commissioning. EverCool and TECH FREE handle every stage in-house.",
 
-  // Homepage — Certifications strip
+  // Homepage - Certifications strip
   certTitle: "Certifications & Standards",
   certPartner: "Danfoss Strategic Partner · Green Building Association Member",
 
-  // Homepage — TECH FREE Products teaser
+  // Homepage - TECH FREE Products teaser
   techFreeTitle: "TECH FREE Products",
   techFreeSub: "Industrial AHU systems & components",
   viewAll: "View All",
@@ -735,7 +735,7 @@ const th: typeof en = {
   prodIndustrial: "อุตสาหกรรม",
   prodViewSpecs: "ดูสเปคทางเทคนิค",
 
-  // Homepage — New Hero
+  // Homepage - New Hero
   heroEyebrow: "ก่อตั้ง 1998 · ตัวแทนจำหน่ายอย่างเป็นทางการ TECH FREE",
   heroH1: "บุกเบิกนวัตกรรมสีเขียวใน",
   heroH1Teal: "คุณภาพอากาศของไทย",
@@ -745,14 +745,14 @@ const th: typeof en = {
   heroStatCerts: "การรับรอง",
   heroStatMarkets: "ตลาดโลก",
 
-  // Homepage — Trust Banner
+  // Homepage - Trust Banner
   trustBannerLabel: "ไว้วางใจโดย",
   trustHospitals: "โรงพยาบาล",
   trustPharma: "โรงงานยา",
   trustHotels: "โรงแรมและการบริการ",
   trustDataCentres: "ศูนย์ข้อมูล",
 
-  // Homepage — Core Solutions section
+  // Homepage - Core Solutions section
   coreEyebrow: "สายผลิตภัณฑ์",
   coreHeading: "โซลูชันหลัก",
   ahuSubtitle: "เครื่องส่งลมเย็นสั่งทำ",
@@ -777,7 +777,7 @@ const th: typeof en = {
   purifierFeat4: "กรองกลิ่นด้วยถ่านกัมมันต์",
   purifierLink: "ดูสินค้า",
 
-  // Homepage — Why EverCool bento
+  // Homepage - Why EverCool bento
   whyEyebrow: "ทำไมต้อง EverCool",
   whyHeading: "สร้างต่างจากคนอื่น",
   whyECFansTitle: "พัดลม EC ประหยัดพลังงาน",
@@ -790,11 +790,11 @@ const th: typeof en = {
   whyAZTitle: "การติดตั้งแบบครบวงจร A-Z",
   whyAZBody: "ตั้งแต่การออกแบบระบบ พัฒนาผลิตภัณฑ์ ตรรกะการควบคุม การเขียนโปรแกรม ไปจนถึงการเปิดใช้งานที่หน้างาน EverCool และ TECH FREE ดูแลทุกขั้นตอนภายในองค์กร",
 
-  // Homepage — Certifications strip
+  // Homepage - Certifications strip
   certTitle: "การรับรองและมาตรฐาน",
   certPartner: "พาร์ทเนอร์เชิงกลยุทธ์ Danfoss · สมาชิกสมาคมอาคารสีเขียว",
 
-  // Homepage — TECH FREE Products teaser
+  // Homepage - TECH FREE Products teaser
   techFreeTitle: "ผลิตภัณฑ์ TECH FREE",
   techFreeSub: "ระบบ AHU อุตสาหกรรมและชิ้นส่วน",
   viewAll: "ดูทั้งหมด",

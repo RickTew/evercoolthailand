@@ -30,7 +30,7 @@
 }
 
 /* The Email inbox (ported from newnei) renders on white cards, so it must
-   keep the LIGHT palette even when the portal is in dark mode — otherwise
+   keep the LIGHT palette even when the portal is in dark mode - otherwise
    dark mode flips the text tokens light and produces pale-on-white. Scoped
    re-assertion beats the .dark override inside this subtree. Proper dark
    styling for the inbox is a later polish item. */

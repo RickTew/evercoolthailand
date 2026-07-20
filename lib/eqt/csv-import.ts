@@ -234,7 +234,7 @@ export function coerceDate(raw: string): string | null {
 function nonEmpty(s: string | undefined): string | null {
   if (!s) return null
   const t = s.trim()
-  return t === '' || t === '—' || t === '-' ? null : t
+  return t === '' || t === ' - ' || t === '-' ? null : t
 }
 
 // ─── Row mapping ──────────────────────────────────────────────────────────────

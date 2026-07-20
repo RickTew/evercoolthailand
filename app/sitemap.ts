@@ -14,7 +14,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       .eq("is_published", true);
     articles = data ?? [];
   } catch {
-    // no-op — service role key not available in local build
+    // no-op - service role key not available in local build
   }
 
   const staticRoutes: MetadataRoute.Sitemap = [

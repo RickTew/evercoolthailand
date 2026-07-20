@@ -7,12 +7,12 @@
  *   into the DB or the staff notification email.
  *
  * Note: this does NOT rate-limit by IP. Distributed rate limiting needs a shared
- * store (e.g. Upstash Redis) — tracked as a follow-up in IMPROVEMENT-IDEAS.md.
+ * store (e.g. Upstash Redis) - tracked as a follow-up in IMPROVEMENT-IDEAS.md.
  */
 
 export const HONEYPOT_FIELD = "company";
 
-/** True when the honeypot was filled in — treat the request as a bot. */
+/** True when the honeypot was filled in - treat the request as a bot. */
 export function isBot(honeypotValue: unknown): boolean {
   return typeof honeypotValue === "string" && honeypotValue.trim().length > 0;
 }

@@ -9,7 +9,7 @@ type FormState = {
   email: string;
   subject: string;
   message: string;
-  company: string; // honeypot — must stay empty for real users
+  company: string; // honeypot - must stay empty for real users
 };
 
 export default function ContactForm() {
@@ -64,7 +64,7 @@ export default function ContactForm() {
     <div className="bg-ec-card rounded-2xl border border-ec-border p-4">
       <h2 className="text-base font-bold text-ec-text mb-4">{t.contactFormTitle}</h2>
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-        {/* Honeypot — hidden from users, catches bots. Do not remove. */}
+        {/* Honeypot - hidden from users, catches bots. Do not remove. */}
         <input
           type="text"
           name="company"

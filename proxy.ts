@@ -43,10 +43,13 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  // Check admin/staff profile — must exist and be active
+  // Check admin/staff profile — must exist and be active. portal_tabs comes
+  // from this same row (migration 0009 is applied), so a database error leaves
+  // profile null and bounces to login rather than silently dropping the
+  // per-user tab restriction the way a separate best-effort query did.
   const { data: profile } = await supabase
     .from("profiles")
-    .select("role, is_active")
+    .select("role, is_active, portal_tabs")
     .eq("id", user.id)
     .maybeSingle();
 
@@ -56,18 +59,11 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  // Per-user portal-tab restriction (profiles.portal_tabs): a person whose
-  // list is set can only open the ticked tabs; everything else bounces to the
-  // dashboard. Queried separately and best-effort so the portal keeps working
-  // if the column does not exist yet (migration 0009 pending): an error here
-  // simply means "no restriction".
+  // Tab gate: the role sets the widest reachable set, the per-user
+  // profiles.portal_tabs list narrows it further. Anything else bounces to the
+  // dashboard, so a typed URL cannot reach a tab the nav does not offer.
   if (profile.role !== "admin") {
-    const { data: tabsRow, error: tabsError } = await supabase
-      .from("profiles")
-      .select("portal_tabs")
-      .eq("id", user.id)
-      .maybeSingle();
-    const portalTabs = tabsError ? null : (tabsRow?.portal_tabs as string[] | null);
+    const portalTabs = profile.portal_tabs as string[] | null;
     if (!portalPathAllowed(pathname, profile.role, portalTabs)) {
       const dashUrl = request.nextUrl.clone();
       dashUrl.pathname = "/admin/dashboard";

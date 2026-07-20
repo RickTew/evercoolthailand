@@ -154,7 +154,7 @@ export default function AboutDashboard() {
 
       <GrayscaleOnScroll />
 
-      {/* ── 1. HERO — Founders Front and Centre ──────────── */}
+      {/* ── 1. HERO - Founders Front and Centre ──────────── */}
       <div className="-mx-4 md:-mx-10 overflow-hidden">
         <div className="flex flex-col md:flex-row min-h-[460px] md:min-h-[520px]">
 
@@ -217,7 +217,7 @@ export default function AboutDashboard() {
         </div>
       </div>
 
-      {/* ── 2. TEAM — Zigzag ─────────────────────────────── */}
+      {/* ── 2. TEAM - Zigzag ─────────────────────────────── */}
       <div className="px-4 md:px-10 py-14 space-y-16">
         <div className="text-center mb-2 pb-8">
           <p className="text-[10px] font-bold text-ec-teal uppercase tracking-widest mb-2">
@@ -289,7 +289,7 @@ export default function AboutDashboard() {
         </div>
       </div>
 
-      {/* ── 4. EVENTS & COMMUNITY — Zigzag ───────────────── */}
+      {/* ── 4. EVENTS & COMMUNITY - Zigzag ───────────────── */}
       <div className="px-4 md:px-10 py-14 space-y-16">
         <div className="text-center mb-2">
           <p className="text-[10px] font-bold text-ec-teal uppercase tracking-widest mb-2">

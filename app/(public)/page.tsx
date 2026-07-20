@@ -122,7 +122,7 @@ export default function HomePage() {
       {/* NEW LANDING SECTIONS                                      */}
       {/* ───────────────────────────────────────────────────────── */}
 
-      {/* 1. HERO — photo background with dark overlay */}
+      {/* 1. HERO - photo background with dark overlay */}
       <section
         className="relative text-white overflow-hidden"
         style={{
@@ -219,7 +219,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 3. CORE CATEGORIES — 3-column card grid */}
+      {/* 3. CORE CATEGORIES - 3-column card grid */}
       <section className="px-5 md:px-10 py-10">
         <div className="text-center mb-7">
           <p className="text-[10px] font-bold text-ec-teal uppercase tracking-widest mb-1">{t.coreEyebrow}</p>
@@ -299,7 +299,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 4. WHY CHOOSE US — Bento Box */}
+      {/* 4. WHY CHOOSE US - Bento Box */}
       <section className="px-5 md:px-10 pb-10">
         <div className="text-center mb-7">
           <p className="text-[10px] font-bold text-ec-teal uppercase tracking-widest mb-1">{t.whyEyebrow}</p>
@@ -307,7 +307,7 @@ export default function HomePage() {
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 auto-rows-auto">
 
-          {/* Large card — top left, spans 2 rows on md */}
+          {/* Large card - top left, spans 2 rows on md */}
           <div className="col-span-2 md:row-span-2 bg-ec-navy rounded-2xl p-6 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 bg-ec-teal/10 rounded-full -translate-y-1/2 translate-x-1/2 pointer-events-none" />
             <div className="w-12 h-12 rounded-xl bg-ec-teal/20 flex items-center justify-center mb-4">
@@ -323,7 +323,7 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Card — top right col 1 */}
+          {/* Card - top right col 1 */}
           <div className="bg-ec-card rounded-2xl border border-ec-border p-4">
             <div className="w-9 h-9 rounded-xl bg-amber-500/10 flex items-center justify-center mb-3">
               <svg className="w-4.5 h-4.5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
@@ -334,7 +334,7 @@ export default function HomePage() {
             <p className="text-xs text-ec-text-muted leading-relaxed">{t.whyPipingBody}</p>
           </div>
 
-          {/* Card — top right col 2 */}
+          {/* Card - top right col 2 */}
           <div className="bg-ec-card rounded-2xl border border-ec-border p-4">
             <div className="w-9 h-9 rounded-xl bg-sky-500/10 flex items-center justify-center mb-3">
               <svg className="w-4.5 h-4.5 text-sky-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
@@ -345,7 +345,7 @@ export default function HomePage() {
             <p className="text-xs text-ec-text-muted leading-relaxed">{t.whyDDCBody}</p>
           </div>
 
-          {/* Wide card — bottom right, spans 2 cols */}
+          {/* Wide card - bottom right, spans 2 cols */}
           <div className="col-span-2 bg-gradient-to-r from-ec-teal/10 to-transparent border border-ec-teal/20 rounded-2xl p-5 flex gap-4 items-start">
             <div className="w-10 h-10 rounded-xl bg-ec-teal/15 flex items-center justify-center shrink-0">
               <svg className="w-5 h-5 text-ec-teal" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>

@@ -67,7 +67,7 @@
     "importRowsFound": "พบ {n} แถว",
     "importValidationErrors": "{n} แถวมีข้อผิดพลาด จะข้ามไป",
     "importWarnings": "{n} แถวมีคำเตือน",
-    "importDuplicates": "{n} รหัสซ้ำ — มีอยู่ในฐานข้อมูลแล้ว",
+    "importDuplicates": "{n} รหัสซ้ำ - มีอยู่ในฐานข้อมูลแล้ว",
     "importSkipDuplicates": "ข้ามรายการซ้ำ",
     "importImportAll": "นำเข้า {n} โครงการ",
     "importImporting": "กำลังนำเข้า…",
@@ -285,8 +285,8 @@
       "visitSchedule": "กำหนดการเยี่ยม",
       "contractorQtNumber": "เลข QT ผู้รับเหมา",
       "reportStatus": "สถานะรายงาน",
-      "invoiceEndUser": "ใบแจ้งหนี้ — ผู้ใช้งาน",
-      "invoiceContractor": "ใบแจ้งหนี้ — ผู้รับเหมา",
+      "invoiceEndUser": "ใบแจ้งหนี้ - ผู้ใช้งาน",
+      "invoiceContractor": "ใบแจ้งหนี้ - ผู้รับเหมา",
       "notes": "หมายเหตุ"
     },
     "detail": "รายละเอียดรายการ",
@@ -336,7 +336,7 @@
     },
     "report": {
       "monthly": "รายงานรายเดือน",
-      "title": "บริการและบำรุงรักษา — รายงานรายเดือน",
+      "title": "บริการและบำรุงรักษา - รายงานรายเดือน",
       "exportPDF": "ส่งออก PDF",
       "completedThisMonth": "เสร็จสิ้นในเดือนนี้",
       "upcomingThisMonth": "นัดหมายเดือนนี้",

@@ -67,7 +67,7 @@
     "importRowsFound": "Found {n} row(s)",
     "importValidationErrors": "{n} row(s) have errors and will be skipped",
     "importWarnings": "{n} row(s) have warnings",
-    "importDuplicates": "{n} duplicate code(s) — already in the database",
+    "importDuplicates": "{n} duplicate code(s) - already in the database",
     "importSkipDuplicates": "Skip duplicates",
     "importImportAll": "Import {n} project(s)",
     "importImporting": "Importing…",
@@ -285,8 +285,8 @@
       "visitSchedule": "Visit Schedule",
       "contractorQtNumber": "Contractor QT Number",
       "reportStatus": "Report Status",
-      "invoiceEndUser": "Invoice — End User",
-      "invoiceContractor": "Invoice — Contractor",
+      "invoiceEndUser": "Invoice - End User",
+      "invoiceContractor": "Invoice - Contractor",
       "notes": "Notes"
     },
     "detail": "Record Detail",
@@ -336,7 +336,7 @@
     },
     "report": {
       "monthly": "Monthly Report",
-      "title": "Service & Maintenance — Monthly Report",
+      "title": "Service & Maintenance - Monthly Report",
       "exportPDF": "Export PDF",
       "completedThisMonth": "Completed This Month",
       "upcomingThisMonth": "Upcoming This Month",
