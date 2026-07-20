@@ -14,6 +14,38 @@ feeds the staff-facing Build page at /admin/build (Rick's Proof in the Pudding).
 
 ---
 
+## 2026-07-20 (afternoon) - "Still no emails" report investigated; outage tail replayed
+
+Wanrawee reported the inbox still empty hours after the morning fix. Verified
+from live data that the system is actually healthy: /api/health all green,
+25+ tickets created since ~10:15 Thailand time (the moment the morning's
+redeploys took effect), and her own mail (newsletter, expo invitation,
+supplier quote with attachments) present in the database under her scope.
+Key finding from the deployment timeline: the morning env-var fix only
+reached production with the ~09:30-10:15 redeploys; production had been
+serving the July 16 deployment (broken key baked in) all of the prior
+evening and night, so webhook deliveries kept failing until then.
+
+Second finding from the request logs: no one loaded any /admin page in
+production for 7+ hours (and no preview traffic), so Wanrawee was not
+looking at the live CRM inbox at all. Either a stale tab from the outage or
+the old dead mailbox (MX cutover means the old mailbox never receives mail
+again). Action for staff: open the CRM inbox fresh and refresh the page.
+
+Recovery: cross-referenced the provider's received-mail store against the
+database and found 4 emails whose auto-retries had exhausted against the
+broken deployment overnight: 1 real (seminar reply to Wanrawee's address
+with 2 attachments) and 3 spam to info@. All 4 replayed through the signed
+webhook: all accepted; all 4 auto-flagged suspected spam (the seminar mail
+because the sender's own server fails SPF/DMARC, so it sits in the Spam
+view; staff can mark it not-spam). Known cosmetic leftover: one duplicate
+spam ticket ("Notice: Invioce - 75BBY09") from a late provider retry, safe
+to trash.
+
+No code changes this session; operations only. Duration: ~45min (estimate).
+Tokens: not instrumented; rough estimate 100k (marked estimate per the
+honesty rule).
+
 ## 2026-07-20 - Inbound email outage found and fixed; 4 days of mail recovered
 
 Staff reported the CRM inbox showing zero conversations and no new email.
