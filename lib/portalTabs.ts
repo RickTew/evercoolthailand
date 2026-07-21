@@ -29,6 +29,8 @@ export const PORTAL_TABS: {
   { key: "team", label: "Team", pathPrefix: "/admin/team", roles: ["admin", "manager", "owner"] },
   { key: "reports", label: "Reports", pathPrefix: "/admin/reports", roles: ["admin", "manager", "owner"] },
   { key: "users", label: "Users", pathPrefix: "/admin/users", roles: ["admin", "manager"] },
+  // R2 Hosting billing (Rick, 21 Jul): only the people who can pay the bill.
+  { key: "pay", label: "Pay", pathPrefix: "/admin/pay", roles: ["admin", "manager"] },
   { key: "build", label: "Build", pathPrefix: "/admin/build", roles: ALL },
 ];
 
