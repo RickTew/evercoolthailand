@@ -105,7 +105,10 @@ export async function getInvoiceByNo(invoiceNo: string): Promise<HostingInvoice 
 }
 
 export function usd(cents: number): string {
-  return `$${(cents / 100).toFixed(2)}`;
+  return `$${(cents / 100).toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
 }
 
 // "1st Jun 2026", the format the R2 Hosting PDFs use.
