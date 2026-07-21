@@ -48,7 +48,64 @@ items to work in this order before taking on anything new.
    matches the intended design, but an old bookmark now bounces to the
    dashboard. Worth a line in the How to use guide (EN and TH).
 
+New from 2026-07-21 (billing follow-ups, mostly time-gated):
+6. **Introduce the Pay tab to the manager** (it is in her menu now) and watch
+   the first real card payment flip the bill to Paid with its receipt link.
+7. **Around 1st September: issue the September hosting invoice** (payment
+   provider invoice + table row). Decide whether to automate this as a
+   monthly job instead of doing it by hand each month.
+8. **Delete the orphan customer record** in the payment provider dashboard
+   (the earlier duplicate created without an email address).
+
 ---
+
+## 2026-07-21 (morning) - Pay tab: hosting billing in the portal, card payment live
+
+R2 Hosting billing brought into the portal end to end. A new Pay tab
+(manager + admin only) lists the hosting invoices: due bills on top with
+card payment on the payment provider's secure hosted page, an itemized
+dropdown of what the monthly fee covers, and a paid Invoices archive where
+settled bills stay available to view, print or save as PDF.
+
+Shipped in the repo (e11befb through 52d7b19, all deployed and verified
+live in the browser):
+- Pay tab registered in the shared tab registry, manager + admin only; the
+  proxy blocks direct URLs for every other role, same pattern as Users.
+- hosting_invoices table (migration 0010, applied to production with Rick's
+  explicit go-ahead): RLS locked, service-role reads and writes only.
+- /admin/pay: Due now / Upcoming / Paid badges, total-due banner, Pay with
+  card buttons, and the paid archive. /admin/pay/invoice/[no] renders a
+  print-ready copy of the branded invoice document (Save as PDF).
+- Live payment-status sync on page load through a restricted read-only API
+  key (piped clipboard-to-CLI into the production environment, value never
+  printed); a paid bill flips to Paid and gains its receipt link, no
+  webhook needed at this volume.
+- "What the $99 / month covers" dropdown: six service areas (public
+  website, backend dashboard, email CRM, user accounts and access, EQ
+  tracking with Service & Maintenance, infrastructure and security) plus
+  two notes: build work recorded on the Build page after 1st Jul 2026 is
+  billed separately, and the original design and build was never invoiced.
+- Polish along the way: thousands separator on amounts, ribbon overlap fix
+  on the web invoice, due-date convention corrected to the 1st of the
+  service month (matching the old host's own invoices).
+
+Outside the repo (Rick's go-ahead in chat): the branded R2 Hosting PDF
+invoice set generated into Rick's cloud folder (a backfilled paid record
+covering the old hosting Mar 2025 - Jul 2026, plus the monthly invoices);
+payment provider fully set up: business customer, three live invoices at
+the new monthly rate (two due now, one issued ahead) with 30-day payment
+windows and no customer emails sent, and the account's brand icon replaced
+with the R2 mark so the hosted payment page carries the right identity.
+
+Billing decisions recorded with Rick: the old hosting ran through July 2026
+in parallel with the new app's hosting from June 2026, so both are charged
+for the overlap on purpose; the new monthly rate applies from June 2026.
+
+Duration: 3h09m at report time plus the wrap (measured wall clock).
+Tokens: 43.2M total (123k output + 383 fresh input + 43.1M cache), measured.
+Verification state: everything above verified live (Pay tab, printable
+invoice, hosted payment page with the new icon, status sync exercised with
+the restricted key in place). Not yet exercised: an actual card payment.
 
 ## 2026-07-20 (late afternoon) - Work recording built; queue cleared; privilege gaps closed
 

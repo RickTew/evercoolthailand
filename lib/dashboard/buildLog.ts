@@ -30,6 +30,26 @@ export type BuildLogEntry = {
 // old CMS site and the old hosting years). Newest first.
 export const BUILD_LOG: BuildLogEntry[] = [
   {
+    "date": "2026-07-21",
+    "title": "Pay section: hosting billing in the portal, card payment live",
+    "type": "feature",
+    "summary": "The company's hosting bills now live inside the portal. A new Pay tab, visible only to the manager and admin, lists every hosting invoice: due bills on top with a card payment button that opens a secure hosted payment page, an itemized dropdown of everything the monthly fee covers, and an archive where paid invoices stay available to view, print or save as PDF. Payment status updates itself when a bill is paid. The branded invoice documents and the payment provider setup (live invoices, payment windows, brand mark) were completed in the same session.",
+    "hours": 3.2,
+    "tokensK": 43200,
+    "changes": [
+      "New Pay tab, manager and admin only; every other role is blocked even from typed-in addresses, same protection as the Users console",
+      "Invoice records table added with locked-down access (server-only reads and writes), applied to production",
+      "Pay page with Due now / Upcoming / Paid badges, a total-due banner and card payment buttons",
+      "Printable invoice view matching the branded document, with a Print / Save as PDF button",
+      "Paid Invoices archive: settled bills keep their document and receipt available permanently",
+      "Payment status checks itself on page load through a restricted read-only key, so a paid bill flips to Paid with its receipt link automatically",
+      "Coverage dropdown: six service areas spelled out, plus notes that new build work after 1st Jul 2026 is billed separately and the original build was never invoiced",
+      "Branded PDF invoice set produced: a backfilled paid record for the old hosting era and the new monthly invoices",
+      "Payment provider set up: business customer, three live invoices with 30-day payment windows, no customer emails sent, brand icon replaced with the R2 mark",
+      "Polish: thousands separators on amounts, corner-ribbon overlap fixed, due dates corrected to the 1st of the service month",
+    ],
+  },
+  {
     "date": "2026-07-20",
     "title": "Effort recording built; email round trip proven live; staff permissions tightened",
     "type": "infra",
