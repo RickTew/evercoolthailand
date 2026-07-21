@@ -125,6 +125,99 @@ export default async function PayPage() {
         )}
       </div>
 
+      {/* What the monthly fee covers. Rick, 21 Jul: it is far more than
+          standard hosting, so spell it out, but fold it into a dropdown so
+          the bills stay front and center. */}
+      <details className="group rounded-2xl border border-ec-border bg-ec-card">
+        <summary className="flex cursor-pointer list-none items-center justify-between gap-3 p-4 sm:p-5 [&::-webkit-details-marker]:hidden">
+          <div>
+            <span className="font-bold text-ec-text">
+              What the $99 / month covers
+            </span>
+            <span className="ml-2 text-sm text-ec-text-muted">
+              far more than standard hosting
+            </span>
+          </div>
+          <svg
+            aria-hidden
+            viewBox="0 0 20 20"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+            className="h-4 w-4 shrink-0 text-ec-text-muted transition-transform group-open:rotate-180"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 8l4 4 4-4" />
+          </svg>
+        </summary>
+        <div className="border-t border-ec-border p-4 sm:p-5">
+          <div className="grid gap-3 sm:grid-cols-2">
+            {[
+              {
+                icon: "🌐",
+                title: "Public website",
+                body: "The Evercoolthailand.com front end: pages, services, gallery, articles, quote request and booking forms.",
+              },
+              {
+                icon: "🧭",
+                title: "EC Portal (backend dashboard)",
+                body: "Dashboard, Quotes, Bookings, Customers, Projects, Team, Reports and the Users console.",
+              },
+              {
+                icon: "💬",
+                title: "Email CRM system",
+                body: "Company mail on @evercoolthailand.com, the shared inbox with tickets, labels, saved replies, the AIDE draft assistant, and the EN + TH guides.",
+              },
+              {
+                icon: "🔑",
+                title: "User accounts & access",
+                body: "Staff sign-in, roles, per-person tab access and the manager hiring console.",
+              },
+              {
+                icon: "🔧",
+                title: "EQ Tracker, built in",
+                body: "Equipment projects plus Service & Maintenance schedules and reports, consolidated from the old separate app into this portal.",
+              },
+              {
+                icon: "🛡️",
+                title: "Infrastructure & security",
+                body: "Hosting on a global edge network, domain & DNS, SSL, firewall (WAF), spam defense, daily backups, monitoring and updates.",
+              },
+            ].map((item) => (
+              <div
+                key={item.title}
+                className="rounded-xl border border-ec-border p-3.5"
+              >
+                <div className="flex items-center gap-2">
+                  <span aria-hidden className="text-lg">
+                    {item.icon}
+                  </span>
+                  <span className="text-sm font-bold text-ec-text">{item.title}</span>
+                </div>
+                <p className="mt-1.5 text-xs leading-relaxed text-ec-text-muted">
+                  {item.body}
+                </p>
+              </div>
+            ))}
+          </div>
+          <div className="mt-4 space-y-2 rounded-xl bg-ec-navy/5 p-3.5 text-xs leading-relaxed text-ec-text-muted dark:bg-white/5">
+            <p>
+              <b className="text-ec-text">Not included:</b> new build work recorded on
+              the{" "}
+              <Link href="/admin/build" className="font-semibold text-ec-teal hover:underline">
+                Build page
+              </Link>{" "}
+              after 1st Jul 2026. New features beyond upkeep are quoted and billed
+              separately.
+            </p>
+            <p>
+              The original design and build of everything above (the website, the
+              portal, the CRM and the email system) was never invoiced. The monthly
+              fee covers hosting, management and upkeep.
+            </p>
+          </div>
+        </div>
+      </details>
+
       <div className="space-y-3">
         {invoices.length === 0 && (
           <div className="rounded-2xl border border-ec-border bg-ec-card p-6 text-sm text-ec-text-muted">
