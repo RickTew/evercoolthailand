@@ -1,7 +1,7 @@
 -- 0010: R2 Hosting invoices shown on the Pay tab (Rick, 21 Jul).
 --
 -- R2 Hosting (Rick) bills Evercool $99/month for hosting, management and the
--- apps, starting June 2026. The Pay tab (admin + manager only) lists these
+-- apps, starting August 2026. The Pay tab (admin + manager only) lists these
 -- rows; each carries its Stripe hosted-invoice link so Evercool pays by card,
 -- and Stripe's own receipt/PDF links land back here once paid.
 --
@@ -34,32 +34,16 @@ create table if not exists public.hosting_invoices (
 alter table public.hosting_invoices enable row level security;
 revoke all on table public.hosting_invoices from authenticated, anon;
 
--- June + July are due now; August is issued ahead at the same rate. The
--- Stripe columns stay null until the Stripe invoices are created, at which
--- point the Pay buttons go live.
+-- The paid history (Mar 2025 - Jul 2026 at $80/month) lives in the R2H-1001
+-- PDF, not in Stripe and not here: the Pay tab starts with the first invoice
+-- at the new $99 rate, August 2026 (Rick, 21 Jul: "new rate starts August").
+-- The Stripe columns stay null until the Stripe invoice is created, at which
+-- point the Pay button goes live.
 insert into public.hosting_invoices
   (invoice_no, period_start, period_end, description_title, description_lines,
    amount_cents, invoice_date, due_date)
 values
-  ('R2H-1002', '2026-06-01', '2026-06-30',
-   'Managed Web Hosting & Applications - Evercoolthailand.com (06/01/2026 - 06/30/2026)',
-   array[
-     'EC Portal application: CRM, Quotes, Bookings, Customers, Projects, Service, Reports (hosting, management & updates)',
-     'Email infrastructure: custom domain delivery, spam defense, mail storage',
-     'Security & monitoring: firewall (WAF), SSL, daily backups',
-     'Server Location: Global Edge Network'
-   ],
-   9900, '2026-06-01', '2026-06-01'),
-  ('R2H-1003', '2026-07-01', '2026-07-31',
-   'Managed Web Hosting & Applications - Evercoolthailand.com (07/01/2026 - 07/31/2026)',
-   array[
-     'EC Portal application: CRM, Quotes, Bookings, Customers, Projects, Service, Reports (hosting, management & updates)',
-     'Email infrastructure: custom domain delivery, spam defense, mail storage',
-     'Security & monitoring: firewall (WAF), SSL, daily backups',
-     'Server Location: Global Edge Network'
-   ],
-   9900, '2026-07-01', '2026-07-01'),
-  ('R2H-1004', '2026-08-01', '2026-08-31',
+  ('R2H-1002', '2026-08-01', '2026-08-31',
    'Managed Web Hosting & Applications - Evercoolthailand.com (08/01/2026 - 08/31/2026)',
    array[
      'EC Portal application: CRM, Quotes, Bookings, Customers, Projects, Service, Reports (hosting, management & updates)',
