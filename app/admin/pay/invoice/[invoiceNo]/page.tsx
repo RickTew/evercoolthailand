@@ -91,7 +91,7 @@ export default async function InvoicePage({
       <div className="invoice-sheet relative mx-auto max-w-[820px] overflow-hidden rounded-xl border border-ec-border bg-white p-8 text-[13px] text-[#222] sm:p-12">
         {/* PAID / UNPAID corner ribbon */}
         <div
-          className="absolute right-[-64px] top-[34px] w-[260px] rotate-45 py-2 text-center text-3xl font-bold tracking-widest text-white"
+          className="absolute right-[-70px] top-[22px] w-[220px] rotate-45 py-1.5 text-center text-2xl font-bold tracking-widest text-white"
           style={{ background: paid ? BLUE : "#dc2626" }}
         >
           {paid ? "PAID" : "UNPAID"}
@@ -99,7 +99,7 @@ export default async function InvoicePage({
 
         <div className="mb-7 flex items-start justify-between">
           <R2Logo />
-          <div className="mt-10 text-right leading-relaxed">
+          <div className="mt-16 text-right leading-relaxed">
             <div className="text-[15px] font-bold" style={{ color: NAVY }}>
               R2 Hosting
             </div>
