@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useLanguage } from "@/lib/i18n/useLanguage";
 
 /* ─── Types ─────────────────────────────────────────────── */
@@ -27,6 +28,16 @@ const CATEGORIES = [
 ] as const;
 
 const APPLICATIONS = ["Commercial", "Medical", "Industrial"] as const;
+
+// Deep-link slugs used by the footer and home page (/products?cat=...).
+const CATEGORY_SLUGS: Record<string, (typeof CATEGORIES)[number]> = {
+  ahu: "Air Handling Units",
+  ventilation: "Fresh Air Systems",
+  heat: "Fresh Air Systems",
+  outdoor: "Condensing Units",
+  components: "Components",
+  purifiers: "Purifiers",
+};
 
 /* ─── Product Catalog ────────────────────────────────────── */
 const PRODUCTS: Product[] = [
@@ -96,7 +107,7 @@ const PRODUCTS: Product[] = [
     specs: [
       "Penta-post Al frame, double-skin PU insulation, thermo-break eliminates cold bridge",
       "Fire Rated UL94V0, air leakage <0.4 l/s.sqm, EN 1886:2007 compliant",
-      "3TR–110TR capacity, ceiling / vertical / horizontal configurations",
+      "3TR-110TR capacity, ceiling / vertical / horizontal configurations",
     ],
     certifications: ["EN 1886", "UL94V0"],
     badge: "TECH FREE",
@@ -463,7 +474,11 @@ function FilterItem({
 /* ─── Main Dashboard Component ───────────────────────────── */
 export default function ProductDashboard() {
   const { t } = useLanguage();
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const searchParams = useSearchParams();
+  const linkedCategory = CATEGORY_SLUGS[searchParams.get("cat") ?? ""];
+  const [selectedCategories, setSelectedCategories] = useState<string[]>(
+    linkedCategory ? [linkedCategory] : []
+  );
   const [selectedApplications, setSelectedApplications] = useState<string[]>([]);
 
   const CATEGORY_LABELS: Record<string, string> = {

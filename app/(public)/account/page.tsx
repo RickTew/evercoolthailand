@@ -6,9 +6,15 @@ import CustomerPortal from "@/components/public/CustomerPortal";
 export const metadata: Metadata = {
   title: "My Account",
   description: "View your quotes, bookings, and service history.",
+  robots: { index: false, follow: false },
 };
 
-export default async function AccountPage() {
+export default async function AccountPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
+  const { error } = await searchParams;
   const supabase = await createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -19,7 +25,7 @@ export default async function AccountPage() {
           <h1 className="text-2xl font-bold text-ec-text">My Account</h1>
           <p className="text-sm text-ec-text-muted mt-1">Sign in to view your service history</p>
         </div>
-        <AccountAuth />
+        <AccountAuth linkExpired={error === "auth"} />
       </main>
     );
   }

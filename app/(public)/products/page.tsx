@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import Link from "next/link";
 import ProductDashboard from "@/components/public/ProductDashboard";
 
@@ -56,7 +57,9 @@ export default function ProductsPage() {
       </div>
 
       {/* Interactive product dashboard */}
-      <ProductDashboard />
+      <Suspense>
+        <ProductDashboard />
+      </Suspense>
 
       {/* CTA */}
       <div className="mx-4 md:mx-10 mt-10 bg-ec-navy rounded-2xl p-6 text-center">

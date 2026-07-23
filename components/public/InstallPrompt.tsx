@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useSyncExternalStore } from "react";
 import { useLanguage } from "@/lib/i18n/useLanguage";
+import { getConsent, getServerConsent, subscribeConsent } from "@/lib/consent";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>;
@@ -14,6 +15,8 @@ export default function InstallPrompt() {
   const [isIOS, setIsIOS] = useState(false);
   const [isIOSSafari, setIsIOSSafari] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  // Wait for the cookie banner to be answered so the two never overlap.
+  const consent = useSyncExternalStore(subscribeConsent, getConsent, getServerConsent);
 
   useEffect(() => {
     // Don't show if already installed
@@ -25,12 +28,13 @@ export default function InstallPrompt() {
     const ios = /iPad|iPhone|iPod/.test(ua);
     const safari = ios && /Safari/.test(ua) && !/CriOS|FxiOS/.test(ua);
 
-    setIsIOS(ios);
-    setIsIOSSafari(safari);
-
     if (ios) {
       // On iOS show after a delay
-      const timer = setTimeout(() => setShow(true), 3000);
+      const timer = setTimeout(() => {
+        setIsIOS(true);
+        setIsIOSSafari(safari);
+        setShow(true);
+      }, 3000);
       return () => clearTimeout(timer);
     }
 
@@ -58,10 +62,10 @@ export default function InstallPrompt() {
     dismiss();
   }
 
-  if (!show) return null;
+  if (!show || consent === null) return null;
 
   return (
-    <div className="fixed bottom-[4.5rem] left-0 right-0 z-50 px-4 pb-2">
+    <div className="fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom,0px))] md:bottom-4 left-0 right-0 z-50 px-4 pb-2">
       <div className="mx-auto max-w-[480px] bg-ec-navy text-white rounded-2xl p-4 shadow-xl border border-white/10">
         <div className="flex items-start gap-3">
           <div className="w-10 h-10 rounded-xl bg-ec-teal flex items-center justify-center text-lg font-bold shrink-0">

@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Sarabun } from "next/font/google";
-import Script from "next/script";
+import AnalyticsConsent from "@/components/public/AnalyticsConsent";
 import "./globals.css";
 
 // ─── Analytics IDs - set these in .env.local / Vercel env vars ───────────────
@@ -30,12 +30,12 @@ export const metadata: Metadata = {
     "Thailand's trusted indoor air quality and HVAC specialists. AC installation, repair, maintenance, air purifiers, and custom solutions for homes, offices, and factories.",
   manifest: "/manifest.json",
   icons: {
+    // icons/icon.svg is 6.8 MB (embedded raster); never reference it.
     icon: [
-      { url: "/icons/icon.svg", type: "image/svg+xml" },
       { url: "/icons/icon-192.png", type: "image/png", sizes: "192x192" },
       { url: "/icons/icon-512.png", type: "image/png", sizes: "512x512" },
     ],
-    shortcut: "/icons/icon.svg",
+    shortcut: "/icons/icon-192.png",
     apple: "/icons/icon-192.png",
   },
   appleWebApp: {
@@ -84,24 +84,9 @@ export default function RootLayout({
       <body className="font-sans antialiased bg-ec-bg text-ec-text">
         {children}
 
-        {/* GA4 - only loads when NEXT_PUBLIC_GA_ID is set */}
-        {GA_ID && (
-          <>
-            <Script
-              src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
-              strategy="afterInteractive"
-            />
-            <Script id="ga4-init" strategy="afterInteractive">
-              {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${GA_ID}');`}
-            </Script>
-          </>
-        )}
-
-        {/* Meta Pixel - only loads when NEXT_PUBLIC_META_PIXEL_ID is set */}
-        {META_PIXEL_ID && (
-          <Script id="meta-pixel" strategy="afterInteractive">
-            {`!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','${META_PIXEL_ID}');fbq('track','PageView');`}
-          </Script>
+        {/* GA4 + Meta Pixel load only after cookie consent is accepted */}
+        {(GA_ID || META_PIXEL_ID) && (
+          <AnalyticsConsent gaId={GA_ID} metaPixelId={META_PIXEL_ID} />
         )}
       </body>
     </html>

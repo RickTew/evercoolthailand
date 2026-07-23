@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { useLanguage } from "@/lib/i18n/useLanguage";
 
 // Set this to the VAPID public key from your .env.local
@@ -17,18 +17,35 @@ function urlBase64ToUint8Array(base64String: string): ArrayBuffer {
 
 type PermissionState = "default" | "granted" | "denied" | "unsupported";
 
+// serviceWorker.ready never settles when no SW is registered (e.g. Serwist is
+// disabled in development), so cap the wait instead of hanging the button.
+function swReady(timeoutMs = 5000): Promise<ServiceWorkerRegistration> {
+  return Promise.race([
+    navigator.serviceWorker.ready,
+    new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error("Service worker not ready")), timeoutMs)
+    ),
+  ]);
+}
+
 export default function PushOptIn() {
   const { t, lang } = useLanguage();
-  const [permState, setPermState] = useState<PermissionState>("default");
+  const [override, setOverride] = useState<PermissionState | null>(null);
   const [loading, setLoading] = useState(false);
+  const hydrated = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
 
-  useEffect(() => {
-    if (!("Notification" in window) || !("serviceWorker" in navigator) || !VAPID_PUBLIC_KEY) {
-      setPermState("unsupported");
-      return;
-    }
-    setPermState(Notification.permission as PermissionState);
-  }, []);
+  // Derived on the client after hydration; user actions override it.
+  const permState: PermissionState =
+    override ??
+    (!hydrated
+      ? "default"
+      : !("Notification" in window) || !("serviceWorker" in navigator) || !VAPID_PUBLIC_KEY
+        ? "unsupported"
+        : (Notification.permission as PermissionState));
 
   async function handleSubscribe() {
     if (!VAPID_PUBLIC_KEY) return;
@@ -36,12 +53,12 @@ export default function PushOptIn() {
     try {
       const permission = await Notification.requestPermission();
       if (permission !== "granted") {
-        setPermState("denied");
+        setOverride("denied");
         setLoading(false);
         return;
       }
 
-      const reg = await navigator.serviceWorker.ready;
+      const reg = await swReady();
       const sub = await reg.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
@@ -58,7 +75,7 @@ export default function PushOptIn() {
         }),
       });
 
-      setPermState("granted");
+      setOverride("granted");
     } catch (err) {
       console.error("Push subscribe failed:", err);
     }
@@ -68,7 +85,7 @@ export default function PushOptIn() {
   async function handleUnsubscribe() {
     setLoading(true);
     try {
-      const reg = await navigator.serviceWorker.ready;
+      const reg = await swReady();
       const sub = await reg.pushManager.getSubscription();
       if (sub) {
         await fetch("/api/push/subscribe", {
@@ -78,7 +95,7 @@ export default function PushOptIn() {
         });
         await sub.unsubscribe();
       }
-      setPermState("default");
+      setOverride("default");
     } catch (err) {
       console.error("Push unsubscribe failed:", err);
     }

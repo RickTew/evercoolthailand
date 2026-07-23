@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 const PHONE = "+66 95-562-2892";
+const PHONE_TEL = "+66955622892";
 const PHONE_RAW = "66955622892";
 const EMAIL = "info@evercoolthailand.com";
 
@@ -8,7 +9,7 @@ export default function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="bg-ec-navy border-t border-white/10 mt-auto">
+    <footer className="bg-ec-navy border-t border-white/10 mt-auto pb-[calc(4.5rem+env(safe-area-inset-bottom,0px))] md:pb-0">
       <div className="px-5 md:px-10 pt-10 pb-6">
 
         {/* Desktop: 4-column grid | Mobile: stacked */}
@@ -58,11 +59,11 @@ export default function Footer() {
             <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-3">Products</p>
             <ul className="flex flex-col gap-2 mb-5">
               {[
-                { href: "/products#ahu", label: "TECH FREE AHU" },
-                { href: "/products#heat", label: "Heat Recovery Units" },
-                { href: "/products#outdoor", label: "Outdoor Units" },
-                { href: "/products#components", label: "Coils & EC Fans" },
-                { href: "/products#ventilation", label: "Fresh Air Units" },
+                { href: "/products?cat=ahu", label: "TECH FREE AHU" },
+                { href: "/products?cat=heat", label: "Heat Recovery Units" },
+                { href: "/products?cat=outdoor", label: "Outdoor Units" },
+                { href: "/products?cat=components", label: "Coils & EC Fans" },
+                { href: "/products?cat=ventilation", label: "Fresh Air Units" },
               ].map((l) => (
                 <li key={l.href}>
                   <Link href={l.href} className="text-xs text-white/55 hover:text-white transition-colors">
@@ -76,7 +77,9 @@ export default function Footer() {
               {[
                 { href: "/about", label: "About Us" },
                 { href: "/gallery", label: "Our Work" },
+                { href: "/learn", label: "Learning Hub" },
                 { href: "/contact", label: "Contact" },
+                { href: "/privacy", label: "Privacy Policy" },
               ].map((l) => (
                 <li key={l.href}>
                   <Link href={l.href} className="text-xs text-white/55 hover:text-white transition-colors">
@@ -92,7 +95,7 @@ export default function Footer() {
             <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-3">Contact</p>
             <div className="flex flex-col gap-3 mb-5">
               <a
-                href={`tel:${PHONE_RAW}`}
+                href={`tel:${PHONE_TEL}`}
                 className="flex items-center gap-2 text-xs text-white/60 hover:text-white transition-colors"
               >
                 <svg className="w-3.5 h-3.5 text-ec-teal shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -135,7 +138,7 @@ export default function Footer() {
         <div className="border-t border-white/10 pt-4 flex flex-col md:flex-row md:items-center md:justify-between gap-2">
           <p className="text-[10px] text-white/30">© {year} Evercool Thailand Co., Ltd. All rights reserved.</p>
           <div className="flex items-center gap-3">
-            <span className="text-[10px] text-white/30">Mon–Sat 08:00–18:00</span>
+            <span className="text-[10px] text-white/30">Mon to Sat 08:00-18:00</span>
             <span className="text-white/20">·</span>
             <span className="text-[10px] text-white/30">Licensed HVAC Contractor</span>
             <span className="text-white/20">·</span>

@@ -52,3 +52,6 @@ next-env.d.ts
 
 # Supabase CLI local state
 supabase/.temp/
+
+# Local audit notes (keep out of the public repo)
+FRONTEND-AUDIT.md

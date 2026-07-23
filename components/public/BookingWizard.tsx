@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useLanguage } from "@/lib/i18n/useLanguage";
 import PromptPaySheet from "@/components/public/PromptPaySheet";
-import { bangkokToday } from "@/lib/timezone";
+import { bangkokToday, bangkokTimeHHMM } from "@/lib/timezone";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -20,7 +20,6 @@ type BookingForm = {
   phone: string;
   email: string;
   notes: string;
-  preferredLang: "en" | "th";
 };
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -45,7 +44,7 @@ const AREAS = [
 const EMPTY_FORM: BookingForm = {
   serviceSlug: "", serviceName: "", date: "", timeSlot: "",
   area: "", address: "", photos: [], name: "", phone: "",
-  email: "", notes: "", preferredLang: "en",
+  email: "", notes: "",
 };
 
 // ─── Calendar ─────────────────────────────────────────────────────────────────
@@ -170,33 +169,19 @@ export default function BookingWizard() {
   const { t, lang } = useLanguage();
   const searchParams = useSearchParams();
   const [step, setStep] = useState(0);
-  const [form, setForm] = useState<BookingForm>(EMPTY_FORM);
+  // Pre-fill service from the URL param (searchParams are hydration-safe).
+  const [form, setForm] = useState<BookingForm>(() => {
+    const match = SERVICES.find((s) => s.slug === searchParams.get("service"));
+    return match
+      ? { ...EMPTY_FORM, serviceSlug: match.slug, serviceName: match.labelEn }
+      : EMPTY_FORM;
+  });
   const [photoPreviews, setPhotoPreviews] = useState<string[]>([]);
   const [photoError, setPhotoError] = useState("");
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
   const [bookingId, setBookingId] = useState<string>("");
   const [company, setCompany] = useState(""); // honeypot - stays empty for real users
   const [showPayment, setShowPayment] = useState(false);
-
-  // Pre-fill service from URL param
-  useEffect(() => {
-    const serviceParam = searchParams.get("service");
-    if (serviceParam) {
-      const match = SERVICES.find((s) => s.slug === serviceParam);
-      if (match) {
-        setForm((prev) => ({
-          ...prev,
-          serviceSlug: match.slug,
-          serviceName: match.labelEn,
-        }));
-      }
-    }
-    // Pre-fill language
-    const saved = localStorage.getItem("ec_lang");
-    if (saved === "en" || saved === "th") {
-      setForm((prev) => ({ ...prev, preferredLang: saved }));
-    }
-  }, [searchParams]);
 
   function update<K extends keyof BookingForm>(key: K, value: BookingForm[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -238,7 +223,8 @@ export default function BookingWizard() {
       fd.append("area", form.area);
       fd.append("address", form.address);
       fd.append("notes", form.notes);
-      fd.append("preferredLanguage", form.preferredLang);
+      // Read the language at submit time; the saved ec_lang loads after mount.
+      fd.append("preferredLanguage", lang);
       fd.append("company", company);
       for (const photo of form.photos) fd.append("photos", photo);
 
@@ -351,26 +337,45 @@ export default function BookingWizard() {
         <div className="flex flex-col gap-4">
           <div>
             <p className="text-sm font-semibold text-ec-text-muted mb-2">{t.bookSelectDate}</p>
-            <BookingCalendar selected={form.date} onSelect={(d) => update("date", d)} />
+            <BookingCalendar
+              selected={form.date}
+              onSelect={(d) =>
+                setForm((prev) => ({
+                  ...prev,
+                  date: d,
+                  // Drop a selected slot that is in the past for the new date.
+                  timeSlot:
+                    d === bangkokToday() && prev.timeSlot <= bangkokTimeHHMM()
+                      ? ""
+                      : prev.timeSlot,
+                }))
+              }
+            />
           </div>
 
           {form.date && (
             <div>
               <p className="text-sm font-semibold text-ec-text-muted mb-2">{t.bookSelectTime}</p>
               <div className="grid grid-cols-4 gap-2">
-                {TIME_SLOTS.map((slot) => (
-                  <button
-                    key={slot}
-                    onClick={() => update("timeSlot", slot)}
-                    className={`py-2.5 rounded-xl text-sm font-semibold transition-all ${
-                      form.timeSlot === slot
-                        ? "bg-ec-teal text-white shadow-sm"
-                        : "bg-ec-card border border-ec-border text-ec-text hover:border-ec-teal/30"
-                    }`}
-                  >
-                    {slot}
-                  </button>
-                ))}
+                {TIME_SLOTS.map((slot) => {
+                  // When booking for today (Bangkok time), slots already in the
+                  // past are not offered.
+                  const past = form.date === bangkokToday() && slot <= bangkokTimeHHMM();
+                  return (
+                    <button
+                      key={slot}
+                      disabled={past}
+                      onClick={() => update("timeSlot", slot)}
+                      className={`py-2.5 rounded-xl text-sm font-semibold transition-all disabled:opacity-30 disabled:cursor-not-allowed ${
+                        form.timeSlot === slot && !past
+                          ? "bg-ec-teal text-white shadow-sm"
+                          : "bg-ec-card border border-ec-border text-ec-text hover:border-ec-teal/30"
+                      }`}
+                    >
+                      {slot}
+                    </button>
+                  );
+                })}
               </div>
               <p className="text-xs text-ec-text-muted mt-2">{t.bookAvailable}</p>
             </div>

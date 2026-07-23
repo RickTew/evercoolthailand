@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { createBrowserClient } from "@supabase/ssr";
 import { useLanguage } from "@/lib/i18n/useLanguage";
 
@@ -14,14 +14,18 @@ function looksLikeBotEmail(email: string): boolean {
   return dots > 4 && avgLen < 3;
 }
 
-export default function AccountAuth() {
+export default function AccountAuth({ linkExpired = false }: { linkExpired?: boolean }) {
   const { t } = useLanguage();
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [honeypot, setHoneypot] = useState(""); // bots fill this, humans don't
-  const loadedAt = useRef(Date.now());
+  const loadedAt = useRef<number | null>(null);
+
+  useEffect(() => {
+    loadedAt.current ??= Date.now();
+  }, []);
 
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -34,8 +38,12 @@ export default function AccountAuth() {
     // Honeypot check: bots fill hidden fields
     if (honeypot) return;
 
-    // Speed check: real humans take more than 2 seconds
-    if (Date.now() - loadedAt.current < 2000) return;
+    // Speed check: real humans take more than 2 seconds. Password-manager
+    // autofill can trip this, so give feedback instead of a dead button.
+    if (loadedAt.current === null || Date.now() - loadedAt.current < 2000) {
+      setError(t.formTryAgain);
+      return;
+    }
 
     // Email pattern check: silently swallow dot-spam bot emails
     if (looksLikeBotEmail(email)) {
@@ -82,6 +90,10 @@ export default function AccountAuth() {
     <div className="bg-ec-card rounded-2xl border border-ec-border p-5">
       <h2 className="text-base font-bold text-ec-text mb-1">{t.accountSignIn}</h2>
       <p className="text-xs text-ec-text-muted mb-4">{t.accountAuthDesc}</p>
+
+      {linkExpired && !error && (
+        <p className="text-xs text-amber-500 mb-3">{t.accountLinkExpired}</p>
+      )}
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">
         {/* Honeypot: hidden from real users, bots fill it and get silently blocked */}

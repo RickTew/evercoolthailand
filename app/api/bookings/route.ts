@@ -47,7 +47,7 @@ export async function POST(request: Request) {
         const { error: uploadError } = await admin.storage
           .from("quote-photos")
           .upload(`bookings/${fileName}`, buffer, { contentType: photo.type, upsert: false });
-        if (!uploadError) photoPaths.push(fileName);
+        if (!uploadError) photoPaths.push(`bookings/${fileName}`);
       }
     }
 
@@ -72,6 +72,13 @@ export async function POST(request: Request) {
     // Non-blocking email
     try {
       const { sendEmail, escapeHtml } = await import("@/lib/email/send");
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+      const photoLinksHtml = photoPaths
+        .map((p, i) => {
+          const url = `${supabaseUrl}/storage/v1/object/public/quote-photos/${p}`;
+          return `<a href="${url}">Photo ${i + 1}</a>`;
+        })
+        .join(" · ");
       await sendEmail({
         to: "info@evercoolthailand.com",
         subject: `New Booking: ${serviceName} on ${bookingDate} at ${bookingTime}`,
@@ -85,7 +92,7 @@ export async function POST(request: Request) {
           <p><strong>Area:</strong> ${escapeHtml(area)}</p>
           <p><strong>Address:</strong> ${escapeHtml(address)}</p>
           ${notes ? `<p><strong>Notes:</strong> ${escapeHtml(notes)}</p>` : ""}
-          <p><strong>Photos:</strong> ${photoPaths.length}</p>
+          <p><strong>Photos:</strong> ${photoPaths.length ? photoLinksHtml : "None"}</p>
         `,
       });
     } catch {

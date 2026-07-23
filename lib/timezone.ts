@@ -32,6 +32,15 @@ export function formatBangkokTime(
   });
 }
 
+export function bangkokTimeHHMM(): string {
+  return new Date().toLocaleTimeString("en-GB", {
+    timeZone: BANGKOK_TZ,
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+}
+
 export function bangkokStartOfDay(dateStr?: string): string {
   const date = dateStr || bangkokToday();
   return `${date}T00:00:00+07:00`;

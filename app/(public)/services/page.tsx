@@ -38,7 +38,7 @@ export default async function ServicesPage() {
 
       <SolutionsDashboard />
 
-      <div className="px-4 md:px-10 pt-2 pb-8">
+      <div id="services-grid" className="px-4 md:px-10 pt-2 pb-8 scroll-mt-20">
         <div className="mb-6">
           <h2 className="text-2xl font-bold text-ec-text leading-tight">All Services</h2>
           <p className="text-sm text-ec-text-muted mt-1">
@@ -49,7 +49,7 @@ export default async function ServicesPage() {
       </div>
 
       {/* Booking wizard */}
-      <div className="border-t border-ec-border mt-2">
+      <div id="book" className="border-t border-ec-border mt-2 scroll-mt-20">
         <Suspense>
           <BookingWizard />
         </Suspense>

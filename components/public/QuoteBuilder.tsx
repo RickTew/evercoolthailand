@@ -22,7 +22,6 @@ interface QuoteForm {
   phone: string;
   email: string;
   notes: string;
-  preferredLang: "en" | "th";
   preferredTier: Tier | "";
 }
 
@@ -50,9 +49,13 @@ export default function QuoteBuilder() {
   const [photoError, setPhotoError] = useState("");
   const [company, setCompany] = useState(""); // honeypot - stays empty for real users
 
+  // Only accept known service slugs from the URL; anything else starts blank.
+  const linkedService = searchParams.get("service");
   const [form, setForm] = useState<QuoteForm>({
     propertyType: "",
-    serviceType: searchParams.get("service") || "",
+    serviceType: SERVICE_OPTIONS.some((o) => o.value === linkedService)
+      ? (linkedService as string)
+      : "",
     areaSqm: "",
     numRooms: "",
     currentAcCount: "",
@@ -64,7 +67,6 @@ export default function QuoteBuilder() {
     phone: "",
     email: "",
     notes: "",
-    preferredLang: lang,
     preferredTier: "",
   });
 
@@ -131,7 +133,8 @@ export default function QuoteBuilder() {
       body.append("phone", form.phone);
       body.append("email", form.email);
       body.append("notes", form.notes);
-      body.append("preferredLang", form.preferredLang);
+      // Read the language at submit time; the saved ec_lang loads after mount.
+      body.append("preferredLang", lang);
       body.append("preferredTier", form.preferredTier);
       body.append("company", company);
       form.photos.forEach((photo) => body.append("photos", photo));
@@ -244,6 +247,7 @@ export default function QuoteBuilder() {
             <input
               type="number"
               inputMode="numeric"
+              min={0}
               value={form.areaSqm}
               onChange={(e) => update("areaSqm", e.target.value)}
               className="mt-1 w-full px-4 py-3 rounded-xl border border-ec-border bg-ec-card text-ec-text text-sm focus:outline-none focus:border-ec-teal focus:ring-1 focus:ring-ec-teal"
@@ -255,6 +259,7 @@ export default function QuoteBuilder() {
             <input
               type="number"
               inputMode="numeric"
+              min={0}
               value={form.numRooms}
               onChange={(e) => update("numRooms", e.target.value)}
               className="mt-1 w-full px-4 py-3 rounded-xl border border-ec-border bg-ec-card text-ec-text text-sm focus:outline-none focus:border-ec-teal focus:ring-1 focus:ring-ec-teal"
@@ -266,6 +271,7 @@ export default function QuoteBuilder() {
             <input
               type="number"
               inputMode="numeric"
+              min={0}
               value={form.currentAcCount}
               onChange={(e) => update("currentAcCount", e.target.value)}
               className="mt-1 w-full px-4 py-3 rounded-xl border border-ec-border bg-ec-card text-ec-text text-sm focus:outline-none focus:border-ec-teal focus:ring-1 focus:ring-ec-teal"
@@ -317,6 +323,7 @@ export default function QuoteBuilder() {
           <div className="grid grid-cols-3 gap-3">
             {form.photos.map((_photo, i) => (
               <div key={i} className="relative aspect-square rounded-xl overflow-hidden bg-ec-border">
+                {/* eslint-disable-next-line @next/next/no-img-element -- blob object-URL preview, not optimizable */}
                 <img
                   src={photoPreviews[i]}
                   alt={`Photo ${i + 1}`}
@@ -351,7 +358,11 @@ export default function QuoteBuilder() {
             accept="image/*"
             multiple
             className="hidden"
-            onChange={(e) => addPhotos(e.target.files)}
+            onChange={(e) => {
+              addPhotos(e.target.files);
+              // Allow re-selecting the same file after removing it.
+              e.target.value = "";
+            }}
           />
         </div>
       )}

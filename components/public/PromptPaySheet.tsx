@@ -31,9 +31,14 @@ export default function PromptPaySheet({ open, onClose, amount, reference }: Pro
   }, [open, amount]);
 
   async function handleCopy() {
-    await navigator.clipboard.writeText(PROMPTPAY_PHONE);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    try {
+      await navigator.clipboard.writeText(PROMPTPAY_PHONE);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Clipboard unavailable (insecure context / in-app browser); the number
+      // is visible on screen so the user can copy it manually.
+    }
   }
 
   if (!open) return null;

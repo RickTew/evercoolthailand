@@ -99,6 +99,14 @@ input[type="date"] {
   to { opacity: 1; transform: translateY(0); }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .page-enter,
+  .animate-pulse,
+  .animate-spin {
+    animation: none;
+  }
+}
+
 /* Bottom nav safe area - mobile only */
 .pb-nav {
   padding-bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px));
