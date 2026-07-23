@@ -1,240 +1,239 @@
 "use client";
 
-// TEST VARIANT C: "Straight Answer"
-// Audit-driven rebuild in the existing brand language (ec tokens, so it
-// follows light/dark automatically). Every problem the audit found gets an
-// answer: the primary action is above the fold with call and WhatsApp beside
-// it, trust signals are real (certs, factory, projects), every service card
-// lands inside the quote wizard, and no text drops below 12px or 60% white.
+// TEST VARIANT C (v2): "Engineered Air · Front Desk"
+// Variation of A. Identical visual DNA (dark ground, Archivo, hairlines,
+// square corners, one teal accent) but tuned for conversion: the hero leads
+// with the three ways to act, services appear as numbered rows that drop
+// into the quote wizard, and a three-step process answers "what happens
+// next" before the proof band.
 
 import Link from "next/link";
 import Image from "next/image";
+import { Archivo } from "next/font/google";
 import { useLanguage } from "@/lib/i18n/useLanguage";
+
+const archivo = Archivo({
+  subsets: ["latin"],
+  weight: ["500", "700", "900"],
+  variable: "--font-archivo",
+  display: "swap",
+});
 
 const COPY = {
   en: {
-    heroTitle: "Cooling and clean air, done properly.",
-    heroSub: "AC installation, repair, and air quality systems for homes and industry. Backed by our own 250,000 sqft certified factory.",
+    eyebrow: "EverCool Thailand · Est. 1998",
+    headline1: "Tell us what",
+    headline2: "the air needs to do.",
+    sub: "Cooling, humidity, filtration, or a full custom air handling system. Quote in 24 hours, in Thai or English.",
     quoteCta: "Get a free quote",
-    quoteNote: "Answer in 24 hours. No obligation.",
-    call: "Call",
+    call: "Call 095-562-2892",
     chat: "WhatsApp",
-    trust: ["Since 1998", "ISO 9001 factory", "Bangkok · Koh Tao · Surat Thani", "EN + TH support"],
-    servicesTitle: "What do you need done?",
-    servicesSub: "Pick one and tell us about your space. Takes two minutes.",
-    stepsTitle: "How it works",
+    trust: ["Since 1998", "ISO 9001 factory", "Bangkok · Koh Tao · Surat Thani", "8 markets"],
+    jobsHeading: "Choose the job",
+    jobsSub: "Each line starts a two-minute quote.",
+    stepsHeading: "What happens next",
     steps: [
-      ["Tell us about the job", "Property type, size, photos if you have them."],
-      ["Get your quote in 24 hours", "A real price range and recommendation, not a callback promise."],
-      ["We install and stand behind it", "Certified equipment, tested before shipping, serviced after."],
+      ["Tell us about the space", "Property type, size, photos if you have them."],
+      ["Quote within 24 hours", "A real recommendation with a price range."],
+      ["Install, test, maintain", "Certified equipment, serviced by the same team."],
     ],
-    proofTitle: "Why people trust the equipment",
-    proofBody: "We are not resellers. TECH FREE air handling units are built in a 250,000 sqft ISO 9001 factory and certified against EN 1886, AHRI, VDI 6022, and BS 476. The same systems run in hospitals, data centres, and hotels across eight markets.",
-    proofCta: "See the products",
-    projLabel: "Selected projects",
-    toolsTitle: "Not sure what size you need?",
-    toolsBody: "Use the free sizing and energy calculators, then send the result straight into a quote.",
-    toolsCta: "Open the calculators",
-    finalTitle: "Ready when you are.",
-    finalSub: "Quote by form, phone, or WhatsApp. Thai and English.",
+    proofHeading: "Built in our own factory",
+    proofBody: "TECH FREE air handling units are manufactured in a 250,000 sqft ISO 9001 facility and certified against EN 1886, AHRI, VDI 6022, and BS 476. The same systems run in hospitals, data centres, and hotels across eight markets.",
+    proofCta: "See the equipment",
+    toolsLabel: "Not sure about sizing?",
+    toolsCta: "Use the free calculators",
+    finalHeading: "Ready when you are.",
+    finalCta: "Start a quote",
   },
   th: {
-    heroTitle: "ความเย็นและอากาศสะอาด ทำอย่างมืออาชีพ",
-    heroSub: "ติดตั้งแอร์ ซ่อมแอร์ และระบบคุณภาพอากาศ สำหรับบ้านและอุตสาหกรรม หนุนด้วยโรงงานรับรอง 250,000 ตร.ฟุตของเราเอง",
+    eyebrow: "EverCool Thailand · ก่อตั้ง 1998",
+    headline1: "บอกเราว่า",
+    headline2: "อากาศของคุณต้องทำอะไร",
+    sub: "ความเย็น ความชื้น การกรอง หรือระบบส่งลมเย็นสั่งทำครบวงจร ใบเสนอราคาใน 24 ชั่วโมง ทั้งไทยและอังกฤษ",
     quoteCta: "ขอใบเสนอราคาฟรี",
-    quoteNote: "ตอบภายใน 24 ชั่วโมง ไม่มีข้อผูกมัด",
-    call: "โทร",
+    call: "โทร 095-562-2892",
     chat: "WhatsApp",
-    trust: ["ตั้งแต่ปี 1998", "โรงงาน ISO 9001", "กรุงเทพฯ · เกาะเต่า · สุราษฎร์ธานี", "บริการไทยและอังกฤษ"],
-    servicesTitle: "ต้องการให้ทำอะไร",
-    servicesSub: "เลือกหนึ่งอย่างแล้วเล่าเกี่ยวกับพื้นที่ของคุณ ใช้เวลาสองนาที",
-    stepsTitle: "ขั้นตอนการทำงาน",
+    trust: ["ตั้งแต่ปี 1998", "โรงงาน ISO 9001", "กรุงเทพฯ · เกาะเต่า · สุราษฎร์ธานี", "8 ตลาด"],
+    jobsHeading: "เลือกงานของคุณ",
+    jobsSub: "แต่ละรายการเริ่มขอใบเสนอราคาใน 2 นาที",
+    stepsHeading: "ขั้นตอนถัดไป",
     steps: [
-      ["เล่าเกี่ยวกับงาน", "ประเภทสถานที่ ขนาด และรูปถ่ายถ้ามี"],
-      ["รับใบเสนอราคาใน 24 ชั่วโมง", "ช่วงราคาและคำแนะนำจริง ไม่ใช่แค่สัญญาว่าจะโทรกลับ"],
-      ["เราติดตั้งและรับประกันงาน", "อุปกรณ์ผ่านการรับรอง ทดสอบก่อนส่ง และดูแลหลังการขาย"],
+      ["เล่าเกี่ยวกับพื้นที่", "ประเภทสถานที่ ขนาด และรูปถ่ายถ้ามี"],
+      ["ใบเสนอราคาใน 24 ชั่วโมง", "คำแนะนำจริงพร้อมช่วงราคา"],
+      ["ติดตั้ง ทดสอบ ดูแล", "อุปกรณ์รับรองมาตรฐาน ดูแลโดยทีมเดียวกัน"],
     ],
-    proofTitle: "ทำไมอุปกรณ์ถึงได้รับความไว้วางใจ",
-    proofBody: "เราไม่ใช่ผู้ค้าปลีกทั่วไป เครื่อง TECH FREE ผลิตในโรงงาน ISO 9001 ขนาด 250,000 ตร.ฟุต และรับรองตาม EN 1886, AHRI, VDI 6022 และ BS 476 ระบบเดียวกันนี้ทำงานอยู่ในโรงพยาบาล ศูนย์ข้อมูล และโรงแรมใน 8 ตลาด",
-    proofCta: "ดูสินค้า",
-    projLabel: "ผลงานที่ผ่านมา",
-    toolsTitle: "ไม่แน่ใจว่าต้องใช้ขนาดเท่าไร",
-    toolsBody: "ใช้เครื่องคำนวณขนาดแอร์และค่าไฟฟรี แล้วส่งผลลัพธ์เข้าใบเสนอราคาได้ทันที",
-    toolsCta: "เปิดเครื่องคำนวณ",
-    finalTitle: "พร้อมเมื่อคุณพร้อม",
-    finalSub: "ขอใบเสนอราคาผ่านฟอร์ม โทรศัพท์ หรือ WhatsApp ทั้งไทยและอังกฤษ",
+    proofHeading: "ผลิตในโรงงานของเราเอง",
+    proofBody: "เครื่อง TECH FREE ผลิตในโรงงาน ISO 9001 ขนาด 250,000 ตร.ฟุต และรับรองตาม EN 1886, AHRI, VDI 6022 และ BS 476 ระบบเดียวกันทำงานในโรงพยาบาล ศูนย์ข้อมูล และโรงแรมใน 8 ตลาด",
+    proofCta: "ดูอุปกรณ์",
+    toolsLabel: "ไม่แน่ใจเรื่องขนาด",
+    toolsCta: "ใช้เครื่องคำนวณฟรี",
+    finalHeading: "พร้อมเมื่อคุณพร้อม",
+    finalCta: "เริ่มขอใบเสนอราคา",
   },
 } as const;
 
-const SERVICE_LINKS = [
-  { key: "svcInstall", descKey: "svcInstallDesc", href: "/quote?service=ac-installation", emoji: "❄️" },
-  { key: "svcRepair", descKey: "svcRepairDesc", href: "/quote?service=ac-repair", emoji: "🔧" },
-  { key: "svcMaintenance", descKey: "svcMaintenanceDesc", href: "/quote?service=ac-maintenance", emoji: "🛡️" },
-  { key: "svcPurifier", descKey: "svcPurifierDesc", href: "/quote?service=air-purifier", emoji: "🌬️" },
-  { key: "svcAHU", descKey: "svcAHUDesc", href: "/quote?service=custom-ahu", emoji: "⚙️" },
-  { key: "svcConsultation", descKey: "svcConsultationDesc", href: "/quote?service=iaq-consultation", emoji: "📋" },
-] as const;
-
-const PROJECTS = [
-  { name: "The Londoner Hotel", place: "United Kingdom" },
-  { name: "Theme Park", place: "Macau" },
+const JOBS = [
+  { en: "AC installation", th: "ติดตั้งแอร์", detail: "Homes, offices, factories", href: "/quote?service=ac-installation" },
+  { en: "AC repair", th: "ซ่อมแอร์", detail: "All brands and systems", href: "/quote?service=ac-repair" },
+  { en: "Maintenance plans", th: "แผนบำรุงรักษา", detail: "Quarterly and annual", href: "/quote?service=ac-maintenance" },
+  { en: "Air purification", th: "เครื่องฟอกอากาศ", detail: "HEPA H13, PM2.5", href: "/quote?service=air-purifier" },
+  { en: "Custom AHU", th: "AHU สั่งทำพิเศษ", detail: "Engineered to specification", href: "/quote?service=custom-ahu" },
+  { en: "IAQ consultation", th: "ที่ปรึกษาคุณภาพอากาศ", detail: "Assessment and solutions", href: "/quote?service=iaq-consultation" },
 ];
 
 export default function HomeC() {
-  const { t, lang } = useLanguage();
+  const { lang } = useLanguage();
   const c = COPY[lang];
+  const display = "var(--font-archivo), var(--font-sarabun), sans-serif";
 
   return (
-    <main className="page-enter">
-      {/* ── Hero: one promise, three ways to act ── */}
-      <section className="bg-ec-navy text-white px-5 md:px-10 pt-14 pb-10 md:pt-20 md:pb-14">
-        <p className="text-xs font-bold uppercase tracking-widest text-ec-teal mb-4">
-          EverCool Thailand · {t.heroEyebrow}
-        </p>
-        <h1 className="text-3xl md:text-5xl font-black leading-tight max-w-2xl mb-4" style={{ textWrap: "balance" }}>
-          {c.heroTitle}
+    <main className={`${archivo.variable} bg-[#06121d] text-[#eef6fa]`}>
+      {/* ── Hero: the action row is the hero ── */}
+      <section className="border-b border-[#17364b] px-5 md:px-12 pt-16 pb-12 md:pt-24 md:pb-16">
+        <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-[#00b2d4] mb-8">{c.eyebrow}</p>
+        <h1
+          className="font-black leading-[0.98] tracking-tight text-[11vw] md:text-6xl lg:text-7xl mb-6"
+          style={{ fontFamily: display, textWrap: "balance" }}
+        >
+          {c.headline1}
+          <br />
+          <span className="text-[#00b2d4]">{c.headline2}</span>
         </h1>
-        <p className="text-[15px] md:text-base text-white/75 leading-relaxed max-w-xl mb-8">{c.heroSub}</p>
+        <p className="max-w-xl text-[15px] leading-relaxed text-[#7d93a5] mb-10">{c.sub}</p>
 
-        <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-3">
+        <div className="flex flex-col sm:flex-row gap-3 mb-10">
           <Link
             href="/quote"
-            className="bg-ec-teal hover:bg-ec-teal-light text-white text-center font-bold text-base rounded-2xl px-8 py-4 shadow-lg shadow-ec-teal/25 transition-all active:scale-[0.98]"
+            className="bg-[#00b2d4] hover:bg-[#00d4ff] text-[#06121d] text-center font-bold text-base px-8 py-4 transition-colors"
           >
-            {c.quoteCta}
+            {c.quoteCta} →
           </Link>
           <div className="flex gap-3">
             <a
               href="tel:+66955622892"
-              className="flex-1 sm:flex-none border border-white/25 hover:bg-white/10 text-white font-semibold text-sm rounded-2xl px-5 py-4 text-center transition-colors"
+              className="flex-1 sm:flex-none border border-[#2a4b63] hover:border-[#00b2d4] text-[#eef6fa] font-semibold text-sm px-6 py-4 text-center transition-colors"
             >
-              {c.call} 095-562-2892
+              {c.call}
             </a>
             <a
               href="https://wa.me/66955622892"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex-1 sm:flex-none border border-white/25 hover:bg-white/10 text-white font-semibold text-sm rounded-2xl px-5 py-4 text-center transition-colors"
+              className="flex-1 sm:flex-none border border-[#2a4b63] hover:border-[#00b2d4] text-[#eef6fa] font-semibold text-sm px-6 py-4 text-center transition-colors"
             >
               {c.chat}
             </a>
           </div>
         </div>
-        <p className="text-xs text-white/70 mb-8">{c.quoteNote}</p>
 
-        {/* Trust chips: real facts only */}
-        <div className="flex flex-wrap gap-2">
+        {/* Trust rail: hairline row, real facts only */}
+        <div className="border-t border-[#17364b] pt-4 flex flex-wrap gap-x-8 gap-y-2">
           {c.trust.map((item) => (
-            <span
-              key={item}
-              className="text-xs font-semibold text-white/85 bg-white/10 border border-white/15 rounded-full px-3 py-1.5"
-            >
+            <span key={item} className="text-xs font-semibold text-[#7d93a5] tabular-nums">
               {item}
             </span>
           ))}
         </div>
       </section>
 
-      {/* ── Services: each card starts a quote ── */}
-      <section className="px-5 md:px-10 py-12">
-        <h2 className="text-xl md:text-2xl font-bold text-ec-text mb-1">{c.servicesTitle}</h2>
-        <p className="text-sm text-ec-text-muted mb-6">{c.servicesSub}</p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          {SERVICE_LINKS.map((s) => (
+      {/* ── Jobs as numbered rows (A's spec-row DNA, aimed at the wizard) ── */}
+      <section className="px-5 md:px-12 py-16 border-b border-[#17364b]">
+        <div className="flex items-baseline justify-between mb-8 gap-4">
+          <h2 className="text-2xl md:text-3xl font-black" style={{ fontFamily: display }}>
+            {c.jobsHeading}
+          </h2>
+          <p className="text-xs text-[#7d93a5] hidden md:block">{c.jobsSub}</p>
+        </div>
+        <div className="border-t border-[#17364b]">
+          {JOBS.map((job, i) => (
             <Link
-              key={s.href}
-              href={s.href}
-              className="group flex items-start gap-3 bg-ec-card border border-ec-border rounded-2xl p-4 hover:border-ec-teal/50 hover:shadow-md hover:shadow-ec-teal/5 transition-all"
+              key={job.href}
+              href={job.href}
+              className="group grid grid-cols-[auto_1fr_auto] md:grid-cols-[80px_1fr_1fr_auto] items-baseline gap-4 border-b border-[#17364b] py-5 hover:bg-[#0a1c2b] transition-colors px-2 -mx-2"
             >
-              <span className="text-2xl shrink-0" aria-hidden="true">{s.emoji}</span>
-              <span className="min-w-0">
-                <span className="block text-sm font-bold text-ec-text group-hover:text-ec-teal transition-colors">
-                  {t[s.key]}
-                </span>
-                <span className="block text-xs text-ec-text-muted mt-0.5 leading-relaxed">{t[s.descKey]}</span>
+              <span className="text-xs tabular-nums text-[#7d93a5]">{String(i + 1).padStart(2, "0")}</span>
+              <span className="text-base md:text-lg font-bold group-hover:text-[#00b2d4] transition-colors">
+                {lang === "th" ? job.th : job.en}
               </span>
+              <span className="hidden md:block text-xs text-[#7d93a5]">{job.detail}</span>
+              <span className="text-[#00b2d4] opacity-0 group-hover:opacity-100 transition-opacity">→</span>
             </Link>
           ))}
         </div>
       </section>
 
-      {/* ── How it works ── */}
-      <section className="px-5 md:px-10 pb-12">
-        <h2 className="text-xl md:text-2xl font-bold text-ec-text mb-6">{c.stepsTitle}</h2>
-        <ol className="grid grid-cols-1 md:grid-cols-3 gap-3">
+      {/* ── Three steps as hairline columns ── */}
+      <section className="border-b border-[#17364b]">
+        <div className="px-5 md:px-12 pt-16 pb-8">
+          <h2 className="text-2xl md:text-3xl font-black" style={{ fontFamily: display }}>
+            {c.stepsHeading}
+          </h2>
+        </div>
+        <div className="grid md:grid-cols-3">
           {c.steps.map(([title, body], i) => (
-            <li key={title} className="bg-ec-card border border-ec-border rounded-2xl p-5">
-              <span className="inline-flex w-7 h-7 items-center justify-center rounded-full bg-ec-teal text-white text-xs font-bold mb-3">
-                {i + 1}
-              </span>
-              <p className="text-sm font-bold text-ec-text mb-1">{title}</p>
-              <p className="text-xs text-ec-text-muted leading-relaxed">{body}</p>
-            </li>
-          ))}
-        </ol>
-      </section>
-
-      {/* ── Proof: factory + certs + projects ── */}
-      <section className="px-5 md:px-10 pb-12">
-        <div className="bg-ec-navy text-white rounded-3xl overflow-hidden md:grid md:grid-cols-2">
-          <div className="relative aspect-[16/10] md:aspect-auto">
-            <Image
-              src="/images/activities/factory-assembly.jpg"
-              alt="Air handling units on the factory assembly line"
-              fill
-              sizes="(max-width: 768px) 100vw, 45vw"
-              className="object-cover"
-            />
-          </div>
-          <div className="p-6 md:p-8">
-            <h2 className="text-xl md:text-2xl font-bold mb-3" style={{ textWrap: "balance" }}>
-              {c.proofTitle}
-            </h2>
-            <p className="text-sm text-white/75 leading-relaxed mb-5">{c.proofBody}</p>
-            <p className="text-xs font-bold uppercase tracking-widest text-ec-teal mb-2">{c.projLabel}</p>
-            <ul className="mb-6">
-              {PROJECTS.map((p) => (
-                <li key={p.name} className="text-sm text-white/85 py-1">
-                  <span className="font-semibold">{p.name}</span>
-                  <span className="text-white/70"> · {p.place}</span>
-                </li>
-              ))}
-            </ul>
-            <Link
-              href="/products"
-              className="inline-block bg-white/10 hover:bg-white/20 border border-white/20 text-white font-semibold text-sm rounded-xl px-5 py-2.5 transition-colors"
+            <div
+              key={title}
+              className={`px-5 md:px-12 py-8 md:pb-16 ${i > 0 ? "border-t md:border-t-0 md:border-l border-[#17364b]" : ""}`}
             >
-              {c.proofCta} →
-            </Link>
-          </div>
+              <p className="text-3xl font-black text-[#00b2d4] tabular-nums mb-3" style={{ fontFamily: display }}>
+                {String(i + 1).padStart(2, "0")}
+              </p>
+              <p className="text-base font-bold mb-1">{title}</p>
+              <p className="text-sm text-[#7d93a5] leading-relaxed">{body}</p>
+            </div>
+          ))}
         </div>
       </section>
 
-      {/* ── Calculators teaser ── */}
-      <section className="px-5 md:px-10 pb-12">
-        <div className="bg-ec-teal/5 border border-ec-teal/20 rounded-3xl p-6 md:p-8 md:flex md:items-center md:justify-between gap-6">
-          <div>
-            <h2 className="text-lg md:text-xl font-bold text-ec-text mb-1">{c.toolsTitle}</h2>
-            <p className="text-sm text-ec-text-muted leading-relaxed">{c.toolsBody}</p>
-          </div>
+      {/* ── Proof band ── */}
+      <section className="grid md:grid-cols-2 border-b border-[#17364b]">
+        <div className="relative aspect-[4/3] md:aspect-auto md:min-h-[360px]">
+          <Image
+            src="/images/activities/factory-assembly.jpg"
+            alt="AHU assembly line inside the factory"
+            fill
+            sizes="(max-width: 768px) 100vw, 50vw"
+            className="object-cover"
+          />
+        </div>
+        <div className="px-5 md:px-12 py-12 md:py-16 flex flex-col justify-center md:border-l border-[#17364b]">
+          <h2 className="text-2xl md:text-3xl font-black mb-4" style={{ fontFamily: display, textWrap: "balance" }}>
+            {c.proofHeading}
+          </h2>
+          <p className="text-sm leading-relaxed text-[#7d93a5] max-w-md mb-6">{c.proofBody}</p>
           <Link
-            href="/learn"
-            className="mt-4 md:mt-0 inline-block shrink-0 bg-ec-teal hover:bg-ec-teal-light text-white font-bold text-sm rounded-xl px-6 py-3 transition-colors"
+            href="/products"
+            className="w-fit border border-[#2a4b63] hover:border-[#00b2d4] text-[#eef6fa] font-semibold text-sm px-6 py-3 transition-colors"
           >
-            {c.toolsCta}
+            {c.proofCta} →
           </Link>
         </div>
       </section>
 
+      {/* ── Calculators strip ── */}
+      <section className="border-b border-[#17364b] px-5 md:px-12 py-6 flex flex-wrap items-center justify-between gap-3">
+        <p className="text-sm font-semibold text-[#7d93a5]">{c.toolsLabel}</p>
+        <Link
+          href="/learn"
+          className="text-sm font-bold text-[#00b2d4] hover:text-[#00d4ff] transition-colors"
+        >
+          {c.toolsCta} →
+        </Link>
+      </section>
+
       {/* ── Final CTA ── */}
-      <section className="px-5 md:px-10 pb-16 text-center">
-        <h2 className="text-2xl md:text-3xl font-black text-ec-text mb-2">{c.finalTitle}</h2>
-        <p className="text-sm text-ec-text-muted mb-6">{c.finalSub}</p>
+      <section className="px-5 md:px-12 py-20 text-center">
+        <h2
+          className="text-3xl md:text-5xl font-black mb-8"
+          style={{ fontFamily: display, textWrap: "balance" }}
+        >
+          {c.finalHeading}
+        </h2>
         <Link
           href="/quote"
-          className="inline-block bg-ec-teal hover:bg-ec-teal-light text-white font-bold text-base rounded-2xl px-10 py-4 shadow-lg shadow-ec-teal/25 transition-all active:scale-[0.98]"
+          className="inline-block bg-[#00b2d4] hover:bg-[#00d4ff] text-[#06121d] font-bold text-sm px-10 py-4 transition-colors"
         >
-          {c.quoteCta}
+          {c.finalCta} →
         </Link>
       </section>
     </main>

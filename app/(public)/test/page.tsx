@@ -9,18 +9,18 @@ export const metadata: Metadata = {
 const VARIANTS = [
   {
     href: "/test/home-a",
-    name: "A · Engineered Air",
-    desc: "Editorial dark treatment from the design skill: display typography, spec-sheet rows, ambient airflow hero.",
+    name: "A · Engineered Air (reference)",
+    desc: "The keeper: dark editorial treatment, display typography, spec-sheet rows, ambient airflow hero.",
   },
   {
     href: "/test/home-b",
-    name: "B · Quiet Air",
-    desc: "Taste pass: light, serif-led, hairline rules, maximum restraint. Whitespace as clean air.",
+    name: "B · Engineered Air: Showroom",
+    desc: "Variation of A where the machines are the heroes: product spotlight on a drafting grid, photographic catalog tiles.",
   },
   {
     href: "/test/home-c",
-    name: "C · Straight Answer",
-    desc: "Audit-driven rebuild in the current brand language: conversion-first hierarchy, honest trust signals.",
+    name: "C · Engineered Air: Front Desk",
+    desc: "Variation of A tuned for conversion: quote/call/WhatsApp as the hero, services as numbered rows into the wizard, 3-step process.",
   },
 ];
 

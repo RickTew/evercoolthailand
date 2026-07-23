@@ -1,174 +1,237 @@
 "use client";
 
-// TEST VARIANT B: "Quiet Air"
-// Taste pass. The page itself demonstrates the product: clean, calm, nothing
-// in the air that does not need to be there. Serif display over a warm-cool
-// white, hairline rules instead of cards, the teal accent spent exactly once
-// per screen. Restraint is the design.
+// TEST VARIANT B (v2): "Engineered Air · Showroom"
+// Variation of A. Same dark technical ground, Archivo display, hairlines,
+// single teal accent; but here the machines are the heroes. The hero puts a
+// real AHU under a spotlight on a drafting grid with spec callouts, and the
+// catalog appears as photographic tiles instead of text rows.
 
 import Link from "next/link";
 import Image from "next/image";
-import { Newsreader } from "next/font/google";
+import { Archivo } from "next/font/google";
 import { useLanguage } from "@/lib/i18n/useLanguage";
 
-const newsreader = Newsreader({
+const archivo = Archivo({
   subsets: ["latin"],
-  style: ["normal", "italic"],
-  weight: ["400", "500"],
-  variable: "--font-newsreader",
+  weight: ["500", "700", "900"],
+  variable: "--font-archivo",
   display: "swap",
 });
 
 const COPY = {
   en: {
-    kicker: "EverCool Thailand · since 1998",
-    line1: "Everything feels better",
-    line2: "in clean air.",
-    sub: "We design, build, and maintain the systems that move it: air handling units, fresh air systems, and filtration for hospitals, hotels, data centres, and homes across Thailand.",
-    facts: [
-      ["1998", "founded"],
-      ["250,000 sqft", "certified factory"],
-      ["8 markets", "installed base"],
-    ],
-    servicesKicker: "What we do",
-    services: [
-      ["AC installation", "/quote?service=ac-installation"],
-      ["AC repair", "/quote?service=ac-repair"],
-      ["Maintenance plans", "/quote?service=ac-maintenance"],
-      ["Air purification", "/quote?service=air-purifier"],
-      ["Custom air handling units", "/quote?service=custom-ahu"],
-      ["Indoor air quality consulting", "/quote?service=iaq-consultation"],
-    ],
-    photoCaption: "Laboratory control room, factory acceptance testing.",
-    closing1: "Tell us about your space.",
-    closing2: "We will tell you what the air needs.",
-    cta: "Request a quote",
-    or: "or call +66 95-562-2892",
+    eyebrow: "EverCool Thailand · TECH FREE Authorised Distributor",
+    headline1: "The machines",
+    headline2: "behind clean air.",
+    sub: "Air handling units, heat recovery, and filtration systems built in our own 250,000 sqft ISO 9001 factory, and installed across Thailand by the people who know them best.",
+    ctaProducts: "Browse the catalog",
+    ctaQuote: "Request a quote",
+    calloutCapacity: "3TR-110TR capacity",
+    calloutPanel: "EN 1886 panel construction",
+    calloutFans: "EC fan technology",
+    tilesHeading: "Pick your machine",
+    factoryHeading: "From our floor to yours",
+    factoryBody: "Every unit is assembled and factory-acceptance-tested before it ships. What you see in the showroom is what arrives on site.",
+    statFounded: "Founded",
+    statFactory: "sqft factory",
+    statMarkets: "Markets",
+    statCerts: "Certifications",
+    finalHeading: "Want one of these working for you?",
+    finalCta: "Start a quote",
+    call: "Call +66 95-562-2892",
   },
   th: {
-    kicker: "EverCool Thailand · ตั้งแต่ปี 1998",
-    line1: "ทุกอย่างดีขึ้น",
-    line2: "ในอากาศที่สะอาด",
-    sub: "เราออกแบบ ผลิต และดูแลระบบที่ขับเคลื่อนอากาศ: เครื่องส่งลมเย็น ระบบเติมอากาศ และการกรองอากาศ สำหรับโรงพยาบาล โรงแรม ศูนย์ข้อมูล และบ้านทั่วประเทศไทย",
-    facts: [
-      ["1998", "ก่อตั้ง"],
-      ["250,000 ตร.ฟุต", "โรงงานที่ได้รับการรับรอง"],
-      ["8 ตลาด", "ฐานการติดตั้ง"],
-    ],
-    servicesKicker: "สิ่งที่เราทำ",
-    services: [
-      ["ติดตั้งแอร์", "/quote?service=ac-installation"],
-      ["ซ่อมแอร์", "/quote?service=ac-repair"],
-      ["แผนบำรุงรักษา", "/quote?service=ac-maintenance"],
-      ["เครื่องฟอกอากาศ", "/quote?service=air-purifier"],
-      ["AHU สั่งทำพิเศษ", "/quote?service=custom-ahu"],
-      ["ที่ปรึกษาคุณภาพอากาศ", "/quote?service=iaq-consultation"],
-    ],
-    photoCaption: "ห้องควบคุมห้องปฏิบัติการ ระหว่างการทดสอบ Factory Acceptance Test",
-    closing1: "เล่าให้เราฟังเกี่ยวกับพื้นที่ของคุณ",
-    closing2: "เราจะบอกคุณว่าอากาศต้องการอะไร",
-    cta: "ขอใบเสนอราคา",
-    or: "หรือโทร +66 95-562-2892",
+    eyebrow: "EverCool Thailand · ตัวแทนจำหน่ายอย่างเป็นทางการ TECH FREE",
+    headline1: "เครื่องจักร",
+    headline2: "เบื้องหลังอากาศสะอาด",
+    sub: "เครื่องส่งลมเย็น ระบบนำความร้อนกลับ และระบบกรองอากาศ ผลิตในโรงงาน ISO 9001 ขนาด 250,000 ตร.ฟุตของเราเอง และติดตั้งทั่วไทยโดยทีมที่รู้จักเครื่องดีที่สุด",
+    ctaProducts: "ดูแคตตาล็อก",
+    ctaQuote: "ขอใบเสนอราคา",
+    calloutCapacity: "ขนาด 3TR-110TR",
+    calloutPanel: "โครงสร้างแผงตาม EN 1886",
+    calloutFans: "เทคโนโลยีพัดลม EC",
+    tilesHeading: "เลือกเครื่องของคุณ",
+    factoryHeading: "จากโรงงานของเราถึงไซต์ของคุณ",
+    factoryBody: "ทุกเครื่องประกอบและผ่านการทดสอบ Factory Acceptance Test ก่อนส่งมอบ สิ่งที่เห็นในโชว์รูมคือสิ่งที่ถึงหน้างาน",
+    statFounded: "ก่อตั้ง",
+    statFactory: "ตร.ฟุต โรงงาน",
+    statMarkets: "ตลาด",
+    statCerts: "การรับรอง",
+    finalHeading: "อยากให้เครื่องเหล่านี้ทำงานให้คุณไหม",
+    finalCta: "เริ่มขอใบเสนอราคา",
+    call: "โทร +66 95-562-2892",
   },
+} as const;
+
+const TILES = [
+  { en: "Air Handling Units", th: "เครื่องส่งลมเย็น", img: "/images/products/modular-ahu-2.png", href: "/products?cat=ahu" },
+  { en: "Heat Recovery", th: "นำความร้อนกลับ", img: "/images/products/Dual System Heat Recovery Unit.png", href: "/products?cat=heat" },
+  { en: "Fresh Air Systems", th: "ระบบเติมอากาศ", img: "/images/products/Cabinet Fresh Air System X-Series.png", href: "/products?cat=ventilation" },
+  { en: "Outdoor Units", th: "ยูนิตภายนอก", img: "/images/products/dry-cooler.png", href: "/products?cat=outdoor" },
+  { en: "Coils & EC Fans", th: "คอยล์และพัดลม EC", img: "/images/products/coils.png", href: "/products?cat=components" },
+  { en: "Hygienic AHU", th: "AHU ปลอดเชื้อ", img: "/images/products/hygienicairhandlingunit.png", href: "/products?cat=ahu" },
+];
+
+const CERTS = ["ISO 9001", "EN 1886", "AHRI 1350", "AHRI 410", "VDI 6022", "BS 476"];
+
+// Faint drafting grid for the product spotlight.
+const GRID_BG = {
+  backgroundImage:
+    "repeating-linear-gradient(0deg, rgba(0,178,212,0.07) 0 1px, transparent 1px 40px), repeating-linear-gradient(90deg, rgba(0,178,212,0.07) 0 1px, transparent 1px 40px)",
 } as const;
 
 export default function HomeB() {
   const { lang } = useLanguage();
   const c = COPY[lang];
-  const serif = "var(--font-newsreader), var(--font-sarabun), serif";
+  const display = "var(--font-archivo), var(--font-sarabun), sans-serif";
 
   return (
-    <main className={`${newsreader.variable} bg-[#fbfdfe] text-[#14212c]`}>
-      {/* ── Statement ── */}
-      <section className="px-6 md:px-16 pt-24 pb-16 md:pt-32 md:pb-20">
-        <p className="text-[11px] uppercase tracking-[0.22em] text-[#67788a] mb-10">{c.kicker}</p>
-        <h1
-          className="text-[11vw] md:text-6xl lg:text-7xl leading-[1.04] font-normal mb-10"
-          style={{ fontFamily: serif, textWrap: "balance" }}
-        >
-          {c.line1}
-          <br />
-          <em className="text-[#0090aa]">{c.line2}</em>
-        </h1>
-        <p className="max-w-[62ch] text-[15px] leading-[1.8] text-[#46586a]">{c.sub}</p>
+    <main className={`${archivo.variable} bg-[#06121d] text-[#eef6fa]`}>
+      {/* ── Hero: product spotlight ── */}
+      <section className="border-b border-[#17364b] md:grid md:grid-cols-[1.1fr_1fr]">
+        <div className="px-5 md:px-12 pt-16 pb-10 md:pt-24 md:pb-20 flex flex-col justify-center">
+          <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-[#00b2d4] mb-6">{c.eyebrow}</p>
+          <h1
+            className="font-black leading-[0.98] tracking-tight text-[11vw] md:text-6xl lg:text-7xl mb-6"
+            style={{ fontFamily: display, textWrap: "balance" }}
+          >
+            {c.headline1}
+            <br />
+            <span className="text-[#00b2d4]">{c.headline2}</span>
+          </h1>
+          <p className="max-w-lg text-[15px] leading-relaxed text-[#7d93a5] mb-8">{c.sub}</p>
+          <div className="flex flex-wrap gap-3">
+            <Link
+              href="/products"
+              className="bg-[#00b2d4] hover:bg-[#00d4ff] text-[#06121d] font-bold text-sm px-6 py-3.5 transition-colors"
+            >
+              {c.ctaProducts} →
+            </Link>
+            <Link
+              href="/quote"
+              className="border border-[#2a4b63] hover:border-[#00b2d4] text-[#eef6fa] font-semibold text-sm px-6 py-3.5 transition-colors"
+            >
+              {c.ctaQuote}
+            </Link>
+          </div>
+        </div>
+
+        <div className="relative md:border-l border-t md:border-t-0 border-[#17364b] min-h-[300px] md:min-h-0" style={GRID_BG}>
+          <Image
+            src="/images/products/modular-ahu-2.png"
+            alt="TECH FREE modular air handling unit"
+            fill
+            sizes="(max-width: 768px) 100vw, 45vw"
+            className="object-contain p-8 md:p-12"
+          />
+          {/* Spec callouts */}
+          <div className="absolute left-4 bottom-4 md:left-6 md:bottom-6 flex flex-col gap-1.5">
+            {[c.calloutCapacity, c.calloutPanel, c.calloutFans].map((s) => (
+              <span
+                key={s}
+                className="text-[11px] font-semibold text-[#eef6fa] bg-[#06121d]/85 border border-[#17364b] px-2.5 py-1 w-fit tabular-nums"
+              >
+                {s}
+              </span>
+            ))}
+          </div>
+        </div>
       </section>
 
-      {/* ── Facts row ── */}
-      <section className="px-6 md:px-16">
-        <div className="border-t border-b border-[#e5edf2] grid grid-cols-1 md:grid-cols-3">
-          {c.facts.map(([v, l], i) => (
-            <div
-              key={l}
-              className={`py-6 md:py-8 ${i > 0 ? "border-t md:border-t-0 md:border-l border-[#e5edf2] md:pl-10" : ""}`}
-            >
-              <p className="text-2xl md:text-[28px] tabular-nums" style={{ fontFamily: serif }}>
-                {v}
-              </p>
-              <p className="text-xs text-[#67788a] mt-1">{l}</p>
-            </div>
+      {/* ── Stats rail (A's DNA) ── */}
+      <section className="border-b border-[#17364b] grid grid-cols-2 md:grid-cols-4">
+        {[
+          { v: "1998", l: c.statFounded },
+          { v: "250,000", l: c.statFactory },
+          { v: "8", l: c.statMarkets },
+          { v: "6", l: c.statCerts },
+        ].map((s, i) => (
+          <div
+            key={s.l}
+            className={`px-5 md:px-12 py-5 ${i > 0 ? "border-l border-[#17364b]" : ""} ${i > 1 ? "border-t md:border-t-0" : ""}`}
+          >
+            <p className="text-2xl md:text-3xl font-black tabular-nums" style={{ fontFamily: display }}>
+              {s.v}
+            </p>
+            <p className="text-[11px] uppercase tracking-widest text-[#7d93a5] mt-1">{s.l}</p>
+          </div>
+        ))}
+      </section>
+
+      {/* ── Catalog tiles ── */}
+      <section className="px-5 md:px-12 py-16 border-b border-[#17364b]">
+        <h2 className="text-2xl md:text-3xl font-black mb-8" style={{ fontFamily: display }}>
+          {c.tilesHeading}
+        </h2>
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-px bg-[#17364b] border border-[#17364b]">
+          {TILES.map((tile) => (
+            <Link key={tile.href + tile.en} href={tile.href} className="group bg-[#06121d] hover:bg-[#0a1c2b] transition-colors">
+              <div className="relative aspect-[4/3]" style={GRID_BG}>
+                <Image
+                  src={tile.img}
+                  alt={tile.en}
+                  fill
+                  sizes="(max-width: 1024px) 50vw, 33vw"
+                  className="object-contain p-5 group-hover:scale-[1.04] transition-transform duration-300"
+                />
+              </div>
+              <div className="px-4 py-3 border-t border-[#17364b] flex items-center justify-between gap-2">
+                <span className="text-sm font-bold group-hover:text-[#00b2d4] transition-colors">
+                  {lang === "th" ? tile.th : tile.en}
+                </span>
+                <span className="text-[#00b2d4] opacity-0 group-hover:opacity-100 transition-opacity">→</span>
+              </div>
+            </Link>
           ))}
         </div>
       </section>
 
-      {/* ── Photo ── */}
-      <section className="px-6 md:px-16 py-16 md:py-20">
-        <figure>
-          <div className="relative aspect-[16/9] overflow-hidden">
-            <Image
-              src="/images/lab-control-room.jpg"
-              alt={c.photoCaption}
-              fill
-              sizes="(max-width: 768px) 100vw, 90vw"
-              className="object-cover"
-            />
+      {/* ── Factory band ── */}
+      <section className="grid md:grid-cols-2 border-b border-[#17364b]">
+        <div className="px-5 md:px-12 py-12 md:py-16 flex flex-col justify-center order-2 md:order-1">
+          <h2 className="text-2xl md:text-3xl font-black mb-4" style={{ fontFamily: display, textWrap: "balance" }}>
+            {c.factoryHeading}
+          </h2>
+          <p className="text-sm leading-relaxed text-[#7d93a5] max-w-md mb-8">{c.factoryBody}</p>
+          <div className="flex flex-wrap gap-x-5 gap-y-2">
+            {CERTS.map((cert) => (
+              <span key={cert} className="text-sm font-semibold tabular-nums">{cert}</span>
+            ))}
           </div>
-          <figcaption className="text-xs text-[#67788a] mt-3">{c.photoCaption}</figcaption>
-        </figure>
+        </div>
+        <div className="relative aspect-[4/3] md:aspect-auto md:min-h-[380px] order-1 md:order-2 md:border-l border-[#17364b]">
+          <Image
+            src="/images/activities/factory-acceptance-test.jpg"
+            alt="Factory acceptance test in progress"
+            fill
+            sizes="(max-width: 768px) 100vw, 50vw"
+            className="object-cover"
+          />
+        </div>
       </section>
 
-      {/* ── Services as a list ── */}
-      <section className="px-6 md:px-16 pb-20">
-        <p className="text-[11px] uppercase tracking-[0.22em] text-[#67788a] mb-6">{c.servicesKicker}</p>
-        <ul className="border-t border-[#e5edf2]">
-          {c.services.map(([label, href]) => (
-            <li key={href} className="border-b border-[#e5edf2]">
-              <Link
-                href={href}
-                className="group flex items-baseline justify-between gap-4 py-5 hover:pl-2 transition-all"
-              >
-                <span className="text-xl md:text-2xl" style={{ fontFamily: serif }}>
-                  {label}
-                </span>
-                <span className="text-[#67788a] group-hover:text-[#0090aa] transition-colors text-sm shrink-0">
-                  →
-                </span>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      {/* ── Closing ── */}
-      <section className="px-6 md:px-16 pb-24 md:pb-32 text-center">
-        <p
-          className="text-3xl md:text-4xl leading-snug mb-10"
-          style={{ fontFamily: serif, textWrap: "balance" }}
+      {/* ── Final CTA ── */}
+      <section className="px-5 md:px-12 py-20 text-center">
+        <h2
+          className="text-3xl md:text-5xl font-black mb-8"
+          style={{ fontFamily: display, textWrap: "balance" }}
         >
-          {c.closing1}
-          <br />
-          <em>{c.closing2}</em>
-        </p>
-        <Link
-          href="/quote"
-          className="inline-block border border-[#14212c] hover:bg-[#14212c] hover:text-[#fbfdfe] text-sm font-medium tracking-wide px-10 py-4 transition-colors"
-        >
-          {c.cta}
-        </Link>
-        <p className="text-xs text-[#67788a] mt-4">
-          <a href="tel:+66955622892" className="hover:text-[#0090aa] transition-colors">
-            {c.or}
+          {c.finalHeading}
+        </h2>
+        <div className="flex flex-wrap justify-center gap-3">
+          <Link
+            href="/quote"
+            className="bg-[#00b2d4] hover:bg-[#00d4ff] text-[#06121d] font-bold text-sm px-8 py-4 transition-colors"
+          >
+            {c.finalCta} →
+          </Link>
+          <a
+            href="tel:+66955622892"
+            className="border border-[#2a4b63] hover:border-[#00b2d4] text-[#eef6fa] font-semibold text-sm px-8 py-4 transition-colors"
+          >
+            {c.call}
           </a>
-        </p>
+        </div>
       </section>
     </main>
   );
