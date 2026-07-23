@@ -151,8 +151,8 @@ export default function HomeEngineered() {
 
   return (
     <main className={`${archivo.variable} home-eng bg-[var(--he-bg)] text-[var(--he-ink)]`}>
-      {/* ── Hero ── */}
-      <section className="relative overflow-hidden border-b border-[var(--he-line)]">
+      {/* ── Hero: stays dark in both themes so it flows from the navy top bar ── */}
+      <section className="home-eng-hero relative overflow-hidden border-b border-[var(--he-line)] bg-[var(--he-bg)] text-[var(--he-ink)]">
         <AirflowCanvas />
         <div className="relative px-5 md:px-12 pt-20 pb-16 md:pt-28 md:pb-24">
           <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-[var(--he-accent)] mb-8">

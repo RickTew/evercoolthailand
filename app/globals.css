@@ -88,17 +88,18 @@ input[type="date"] {
    site-wide light/dark toggle. Dark is the primary art direction; light is a
    considered counterpart, not an inversion. */
 .home-eng {
-  --he-bg: #f5f9fb;
+  --he-bg: #e9f1f6;
   --he-ink: #10202c;
-  --he-muted: #5b7080;
-  --he-line: #d8e4eb;
-  --he-line2: #b9cdd8;
-  --he-panel: #eaf2f7;
+  --he-muted: #54697a;
+  --he-line: #c9dae4;
+  --he-line2: #a8c2d1;
+  --he-panel: #dde9f0;
   --he-accent: #0090aa;
   --he-accent-hover: #00b2d4;
   --he-accent-contrast: #ffffff;
 }
-.dark .home-eng {
+.dark .home-eng,
+.home-eng .home-eng-hero {
   --he-bg: #06121d;
   --he-ink: #eef6fa;
   --he-muted: #7d93a5;
