@@ -84,6 +84,32 @@ input[type="date"] {
   min-height: 50px;
 }
 
+/* "Engineered Air" home page: scoped theme tokens so the page follows the
+   site-wide light/dark toggle. Dark is the primary art direction; light is a
+   considered counterpart, not an inversion. */
+.home-eng {
+  --he-bg: #f5f9fb;
+  --he-ink: #10202c;
+  --he-muted: #5b7080;
+  --he-line: #d8e4eb;
+  --he-line2: #b9cdd8;
+  --he-panel: #eaf2f7;
+  --he-accent: #0090aa;
+  --he-accent-hover: #00b2d4;
+  --he-accent-contrast: #ffffff;
+}
+.dark .home-eng {
+  --he-bg: #06121d;
+  --he-ink: #eef6fa;
+  --he-muted: #7d93a5;
+  --he-line: #17364b;
+  --he-line2: #2a4b63;
+  --he-panel: #0a1c2b;
+  --he-accent: #00b2d4;
+  --he-accent-hover: #00d4ff;
+  --he-accent-contrast: #06121d;
+}
+
 /* Hero gradient background */
 .hero-bg {
   background: linear-gradient(135deg, #003554 0%, #00637a 50%, #00b2d4 100%);
