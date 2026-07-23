@@ -30,6 +30,27 @@ export type BuildLogEntry = {
 // old CMS site and the old hosting years). Newest first.
 export const BUILD_LOG: BuildLogEntry[] = [
   {
+    "date": "2026-07-23",
+    "title": "Website audit; new home page design live; customer confirmations",
+    "type": "feature",
+    "summary": "The public website got a full professional audit (56 verified findings across correctness, translations, search visibility, accessibility, performance, and visitor experience), the critical fixes shipped the same day, and the home page was redesigned through a three-way design test, with the chosen direction now live. Customers now receive a confirmation email with a reference number for every booking, quote, and message, and a new Website Questions page lets the team answer the questions the site still needs (LINE account, deposit amount, real customer reviews).",
+    "hours": 4.8,
+    "tokensK": 56800,
+    "changes": [
+      "Fixed the offline app quietly downloading the entire 200+ MB image library onto every visitor's phone; first visits are now light and images load only when viewed",
+      "Cookie consent made real: analytics load only after Accept, Decline loads nothing, and a bilingual Privacy and Cookie Policy page now backs the banner",
+      "Booking photos were being lost; they now save correctly and arrive as links in the staff notification email",
+      "Every booking, quote request, and contact message now sends the customer a bilingual confirmation email with a reference number, also shown on the success screen",
+      "Book a Service now lands on the booking wizard; footer and home page links that led nowhere now open the right product category; the Learning Hub and its calculators are finally reachable from the footer",
+      "New home page live: the Engineered Air design chosen from a three-candidate test round, with a matching light mode; the other two candidates stay available for a later round",
+      "Phone, WhatsApp, and email are now click-to-reveal so address-harvesting bots reading the page source get nothing",
+      "Brand name normalized to EverCool everywhere a visitor sees it, including search results and email sender name",
+      "New Website Questions page for the team, linked from The Build: answer what you know, answers are emailed to Rick, and each answer unlocks site improvements",
+      "Honest copy pass: no more instant-quote promise, no dead-end event badge, and the placeholder customer reviews stay unpublished until real ones are provided",
+      "Mobile polish: quote button in the bottom navigation, footer no longer hidden behind it, install prompt shows the real app icon and no longer overlaps the cookie banner",
+    ],
+  },
+  {
     "date": "2026-07-21",
     "title": "Pay section: hosting billing in the portal, card payment live",
     "type": "feature",

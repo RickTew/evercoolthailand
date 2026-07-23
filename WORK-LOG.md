@@ -57,6 +57,88 @@ New from 2026-07-21 (billing follow-ups, mostly time-gated):
 8. **Delete the orphan customer record** in the payment provider dashboard
    (the earlier duplicate created without an email address).
 
+New from 2026-07-23 (front end):
+9. **Watch for Website Questions answers.** Staff answer at
+   /admin/build/questions (linked from The Build); answers arrive by email.
+   The blocked work behind them: LINE chat buttons (needs the LINE ID),
+   deposit amount on the payment sheet, and real customer reviews (the 8 in
+   the code are build-time placeholders, never publish as-is). Point the
+   manager at the page.
+10. **PRODUCTS content review** (Rick flagged it will raise more staff
+    questions; add them to lib/dashboard/siteQuestions.ts as they surface).
+11. **Thai localization sweep (audit Phase 3).** About page, Footer, product
+    catalog, solutions specs, project references, and article bodies are
+    hardcoded English; the translation plumbing exists, wire it through and
+    have a native speaker review the new Thai.
+12. **SEO/perf structure (audit Phase 4).** Decide on the /th route
+    architecture (Thai content is currently invisible to search), canonicals
+    and social cards, per-article metadata, replace force-dynamic marketing
+    pages with revalidation, image cleanup. Full details in FRONTEND-AUDIT.md
+    (local, gitignored).
+13. **Improve the /test home page variants** (B "Showroom", C "Front Desk")
+    in a later design round; the winner "Engineered Air" is live at /.
+
+---
+
+## 2026-07-23 - Visitor-side audit; new home page design live; customer confirmations
+
+Full audit and overhaul of the public website. Four parallel review passes
+(correctness, translations and copy, search/accessibility/performance, and
+visitor experience) produced 56 verified findings and a 4-phase plan (kept
+in a local, untracked file because this repo is public). The critical fixes
+and all unblocked improvements shipped the same day, and the home page was
+redesigned through a three-way test round, with the winner now live.
+
+Shipped in the repo (1a1be77 through 210049a, all deployed and verified
+live on the production domain):
+- Offline-app fix: the service worker was silently downloading the entire
+  200+ MB image library onto every visitor's phone on first visit; the
+  precache is now 4 small shell files and images load on demand. Also
+  dropped a 6.8 MB icon file from the app manifest and deleted unreferenced
+  leftover images.
+- Cookie consent now means something: analytics and the ad pixel load only
+  after Accept; Decline loads nothing. New bilingual Privacy and Cookie
+  Policy page at /privacy, linked from the consent banner and footer.
+- Booking photos were being lost (stored under a wrong path and shown to
+  nobody); they now store correctly and arrive as links in the staff
+  notification email.
+- Customers finally get a confirmation: bilingual email with a reference
+  number after every booking, quote request, or contact message, and the
+  same reference shows on the success screens.
+- Wayfinding repaired: Book a Service lands on the booking wizard instead
+  of the top of a long page, footer and home links that pointed at
+  removed anchors now preselect the product catalog, the Learning Hub
+  (articles + both calculators) is linked from the footer at last, and
+  the calculators end in a quote button carrying the entered size.
+- Home page: three full design candidates built at /test (not indexed);
+  Rick chose "Engineered Air", now live at /: dark editorial treatment,
+  display typography, spec-sheet product rows, ambient airflow animation,
+  and a considered light-mode counterpart (hero stays dark under the navy
+  bar). The other two variants remain at /test for a later round.
+- Contact details hardened against scrapers: the top bar number reads
+  095-562-XXXX until clicked, and the footer phone, WhatsApp, and email
+  are click-to-reveal; none of them exist in the served page source.
+- Brand casing normalized to EverCool everywhere visitor-facing (Rick's
+  call), including the app manifest, search snippets, and email sender.
+- New Website Questions page for staff (linked from The Build): open
+  questions the site needs answered (LINE account, deposit amount, real
+  reviews, hours), bilingual, answers go to Rick by email. The question
+  list grows as future work hits staff-only knowledge.
+- Honesty pass: "instant quote" wording removed (no instant price is
+  shown), the dead-end "Next Event" badge replaced with a quote button,
+  and the 8 written customer reviews were confirmed to be build-time
+  placeholders, so they stay unpublished until real ones arrive.
+- Mobile polish: quote action added to the bottom navigation, footer no
+  longer hidden behind it, install prompt uses the real app icon, waits
+  for the cookie banner, and no longer overlaps it.
+
+Duration: 4h50m (measured wall clock). Tokens: 56.8M total (188k output +
+469 fresh input + 56.7M cache), measured.
+
+Notes: the audit findings and remaining phases live in FRONTEND-AUDIT.md
+(untracked on purpose; this repo is public). Blocked items wait on staff
+answers via the Website Questions page.
+
 ---
 
 ## 2026-07-21 (morning) - Pay tab: hosting billing in the portal, card payment live
