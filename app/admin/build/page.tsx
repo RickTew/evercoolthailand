@@ -140,6 +140,21 @@ export default async function BuildPage() {
         </div>
       </div>
 
+      {/* Open questions the build needs the team to answer. */}
+      <Link
+        href="/admin/build/questions"
+        className="group flex items-center gap-4 rounded-3xl border border-ec-teal/30 bg-ec-teal/[0.06] p-5 transition hover:border-ec-teal/60"
+      >
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-ec-teal/15 text-xl">❓</span>
+        <div className="min-w-0 flex-1">
+          <div className="text-sm font-bold text-ec-text">Website Questions / คำถามเกี่ยวกับเว็บไซต์</div>
+          <div className="mt-0.5 text-xs text-ec-text-muted">
+            The build needs answers from the team (LINE account, deposits, reviews...). Answer what you can.
+          </div>
+        </div>
+        <span className="text-ec-teal text-lg transition group-hover:translate-x-0.5">→</span>
+      </Link>
+
       {/* Where the build is: Live / Building / Planned, colour-blocked. */}
       <div className="space-y-4">
         <div className="rounded-3xl border border-green-500/25 bg-green-500/[0.04] p-5">

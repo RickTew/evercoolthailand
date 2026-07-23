@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useLanguage } from "@/lib/i18n/useLanguage";
 
 function Field({ label, value, onChange, unit, min, max, step }: {
@@ -56,15 +57,26 @@ export default function EnergyCostCalculator() {
       </div>
 
       {hasResult && (
-        <div className="bg-ec-teal/5 border border-ec-teal/20 rounded-xl p-3 flex justify-between items-center">
-          <div>
-            <p className="text-xs font-semibold text-ec-text-muted">{t.calcEnergyResult}</p>
-            <p className="text-lg font-bold text-ec-teal">฿{monthly.toFixed(0)}</p>
+        <div className="bg-ec-teal/5 border border-ec-teal/20 rounded-xl p-3">
+          <div className="flex justify-between items-center">
+            <div>
+              <p className="text-xs font-semibold text-ec-text-muted">{t.calcEnergyResult}</p>
+              <p className="text-lg font-bold text-ec-teal">฿{monthly.toFixed(0)}</p>
+            </div>
+            <div className="text-right">
+              <p className="text-xs text-ec-text-muted">Per year</p>
+              <p className="text-sm font-bold text-ec-text">฿{annual.toFixed(0)}</p>
+            </div>
           </div>
-          <div className="text-right">
-            <p className="text-xs text-ec-text-muted">Per year</p>
-            <p className="text-sm font-bold text-ec-text">฿{annual.toFixed(0)}</p>
-          </div>
+          <Link
+            href="/quote?service=iaq-consultation"
+            className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-white bg-ec-teal hover:bg-ec-teal-light rounded-lg px-3 py-2 transition-colors"
+          >
+            {t.calcEnergyCta}
+            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+            </svg>
+          </Link>
         </div>
       )}
     </div>

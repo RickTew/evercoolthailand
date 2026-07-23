@@ -5,7 +5,7 @@ import { breadcrumbJsonLd } from "@/lib/seo";
 export const metadata: Metadata = {
   title: "Contact Us",
   description:
-    "Get in touch with Evercool Thailand. Call, WhatsApp, or send a message. Serving all of Thailand.",
+    "Get in touch with EverCool Thailand. Call, WhatsApp, or send a message. Serving all of Thailand.",
 };
 
 export default function ContactPage() {

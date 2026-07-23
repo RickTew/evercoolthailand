@@ -136,7 +136,7 @@ export default function Footer() {
 
         {/* Bottom bar */}
         <div className="border-t border-white/10 pt-4 flex flex-col md:flex-row md:items-center md:justify-between gap-2">
-          <p className="text-[10px] text-white/30">© {year} Evercool Thailand Co., Ltd. All rights reserved.</p>
+          <p className="text-[10px] text-white/30">© {year} EverCool Thailand Co., Ltd. All rights reserved.</p>
           <div className="flex items-center gap-3">
             <span className="text-[10px] text-white/30">Mon to Sat 08:00-18:00</span>
             <span className="text-white/20">·</span>

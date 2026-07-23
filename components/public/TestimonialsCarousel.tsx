@@ -17,16 +17,16 @@ const TESTIMONIALS = [
     location: "Koh Tao",
     service: "AC Maintenance",
     rating: 5,
-    en: "Running a dive resort on Koh Tao, our ACs are under constant strain from salt air. Evercool's quarterly service keeps everything running perfectly. They understand the coastal challenge.",
-    th: "ดำเนินกิจการรีสอร์ทดำน้ำบนเกาะเต่า บริการรายไตรมาสของ Evercool ทำให้ทุกอย่างทำงานสมบูรณ์ พวกเขาเข้าใจความท้าทายของชายฝั่ง",
+    en: "Running a dive resort on Koh Tao, our ACs are under constant strain from salt air. EverCool's quarterly service keeps everything running perfectly. They understand the coastal challenge.",
+    th: "ดำเนินกิจการรีสอร์ทดำน้ำบนเกาะเต่า บริการรายไตรมาสของ EverCool ทำให้ทุกอย่างทำงานสมบูรณ์ พวกเขาเข้าใจความท้าทายของชายฝั่ง",
   },
   {
     name: "Nattaporn S.",
     location: "Bangkok",
     service: "IAQ Consultation",
     rating: 5,
-    en: "My daughter has asthma and our AC was making it worse. Evercool's IAQ assessment found mold in two units. After treatment and a HEPA purifier, her breathing improved dramatically.",
-    th: "ลูกสาวเป็นหอบหืด Evercool ประเมิน IAQ พบเชื้อราในแอร์ 2 เครื่อง หลังการรักษาและติดตั้ง HEPA อาการดีขึ้นมาก",
+    en: "My daughter has asthma and our AC was making it worse. EverCool's IAQ assessment found mold in two units. After treatment and a HEPA purifier, her breathing improved dramatically.",
+    th: "ลูกสาวเป็นหอบหืด EverCool ประเมิน IAQ พบเชื้อราในแอร์ 2 เครื่อง หลังการรักษาและติดตั้ง HEPA อาการดีขึ้นมาก",
   },
   {
     name: "Mark & Sarah T.",
@@ -49,8 +49,8 @@ const TESTIMONIALS = [
     location: "Surat Thani",
     service: "Custom AHU",
     rating: 5,
-    en: "We needed a custom air handling solution for our 2,000m² warehouse. Evercool engineered and installed the whole system. Professional from quote to commissioning. On time, on budget.",
-    th: "ต้องการระบบระบายอากาศพิเศษสำหรับโกดัง 2,000 ตร.ม. Evercool ออกแบบและติดตั้งครบ ตรงเวลา ตรงงบ",
+    en: "We needed a custom air handling solution for our 2,000m² warehouse. EverCool engineered and installed the whole system. Professional from quote to commissioning. On time, on budget.",
+    th: "ต้องการระบบระบายอากาศพิเศษสำหรับโกดัง 2,000 ตร.ม. EverCool ออกแบบและติดตั้งครบ ตรงเวลา ตรงงบ",
   },
   {
     name: "Warunee P.",
@@ -65,8 +65,8 @@ const TESTIMONIALS = [
     location: "Koh Tao",
     service: "Air Purifier",
     rating: 5,
-    en: "After smoke season made our guesthouse barely livable, Evercool installed HEPA purifiers in every room. Our guests now comment on how fresh the air is. Complete game changer.",
-    th: "หลังจากฤดูหมอกควันทำให้เกสต์เฮ้าส์เราแทบอยู่ไม่ได้ Evercool ติดตั้ง HEPA ทุกห้อง แขกบอกว่าอากาศสดชื่นมาก",
+    en: "After smoke season made our guesthouse barely livable, EverCool installed HEPA purifiers in every room. Our guests now comment on how fresh the air is. Complete game changer.",
+    th: "หลังจากฤดูหมอกควันทำให้เกสต์เฮ้าส์เราแทบอยู่ไม่ได้ EverCool ติดตั้ง HEPA ทุกห้อง แขกบอกว่าอากาศสดชื่นมาก",
   },
 ];
 

@@ -44,6 +44,7 @@ export default function QuoteBuilder() {
   const [step, setStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [quoteId, setQuoteId] = useState("");
   const [error, setError] = useState("");
   const [photoPreviews, setPhotoPreviews] = useState<string[]>([]);
   const [photoError, setPhotoError] = useState("");
@@ -51,12 +52,18 @@ export default function QuoteBuilder() {
 
   // Only accept known service slugs from the URL; anything else starts blank.
   const linkedService = searchParams.get("service");
+  // Product cards and the sizing calculator link here with extra context.
+  const linkedProduct = (searchParams.get("product") ?? "").slice(0, 120);
+  const linkedArea = searchParams.get("area");
   const [form, setForm] = useState<QuoteForm>({
     propertyType: "",
     serviceType: SERVICE_OPTIONS.some((o) => o.value === linkedService)
       ? (linkedService as string)
       : "",
-    areaSqm: "",
+    areaSqm:
+      linkedArea && Number(linkedArea) > 0 && Number(linkedArea) < 100000
+        ? String(Number(linkedArea))
+        : "",
     numRooms: "",
     currentAcCount: "",
     humidityConcern: false,
@@ -66,7 +73,7 @@ export default function QuoteBuilder() {
     name: "",
     phone: "",
     email: "",
-    notes: "",
+    notes: linkedProduct ? `Interested in: ${linkedProduct}` : "",
     preferredTier: "",
   });
 
@@ -141,6 +148,8 @@ export default function QuoteBuilder() {
 
       const res = await fetch("/api/quotes", { method: "POST", body });
       if (!res.ok) throw new Error("Failed to submit quote");
+      const data = (await res.json()) as { quoteId?: string };
+      if (data.quoteId) setQuoteId(data.quoteId);
       setSubmitted(true);
     } catch {
       setError(t.error);
@@ -158,7 +167,15 @@ export default function QuoteBuilder() {
           </svg>
         </div>
         <h1 className="text-xl font-bold text-ec-text mb-2">{t.quoteSuccess}</h1>
-        <p className="text-sm text-ec-text-muted mb-6">{t.quoteSuccessMsg}</p>
+        <p className="text-sm text-ec-text-muted mb-3">{t.quoteSuccessMsg}</p>
+        {quoteId && (
+          <p className="text-xs text-ec-text-muted mb-6">
+            {t.payReference}:{" "}
+            <span className="font-mono font-bold text-ec-text">
+              {quoteId.replace(/-/g, "").slice(0, 8).toUpperCase()}
+            </span>
+          </p>
+        )}
         <a
           href="https://wa.me/66955622892"
           className="inline-flex items-center gap-2 bg-[#25D366] text-white font-semibold text-sm rounded-2xl px-6 py-3"

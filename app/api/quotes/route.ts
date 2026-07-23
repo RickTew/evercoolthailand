@@ -197,6 +197,44 @@ export async function POST(request: Request) {
       // Email failure is non-critical
     }
 
+    // Confirmation to the customer (non-blocking), in their language.
+    if (email) {
+      try {
+        const { sendEmail } = await import("@/lib/email/send");
+        const { customerConfirmationHtml, shortRef } = await import("@/lib/email/customerConfirmation");
+        const ref = shortRef(data.id);
+        const th = preferredLang === "th";
+        const serviceLabel = serviceType.replace(/-/g, " ");
+        await sendEmail({
+          to: email,
+          subject: th
+            ? `รับคำขอใบเสนอราคาของคุณแล้ว [${ref}]`
+            : `Your EverCool quote request is received [${ref}]`,
+          html: customerConfirmationHtml({
+            lang: th ? "th" : "en",
+            heading: th ? "รับคำขอใบเสนอราคาแล้ว" : "Quote request received",
+            intro: th
+              ? `สวัสดีคุณ${name} เราได้รับคำขอใบเสนอราคาของคุณแล้ว ทีมงานจะส่งใบเสนอราคาให้ภายใน 24 ชั่วโมง`
+              : `Hi ${name}, we have received your quote request. Our team will send your quote within 24 hours.`,
+            reference: ref,
+            rows: th
+              ? [
+                  ["บริการ", serviceLabel],
+                  ["ประเภทสถานที่", propertyType],
+                  ["พื้นที่", areaSqm ? `${areaSqm} ตร.ม.` : ""],
+                ]
+              : [
+                  ["Service", serviceLabel],
+                  ["Property type", propertyType],
+                  ["Area", areaSqm ? `${areaSqm} m²` : ""],
+                ],
+          }),
+        });
+      } catch {
+        // Confirmation failure is non-critical
+      }
+    }
+
     return NextResponse.json({ success: true, quoteId: data.id });
   } catch (err) {
     console.error("Quote API error:", err);

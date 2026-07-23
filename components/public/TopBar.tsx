@@ -60,13 +60,13 @@ export default function TopBar() {
           ))}
         </nav>
 
-        {/* Next Event - mobile only, centre of header */}
+        {/* Quote CTA - mobile only, centre of header (replaced the "Next
+            Event" badge, which linked to a page with no event info) */}
         <Link
-          href="/contact"
+          href="/quote"
           className="md:hidden flex items-center gap-1.5 text-[11px] font-bold text-ec-teal border border-ec-teal/40 bg-ec-teal/10 hover:bg-ec-teal/20 px-3 py-1.5 rounded-full transition-colors"
         >
-          <span className="w-1.5 h-1.5 rounded-full bg-ec-teal animate-pulse shrink-0" />
-          {t.nextEvent}
+          {t.getQuote}
         </Link>
 
         {/* Right side actions */}

@@ -250,7 +250,15 @@ export default function BookingWizard() {
           </svg>
         </div>
         <h2 className="text-xl font-bold text-ec-text mb-2">{t.bookSuccess}</h2>
-        <p className="text-sm text-ec-text-muted mb-4 max-w-xs mx-auto">{t.bookSuccessMsg}</p>
+        <p className="text-sm text-ec-text-muted mb-2 max-w-xs mx-auto">{t.bookSuccessMsg}</p>
+        {bookingId && (
+          <p className="text-xs text-ec-text-muted mb-4">
+            {t.payReference}:{" "}
+            <span className="font-mono font-bold text-ec-text">
+              {bookingId.replace(/-/g, "").slice(0, 8).toUpperCase()}
+            </span>
+          </p>
+        )}
 
         <div className="flex flex-col gap-3 max-w-xs mx-auto">
           {/* Pay deposit via PromptPay */}

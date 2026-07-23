@@ -59,6 +59,13 @@ export default function ArticleList({ articles }: { articles: Article[] }) {
         ))}
       </div>
 
+      {filtered.length === 0 && (
+        <div className="bg-ec-card rounded-2xl border border-ec-border p-8 text-center">
+          <p className="text-2xl mb-2">📚</p>
+          <p className="text-sm text-ec-text-muted">{t.learnEmpty}</p>
+        </div>
+      )}
+
       <div className="flex flex-col gap-3">
         {filtered.map((article) => {
           const title = lang === "th" ? article.title_th || article.title_en : article.title_en;

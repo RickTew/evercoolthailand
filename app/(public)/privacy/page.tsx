@@ -4,7 +4,7 @@ import PrivacyContent from "@/components/public/PrivacyContent";
 export const metadata: Metadata = {
   title: "Privacy & Cookie Policy",
   description:
-    "How Evercool Thailand collects, uses, and protects your personal data, and how cookies are used on this site.",
+    "How EverCool Thailand collects, uses, and protects your personal data, and how cookies are used on this site.",
 };
 
 export default function PrivacyPage() {

@@ -157,6 +157,27 @@ export async function POST(request: Request) {
       // Email failure is non-critical
     }
 
+    // Confirmation to the customer (non-blocking). The contact form has no
+    // language field, so the intro carries both languages.
+    if (email) {
+      try {
+        const { sendEmail } = await import("@/lib/email/send");
+        const { customerConfirmationHtml } = await import("@/lib/email/customerConfirmation");
+        await sendEmail({
+          to: email,
+          subject: "We received your message | เราได้รับข้อความของคุณแล้ว",
+          html: customerConfirmationHtml({
+            lang: "en",
+            heading: "Message received",
+            intro: `Hi ${name}, thank you for contacting EverCool Thailand. We will reply within 24 hours (Mon to Sat). สวัสดีคุณ${name} ขอบคุณที่ติดต่อ EverCool Thailand เราจะตอบกลับภายใน 24 ชั่วโมง (จันทร์ถึงเสาร์)`,
+            rows: [["Subject", subject || "General Inquiry"]],
+          }),
+        });
+      } catch {
+        // Confirmation failure is non-critical
+      }
+    }
+
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error("Contact API error:", err);

@@ -11,7 +11,7 @@ export function serviceJsonLd(service: {
     url: service.url,
     provider: {
       "@type": "LocalBusiness",
-      name: "Evercool Thailand",
+      name: "EverCool Thailand",
       telephone: "+66955622892",
       url: "https://evercoolthailand.com",
       areaServed: { "@type": "Country", name: "Thailand" },

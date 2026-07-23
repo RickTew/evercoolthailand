@@ -99,6 +99,43 @@ export async function POST(request: Request) {
       // Email failure is non-critical
     }
 
+    // Confirmation to the customer (non-blocking), in their language.
+    if (email) {
+      try {
+        const { sendEmail } = await import("@/lib/email/send");
+        const { customerConfirmationHtml, shortRef } = await import("@/lib/email/customerConfirmation");
+        const ref = shortRef(data.id);
+        const th = preferredLanguage === "th";
+        await sendEmail({
+          to: email,
+          subject: th
+            ? `ยืนยันการจองบริการของคุณ [${ref}]`
+            : `Your EverCool booking is received [${ref}]`,
+          html: customerConfirmationHtml({
+            lang: th ? "th" : "en",
+            heading: th ? "รับคำขอจองของคุณแล้ว" : "Booking received",
+            intro: th
+              ? `สวัสดีคุณ${name} เราได้รับคำขอจองบริการของคุณแล้ว ทีมงานจะติดต่อกลับเพื่อยืนยันนัดหมายโดยเร็วที่สุด`
+              : `Hi ${name}, we have received your service booking. Our team will contact you shortly to confirm the appointment.`,
+            reference: ref,
+            rows: th
+              ? [
+                  ["บริการ", serviceName],
+                  ["วันที่", `${bookingDate} เวลา ${bookingTime}`],
+                  ["พื้นที่", area],
+                ]
+              : [
+                  ["Service", serviceName],
+                  ["Date", `${bookingDate} at ${bookingTime}`],
+                  ["Area", area],
+                ],
+          }),
+        });
+      } catch {
+        // Confirmation failure is non-critical
+      }
+    }
+
     return NextResponse.json({ success: true, bookingId: data.id });
   } catch (err) {
     console.error("Booking API error:", err);

@@ -415,7 +415,7 @@ function ProductCard({ product, categoryLabel }: { product: Product; categoryLab
 
         {/* CTA */}
         <Link
-          href={`/quote?product=${product.id}`}
+          href={`/quote?service=${product.category === "Purifiers" ? "air-purifier" : "custom-ahu"}&product=${encodeURIComponent(product.name)}`}
           className="text-xs font-semibold text-ec-teal hover:text-ec-teal-light flex items-center gap-1 transition-colors"
         >
           {t.prodViewSpecs}

@@ -554,7 +554,7 @@ export default function HomePage() {
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "LocalBusiness",
-            name: "Evercool Thailand",
+            name: "EverCool Thailand",
             description: "Thailand's trusted IAQ & HVAC specialists. AC installation, repair, maintenance, air purifiers, and custom solutions.",
             telephone: "+66955622892",
             url: "https://evercoolthailand.com",

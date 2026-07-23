@@ -25,7 +25,7 @@ export async function sendEmail({
   html: string;
 }) {
   const { data, error } = await resend.emails.send({
-    from: "Evercool Thailand <hello@evercoolthailand.com>",
+    from: "EverCool Thailand <hello@evercoolthailand.com>",
     to,
     subject,
     html,

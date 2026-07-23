@@ -23,8 +23,8 @@ const sarabun = Sarabun({
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://evercoolthailand.com"),
   title: {
-    default: "Evercool Thailand | IAQ & HVAC Specialists",
-    template: "%s | Evercool Thailand",
+    default: "EverCool Thailand | IAQ & HVAC Specialists",
+    template: "%s | EverCool Thailand",
   },
   description:
     "Thailand's trusted indoor air quality and HVAC specialists. AC installation, repair, maintenance, air purifiers, and custom solutions for homes, offices, and factories.",
@@ -41,7 +41,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Evercool",
+    title: "EverCool",
   },
   formatDetection: {
     telephone: false,
@@ -49,8 +49,8 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    siteName: "Evercool Thailand",
-    title: "Evercool Thailand | IAQ & HVAC Specialists",
+    siteName: "EverCool Thailand",
+    title: "EverCool Thailand | IAQ & HVAC Specialists",
     description:
       "Thailand's trusted indoor air quality and HVAC specialists. AC installation, repair, maintenance, and custom solutions.",
   },

@@ -10,6 +10,7 @@ const en = {
   navHome: "Home",
   navServices: "Solutions",
   navBook: "Book",
+  navQuote: "Quote",
   navAbout: "About",
   navAccount: "Account",
   navLearn: "Learn",
@@ -21,7 +22,7 @@ const en = {
   // Homepage hero
   heroTagline: "Breathing Life into Your Indoors",
   heroSubtitle: "Thailand's trusted IAQ & HVAC specialists",
-  heroQuoteBtn: "Get Instant Quote",
+  heroQuoteBtn: "Get a Quote",
   heroBookBtn: "Book Service",
 
   // Service cards
@@ -61,7 +62,7 @@ const en = {
   iaqPollutionDesc: "Bangkok and major cities face PM2.5 challenges. Clean indoor air is essential for health and comfort.",
 
   // Quote builder
-  quoteTitle: "Get Your Instant Quote",
+  quoteTitle: "Request Your Free Quote",
   quoteStep1: "Property Type",
   quoteStep2: "Service Needed",
   quoteStep3: "Space Details",
@@ -113,7 +114,7 @@ const en = {
   comingSoon: "Coming Soon",
 
   // Install prompt
-  installTitle: "Install Evercool App",
+  installTitle: "Install EverCool App",
   installDesc: "Add to your home screen for quick access",
   installBtn: "Install",
   installIOSTitle: "Install on iPhone",
@@ -187,6 +188,8 @@ const en = {
   galleryBefore: "Before",
   galleryAfter: "After",
   galleryNoImage: "Photos coming soon",
+  galleryEmpty: "No projects to show here yet. Want yours to be the first?",
+  learnEmpty: "No articles here yet. Check back soon.",
   galleryRequestSimilar: "Request Similar Service",
   galleryFilterAll: "All Projects",
   galleryFilterInstallation: "Installation",
@@ -219,6 +222,8 @@ const en = {
   calcCeilStd: "Standard (up to 2.8m)",
   calcCeilHigh: "High (above 2.8m)",
   calcACSizingResult: "Recommended Size",
+  calcQuoteCta: "Get a quote for this size",
+  calcEnergyCta: "Talk to us about saving energy",
   calcEnergyTitle: "Energy Cost Estimator",
   calcEnergyDesc: "Estimate your monthly AC electricity cost",
   calcEnergyKw: "AC Power (kW)",
@@ -413,6 +418,7 @@ const th: typeof en = {
   navHome: "หน้าแรก",
   navServices: "บริการ",
   navBook: "จอง",
+  navQuote: "ใบเสนอราคา",
   navAbout: "เกี่ยวกับ",
   navAccount: "บัญชี",
   navLearn: "เรียนรู้",
@@ -464,7 +470,7 @@ const th: typeof en = {
   iaqPollutionDesc: "กรุงเทพฯ และเมืองใหญ่เผชิญปัญหา PM2.5 อากาศสะอาดภายในอาคารจึงจำเป็นต่อสุขภาพ",
 
   // Quote builder
-  quoteTitle: "ขอใบเสนอราคาทันที",
+  quoteTitle: "ขอใบเสนอราคาฟรี",
   quoteStep1: "ประเภทอสังหาริมทรัพย์",
   quoteStep2: "บริการที่ต้องการ",
   quoteStep3: "รายละเอียดพื้นที่",
@@ -516,7 +522,7 @@ const th: typeof en = {
   comingSoon: "เร็วๆ นี้",
 
   // Install prompt
-  installTitle: "ติดตั้งแอป Evercool",
+  installTitle: "ติดตั้งแอป EverCool",
   installDesc: "เพิ่มลงหน้าจอหลักเพื่อเข้าถึงได้เร็วขึ้น",
   installBtn: "ติดตั้ง",
   installIOSTitle: "ติดตั้งบน iPhone",
@@ -590,6 +596,8 @@ const th: typeof en = {
   galleryBefore: "ก่อน",
   galleryAfter: "หลัง",
   galleryNoImage: "รูปภาพเร็วๆ นี้",
+  galleryEmpty: "ยังไม่มีผลงานในหมวดนี้ อยากให้งานของคุณเป็นงานแรกไหม",
+  learnEmpty: "ยังไม่มีบทความในหมวดนี้ กลับมาดูใหม่เร็วๆ นี้",
   galleryRequestSimilar: "ขอบริการแบบเดียวกัน",
   galleryFilterAll: "ทุกโครงการ",
   galleryFilterInstallation: "ติดตั้ง",
@@ -622,6 +630,8 @@ const th: typeof en = {
   calcCeilStd: "มาตรฐาน (ไม่เกิน 2.8 ม.)",
   calcCeilHigh: "สูง (เกิน 2.8 ม.)",
   calcACSizingResult: "ขนาดที่แนะนำ",
+  calcQuoteCta: "ขอใบเสนอราคาสำหรับขนาดนี้",
+  calcEnergyCta: "ปรึกษาเรื่องประหยัดพลังงาน",
   calcEnergyTitle: "ประมาณค่าไฟ",
   calcEnergyDesc: "ประมาณค่าไฟฟ้าแอร์รายเดือน",
   calcEnergyKw: "กำลังไฟ (กิโลวัตต์)",

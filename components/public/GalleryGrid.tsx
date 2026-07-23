@@ -80,6 +80,20 @@ export default function GalleryGrid({ items }: { items: GalleryItem[] }) {
         ))}
       </div>
 
+      {/* Empty state */}
+      {filtered.length === 0 && (
+        <div className="mt-4 bg-ec-card rounded-2xl border border-ec-border p-8 text-center">
+          <p className="text-2xl mb-2">🖼️</p>
+          <p className="text-sm text-ec-text-muted mb-4">{t.galleryEmpty}</p>
+          <Link
+            href="/quote"
+            className="inline-block bg-ec-teal hover:bg-ec-teal-light text-white font-semibold text-sm rounded-xl px-5 py-2.5 transition-colors"
+          >
+            {t.heroQuoteBtn}
+          </Link>
+        </div>
+      )}
+
       {/* Grid */}
       <div className="mt-4 grid grid-cols-1 gap-4">
         {filtered.map((item) => {
