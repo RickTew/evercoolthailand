@@ -1,6 +1,6 @@
 "use client";
 
-// TEST VARIANT A: "Engineered Air"
+// THE HOME PAGE: "Engineered Air" (chosen from the /test design round, Rick 2026-07-23)
 // Editorial dark treatment. Air as an engineered product: display typography
 // set wide and heavy, spec-sheet rows instead of marketing cards, and an
 // ambient airflow field behind the hero (disabled under reduced motion).
@@ -144,7 +144,7 @@ function AirflowCanvas() {
   return <canvas ref={ref} className="absolute inset-0 w-full h-full pointer-events-none" aria-hidden="true" />;
 }
 
-export default function HomeA() {
+export default function HomeEngineered() {
   const { lang } = useLanguage();
   const c = COPY[lang];
 

@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
-import HomeA from "./HomeA";
+import HomeEngineered from "@/components/public/HomeEngineered";
 
 export const metadata: Metadata = {
   title: "Test A · Engineered Air",
   robots: { index: false, follow: false },
 };
 
+// Reference copy: renders the exact component now live at /.
 export default function TestHomeAPage() {
-  return <HomeA />;
+  return <HomeEngineered />;
 }

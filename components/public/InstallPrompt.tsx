@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useSyncExternalStore } from "react";
+import Image from "next/image";
 import { useLanguage } from "@/lib/i18n/useLanguage";
 import { getConsent, getServerConsent, subscribeConsent } from "@/lib/consent";
 
@@ -68,9 +69,13 @@ export default function InstallPrompt() {
     <div className="fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom,0px))] md:bottom-4 left-0 right-0 z-50 px-4 pb-2">
       <div className="mx-auto max-w-[480px] bg-ec-navy text-white rounded-2xl p-4 shadow-xl border border-white/10">
         <div className="flex items-start gap-3">
-          <div className="w-10 h-10 rounded-xl bg-ec-teal flex items-center justify-center text-lg font-bold shrink-0">
-            EC
-          </div>
+          <Image
+            src="/icons/icon-192.png"
+            alt=""
+            width={40}
+            height={40}
+            className="w-10 h-10 rounded-xl shrink-0"
+          />
           <div className="flex-1 min-w-0">
             <p className="font-semibold text-sm">{t.installTitle}</p>
             {isIOS && !isIOSSafari ? (
